@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: planificador-eventos-backend
+    runtime: docker
+    region: oregon
+    plan: free
+    branch: main
+    healthCheckPath: /api/health
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DB_URL
+        value: jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require&options=-c%20pooler_session_mode%3Dtransaction
+      - key: DB_USER
+        value: postgres.akyvplcsiqhmfkqxvgoq
+      - key: DB_PASSWORD
+        sync: false
+      - key: JAVA_OPTS
+        value: -XX:MaxRAMPercentage=60

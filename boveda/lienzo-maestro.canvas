@@ -47,6 +47,63 @@
 			"width": 240,
 			"height": 120,
 			"color": "1"
+		},
+		{
+			"id": "m002",
+			"type": "file",
+			"file": "mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md",
+			"x": 200,
+			"y": 360,
+			"width": 280,
+			"height": 140
+		},
+		{
+			"id": "p002",
+			"type": "text",
+			"text": "Mejora 002\nEstructura por capas y Supabase\n2026-09-18",
+			"x": -240,
+			"y": 360,
+			"width": 240,
+			"height": 120,
+			"color": "1"
+		},
+		{
+			"id": "m003",
+			"type": "file",
+			"file": "mejoras/2026-09-18-003-endpoint-api-health.md",
+			"x": 200,
+			"y": 540,
+			"width": 280,
+			"height": 140
+		},
+		{
+			"id": "p003",
+			"type": "text",
+			"text": "Mejora 003\nEndpoint de estado /api/health\n2026-09-18",
+			"x": -240,
+			"y": 540,
+			"width": 240,
+			"height": 120,
+			"color": "1"
+		},
+		{
+			"id": "m004",
+			"type": "file",
+			"file": "mejoras/2026-09-18-004-deploy-render-docker-y-cors.md",
+			"x": 200,
+			"y": 720,
+			"width": 280,
+			"height": 140
+		},
+		{
+			"id": "p004",
+			"type": "text",
+			"text": "Mejora 004\nDeploy en Render: Docker, CORS, pooler\n2026-09-18",
+			"x": -240,
+			"y": 720,
+			"width": 240,
+			"height": 120,
+			"color": "1"
 		}
 	],
 	"edges": [
@@ -76,6 +133,48 @@
 			"fromNode": "p001",
 			"fromSide": "right",
 			"toNode": "m001",
+			"toSide": "left"
+		},
+		{
+			"id": "e5",
+			"fromNode": "indice",
+			"fromSide": "bottom",
+			"toNode": "m002",
+			"toSide": "top"
+		},
+		{
+			"id": "e6",
+			"fromNode": "p002",
+			"fromSide": "right",
+			"toNode": "m002",
+			"toSide": "left"
+		},
+		{
+			"id": "e7",
+			"fromNode": "indice",
+			"fromSide": "bottom",
+			"toNode": "m003",
+			"toSide": "top"
+		},
+		{
+			"id": "e8",
+			"fromNode": "p003",
+			"fromSide": "right",
+			"toNode": "m003",
+			"toSide": "left"
+		},
+		{
+			"id": "e9",
+			"fromNode": "indice",
+			"fromSide": "bottom",
+			"toNode": "m004",
+			"toSide": "top"
+		},
+		{
+			"id": "e10",
+			"fromNode": "p004",
+			"fromSide": "right",
+			"toNode": "m004",
 			"toSide": "left"
 		}
 	]

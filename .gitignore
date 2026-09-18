@@ -1,5 +1,13 @@
 HELP.md
 target/
+
+### Env & secrets ###
+.env
+.env.*
+!.env.example
+*.env.local
+*.env.production
+
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

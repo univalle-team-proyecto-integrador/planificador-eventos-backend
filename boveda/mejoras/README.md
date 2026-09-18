@@ -3,3 +3,6 @@
 | Fecha       | Nº  | Mejora                                        | Enlace                                        |
 | ----------- | --- | --------------------------------------------- | --------------------------------------------- |
 | 2026-09-18  | 001 | AGENTS.md y bóveda Obsidian                   | [2026-09-18-001-agents-md-y-boveda](2026-09-18-001-agents-md-y-boveda.md) |
+| 2026-09-18  | 002 | Estructura por capas y conexión a Supabase    | [2026-09-18-002-estructura-capas-y-db-supabase](2026-09-18-002-estructura-capas-y-db-supabase.md) |
+| 2026-09-18  | 003 | Endpoint de estado /api/health                | [2026-09-18-003-endpoint-api-health](2026-09-18-003-endpoint-api-health.md) |
+| 2026-09-18  | 004 | Despliegue en Render: Docker, CORS y pooler   | [2026-09-18-004-deploy-render-docker-y-cors](2026-09-18-004-deploy-render-docker-y-cors.md) |
