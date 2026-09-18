@@ -115,6 +115,11 @@ Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`)
 - Guía para agentes de desarrollo: consultar `AGENTS.md`
 - Registro de mejoras: bóveda Obsidian en `boveda/`
 
+## Flujo de ramas
+
+- La rama `backend/lead` es la rama de desarrollo: allí cada desarrollador realiza su proceso de trabajo.
+- La rama `main` es la raíz coordinada por la persona responsable de coordinación o QA. Los cambios se agregan únicamente desde `main`, después de revisar y validar el trabajo desarrollado en `backend/lead`.
+
 ## Autores
 
 - Santiago Ruiz Gallego
