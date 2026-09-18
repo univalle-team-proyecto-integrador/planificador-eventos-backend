@@ -17,7 +17,7 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
   - Pooler transaccional (Docker/Render, IPv4): `DB_URL=jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:6543/postgres?sslmode=require&options=-c%20pooler_session_mode%3Dtransaction`, `DB_USER=postgres.akyvplcsiqhmfkqxvgoq`. Region is **us-west-2** (verified).
 - Real env vars override `.env` (dotenv is added last).
 - Tests use the `test` profile (`src/test/resources/application-test.properties`) with embedded H2 in PostgreSQL mode — `@ActiveProfiles("test")` must be present on any `@SpringBootTest`.
-- `spring.jpa.hibernate.ddl-auto=validate` — never alters the shared remote DB; schema/migrations are not set up yet.
+- `spring.jpa.hibernate.ddl-auto=validate` — never alters the shared remote DB; schema is defined manually in `db/ddl-supabase.sql` (run it once in the Supabase SQL Editor). Keep the DDL in sync with the JPA entities in `model/`; validated against a real PostgreSQL before changes.
 
 ## Gotchas (verified)
 
@@ -40,13 +40,13 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
 
 ## Structure
 
-- Base package `uv.isj.planificadoreventosbackend`; layered packages (empty, `.gitkeep`):
+- Base package `uv.isj.planificadoreventosbackend`; layered packages:
 
-  - `controller/` — REST controllers (views are JSON/OpenAPI, no JSP)
-  - `service/` — business logic
-  - `repository/` — Spring Data JPA repositories
-  - `model/` — JPA entities and DTOs
-  - `config/` — filters, interceptors, CORS (the "middlewares")
+  - `controller/` — REST controllers (views are JSON/OpenAPI, no JSP) — `HealthController`
+  - `service/` — business logic — `HealthService`
+  - `repository/` — Spring Data JPA repositories (empty until Bloque 2)
+  - `model/` — JPA entities (`TipoEvento`, `Usuario`, `Evento`, `Subtarea`), `EstadoSubtarea` enum, DTOs in `model/dto/`
+  - `config/` — filters, interceptors, CORS (the "middlewares") — `CorsConfig`
 
 - Spring routes live in `@RestController` + `@RequestMapping` annotations — there's no `routes/` dir (this is a Spring Boot repo, not Node/Express).
 - `boveda/` — Obsidian vault with per-improvement records; see AGENTS section below.
@@ -60,4 +60,4 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
 
 ## References
 
-- `README*` — none in this repo yet (frontend keeps its own `AGENTS.md` in the sibling repo).
+- `README.md` — project overview (Spanish, mirrors the frontend README).
