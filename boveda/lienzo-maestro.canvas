@@ -1,0 +1,82 @@
+{
+	"nodes": [
+		{
+			"id": "proyecto",
+			"type": "file",
+			"file": "README.md",
+			"x": -240,
+			"y": -120,
+			"width": 320,
+			"height": 160,
+			"color": "3"
+		},
+		{
+			"id": "flujo",
+			"type": "text",
+			"text": "Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejores/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.",
+			"x": 180,
+			"y": -220,
+			"width": 300,
+			"height": 180
+		},
+		{
+			"id": "indice",
+			"type": "file",
+			"file": "mejoras/README.md",
+			"x": 160,
+			"y": -20,
+			"width": 280,
+			"height": 140,
+			"color": "2"
+		},
+		{
+			"id": "m001",
+			"type": "file",
+			"file": "mejoras/2026-09-18-001-agents-md-y-boveda.md",
+			"x": 200,
+			"y": 180,
+			"width": 280,
+			"height": 140
+		},
+		{
+			"id": "p001",
+			"type": "text",
+			"text": "Mejora 001\nAGENTS.md y bóveda Obsidian\n2026-09-18",
+			"x": -240,
+			"y": 180,
+			"width": 240,
+			"height": 120,
+			"color": "1"
+		}
+	],
+	"edges": [
+		{
+			"id": "e1",
+			"fromNode": "proyecto",
+			"fromSide": "right",
+			"toNode": "flujo",
+			"toSide": "left"
+		},
+		{
+			"id": "e2",
+			"fromNode": "proyecto",
+			"fromSide": "right",
+			"toNode": "indice",
+			"toSide": "left"
+		},
+		{
+			"id": "e3",
+			"fromNode": "indice",
+			"fromSide": "bottom",
+			"toNode": "m001",
+			"toSide": "top"
+		},
+		{
+			"id": "e4",
+			"fromNode": "p001",
+			"fromSide": "right",
+			"toNode": "m001",
+			"toSide": "left"
+		}
+	]
+}
