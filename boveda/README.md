@@ -2,6 +2,8 @@
 
 Esta carpeta (`boveda/`) es una bóveda de Obsidian versionada en este repositorio. Sirve como bitácora del desarrollo: cada mejora realizada sobre el código debe quedar registrada aquí en la misma sesión en que se hace.
 
+El repositorio también cuenta con la rama `backend/lead`, donde los desarrolladores realizan su proceso de trabajo. La rama `main` es coordinada por la persona responsable de coordinación o QA y es la única desde la que se agregan cambios.
+
 ## Estructura
 
 - `lienzo-maestro.canvas` — lienzo maestro de Obsidian con el mapa del proyecto; cada mejora tiene un nodo enlazado a su registro.
