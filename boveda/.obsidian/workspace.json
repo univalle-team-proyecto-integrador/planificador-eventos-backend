@@ -183,13 +183,13 @@
   },
   "active": "7b418d5d940cbd50",
   "lastOpenFiles": [
-    "mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md",
-    "mejoras/2026-09-18-001-agents-md-y-boveda.md",
     "lienzo-maestro.canvas",
+    "mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md",
+    "mejoras/2026-09-18-001-agents-md-y-boveda.md",
+    "mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md",
     "mejoras/README.md",
     "mejoras/plantilla-mejora.md",
     "mejoras/2026-09-18-004-deploy-render-docker-y-cors.md",
-    "mejoras/2026-09-18-003-endpoint-api-health.md",
-    "mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md"
+    "mejoras/2026-09-18-003-endpoint-api-health.md"
   ]
 }

@@ -8,3 +8,5 @@
 | 2026-09-18  | 004 | Despliegue en Render: Docker, CORS y pooler   | [2026-09-18-004-deploy-render-docker-y-cors](2026-09-18-004-deploy-render-docker-y-cors.md) |
 | 2026-09-18  | 005 | Modelo de datos JPA y DDL para Supabase       | [2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase](2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md) |
 | 2026-09-18  | 006 | README del proyecto                           | [2026-09-18-006-readme-del-proyecto](2026-09-18-006-readme-del-proyecto.md) |
+| 2026-09-18  | 007 | Repositorios JPA: TS02-BE-01                   | [2026-09-18-007-repositorios-jpa-ts02](2026-09-18-007-repositorios-jpa-ts02.md) |
+| 2026-09-18  | 008 | Capa service descentralizada                   | [2026-09-18-008-capa-service-descentralizada](2026-09-18-008-capa-service-descentralizada.md) |

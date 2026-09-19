@@ -1,7 +1,6 @@
 {
 	"nodes":[
 		{"id":"proyecto","type":"file","file":"README.md","x":-240,"y":-120,"width":320,"height":160,"color":"3"},
-		{"id":"flujo","type":"text","text":"Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejores/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.","x":180,"y":-220,"width":300,"height":180},
 		{"id":"indice","type":"file","file":"mejoras/README.md","x":160,"y":-20,"width":280,"height":140,"color":"2"},
 		{"id":"m001","type":"file","file":"mejoras/2026-09-18-001-agents-md-y-boveda.md","x":200,"y":180,"width":280,"height":140},
 		{"id":"p001","type":"text","text":"Mejora 001\nAGENTS.md y bóveda Obsidian\n2026-09-18","x":-240,"y":180,"width":240,"height":120,"color":"1"},
@@ -14,7 +13,12 @@
 		{"id":"m005","type":"file","file":"mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md","x":200,"y":900,"width":280,"height":140},
 		{"id":"p005","type":"text","text":"Mejora 005\nModelo de datos JPA + DDL Supabase\n2026-09-18","x":-240,"y":900,"width":240,"height":120,"color":"1"},
 		{"id":"m006","type":"file","file":"mejoras/2026-09-18-006-readme-del-proyecto.md","x":200,"y":1080,"width":280,"height":140},
-		{"id":"p006","type":"text","text":"Mejora 006\nREADME del proyecto\n2026-09-18","x":-240,"y":1080,"width":240,"height":120,"color":"1"}
+		{"id":"p006","type":"text","text":"Mejora 006\nREADME del proyecto\n2026-09-18","x":-240,"y":1080,"width":240,"height":120,"color":"1"},
+		{"id":"m007","type":"file","file":"mejoras/2026-09-18-007-repositorios-jpa-ts02.md","x":200,"y":1260,"width":280,"height":140},
+		{"id":"p007","type":"text","text":"Mejora 007\nRepositorios JPA TS02\n2026-09-18","x":-240,"y":1260,"width":240,"height":120,"color":"1"},
+		{"id":"m008","type":"file","file":"mejoras/2026-09-18-008-capa-service-descentralizada.md","x":200,"y":1440,"width":280,"height":140},
+		{"id":"p008","type":"text","text":"Mejora 008\nCapa service descentralizada\n2026-09-18","x":-240,"y":1440,"width":240,"height":120,"color":"1"},
+		{"id":"flujo","type":"text","text":"Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejores/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.","x":180,"y":-240,"width":300,"height":180}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -30,6 +34,10 @@
 		{"id":"e11","fromNode":"indice","fromSide":"bottom","toNode":"m005","toSide":"top"},
 		{"id":"e12","fromNode":"p005","fromSide":"right","toNode":"m005","toSide":"left"},
 		{"id":"e13","fromNode":"indice","fromSide":"bottom","toNode":"m006","toSide":"top"},
-		{"id":"e14","fromNode":"p006","fromSide":"right","toNode":"m006","toSide":"left"}
+		{"id":"e14","fromNode":"p006","fromSide":"right","toNode":"m006","toSide":"left"},
+		{"id":"e15","fromNode":"indice","fromSide":"bottom","toNode":"m007","toSide":"top"},
+		{"id":"e16","fromNode":"p007","fromSide":"right","toNode":"m007","toSide":"left"},
+		{"id":"e17","fromNode":"indice","fromSide":"bottom","toNode":"m008","toSide":"top"},
+		{"id":"e18","fromNode":"p008","fromSide":"right","toNode":"m008","toSide":"left"}
 	]
 }
