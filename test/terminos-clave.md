@@ -16,3 +16,4 @@ Términos usados en el proyecto para no confundirse al configurar entornos.
 | **`-ten` vs `-` en Vercel** | El proyecto real del frontend es `planificador-eventos-frontend-ten`; el `planificador-eventos-frontend` (sin sufijo) aloja otro build (Create React App). |
 | **ddl-auto=validate** | Hibernate valida el esquema contra la BD remota al arrancar, nunca lo modifica. El esquema se define a mano en `db/ddl-supabase.sql`. |
 | **12-factor** | Config por variables de entorno (url+user+password completos), sin código de configuración por ambiente. |
+| **Swagger/OpenAPI** | Documentación interactiva de la API servida por el propio backend (`/swagger-ui.html`, spec en `/v3/api-docs`). No es un puente: el front llama directo a `/api/**`; el *Try it out* va al mismo host (servidor relativo `/`), por eso no hay CORS. |

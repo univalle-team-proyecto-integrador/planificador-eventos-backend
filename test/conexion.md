@@ -55,3 +55,12 @@ const API_BASE_URL = (
 ## Endpoint de estado
 
 `GET /api/health` → `{"status":"healthy","database":"connected","timestamp":"..."}` ; 503 si la BD no responde (con `unhealthy`/`disconnected`).
+
+## El rol de Swagger (no es un puente)
+
+Swagger (`/swagger-ui.html`, spec en `/v3/api-docs`) es la **documentación interactiva** que sirve el propio backend en su misma URL. **No está en la ruta frontend → backend**: el SPA llama directo a `/api/**` y Swagger jamás reenvió nada al front. Ver [documentacion-swagger.md](documentacion-swagger.md).
+
+```
+Frontend (Vercel) ──HTTPS─▶ /api/** (directo, con CORS)
+Swagger UI          ───────▶ /api/** (Try it out, mismo origen, sin CORS)
+```

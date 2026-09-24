@@ -32,7 +32,9 @@
 		{"id":"m015","type":"file","file":"mejoras/2026-09-24-015-pruebas-e2e-fix-pooler.md","x":200,"y":2520,"width":280,"height":140},
 		{"id":"p015","type":"text","text":"Mejora 015\nPruebas e2e y fix del pooler\n2026-09-24","x":-240,"y":2520,"width":240,"height":120,"color":"1"},
 		{"id":"m016","type":"file","file":"mejoras/2026-09-24-016-workflow-desarrollo-descentralizado.md","x":200,"y":2700,"width":280,"height":140},
-		{"id":"p016","type":"text","text":"Mejora 016\nWorkflow descentralizado\n2026-09-24","x":-240,"y":2700,"width":240,"height":120,"color":"1"}
+		{"id":"p016","type":"text","text":"Mejora 016\nWorkflow descentralizado\n2026-09-24","x":-240,"y":2700,"width":240,"height":120,"color":"1"},
+		{"id":"m017","type":"file","file":"mejoras/2026-09-24-017-evidencias-postman-chrome-y-swagger.md","x":200,"y":2880,"width":280,"height":140},
+		{"id":"p017","type":"text","text":"Mejora 017\nEvidencias Postman + Chrome + Swagger\n2026-09-24","x":-240,"y":2880,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -66,6 +68,8 @@
 		{"id":"e29","fromNode":"indice","fromSide":"bottom","toNode":"m015","toSide":"top"},
 		{"id":"e30","fromNode":"p015","fromSide":"right","toNode":"m015","toSide":"left"},
 		{"id":"e31","fromNode":"indice","fromSide":"bottom","toNode":"m016","toSide":"top"},
-		{"id":"e32","fromNode":"p016","fromSide":"right","toNode":"m016","toSide":"left"}
+		{"id":"e32","fromNode":"p016","fromSide":"right","toNode":"m016","toSide":"left"},
+		{"id":"e33","fromNode":"indice","fromSide":"bottom","toNode":"m017","toSide":"top"},
+		{"id":"e34","fromNode":"p017","fromSide":"right","toNode":"m017","toSide":"left"}
 	]
 }
