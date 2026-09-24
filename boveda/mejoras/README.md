@@ -10,3 +10,5 @@
 | 2026-09-18  | 006 | README del proyecto                           | [2026-09-18-006-readme-del-proyecto](2026-09-18-006-readme-del-proyecto.md) |
 | 2026-09-18  | 007 | Repositorios JPA: TS02-BE-01                   | [2026-09-18-007-repositorios-jpa-ts02](2026-09-18-007-repositorios-jpa-ts02.md) |
 | 2026-09-18  | 008 | Capa service descentralizada                   | [2026-09-18-008-capa-service-descentralizada](2026-09-18-008-capa-service-descentralizada.md) |
+| 2026-09-24  | 009 | Interfaz frontend de creación, detalle y estados | [2026-09-24-009-interfaz-frontend-creacion-y-detalle](2026-09-24-009-interfaz-frontend-creacion-y-detalle.md) |
+| 2026-09-24  | 010 | API REST de eventos y subtareas              | [2026-09-24-010-api-rest-eventos-subtareas](2026-09-24-010-api-rest-eventos-subtareas.md) |

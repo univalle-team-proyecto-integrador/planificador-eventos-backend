@@ -42,9 +42,9 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
 
 - Base package `uv.isj.planificadoreventosbackend`; layered packages:
 
-  - `controller/` — REST controllers (views are JSON/OpenAPI, no JSP) — `HealthController`
-  - `service/` — business logic — `HealthService`
-  - `repository/` — Spring Data JPA repositories (empty until Bloque 2)
+  - `controller/` — REST controllers (views are JSON/OpenAPI, no JSP) — `HealthController`, `EventoController`, `SubtareaController`
+  - `service/` — business logic — `HealthService`, `EventoService`, `SubtareaService`, `UsuarioService`, `TipoEventoService`
+  - `repository/` — Spring Data JPA repositories for the four entities
   - `model/` — JPA entities (`TipoEvento`, `Usuario`, `Evento`, `Subtarea`), `EstadoSubtarea` enum, DTOs in `model/dto/`
   - `config/` — filters, interceptors, CORS (the "middlewares") — `CorsConfig`
 

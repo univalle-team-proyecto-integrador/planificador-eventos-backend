@@ -48,8 +48,8 @@ Base package `uv.isj.planificadoreventosbackend`, organizado en capas al estilo 
 
 ```
 src/main/java/uv/isj/planificadoreventosbackend/
-├── controller/     # REST controllers (HealthController)
-├── service/        # Lógica de negocio (HealthService)
+├── controller/     # REST controllers (Health, Evento, Subtarea)
+├── service/        # Lógica de negocio y CRUD
 ├── repository/     # Repositorios Spring Data JPA
 ├── model/          # Entidades JPA (TipoEvento, Usuario, Evento, Subtarea, EstadoSubtarea)
 │   └── dto/        # DTOs con validación
@@ -60,11 +60,21 @@ db/
 
 ## API
 
-| Endpoint        | Descripción                                                                 |
-| --------------- | --------------------------------------------------------------------------- |
-| `GET /api/health` | Estado de la aplicación y de la base (`healthy/connected` + timestamp). 503 `unhealthy/disconnected` si la BD no responde |
-| `/swagger-ui.html` | Documentación OpenAPI (Swagger UI)                                        |
-| `/v3/api-docs`  | JSON de la especificación OpenAPI                                            |
+| Endpoint | Descripción |
+| --- | --- |
+| `GET /api/health` | Estado de la aplicación y de la base. |
+| `GET /api/eventos` | Lista eventos; acepta `usuarioId` opcional. |
+| `GET /api/eventos/{id}` | Consulta un evento. |
+| `POST /api/eventos` | Crea un evento usando `EventoDTO`. |
+| `PUT /api/eventos/{id}` | Actualiza los datos de un evento. |
+| `DELETE /api/eventos/{id}` | Elimina un evento. |
+| `GET /api/subtareas?eventoId={id}` | Lista las subtareas de un evento. |
+| `GET /api/subtareas/{id}` | Consulta una subtarea. |
+| `POST /api/subtareas` | Crea una subtarea usando `SubtareaDTO`. |
+| `PUT /api/subtareas/{id}` | Actualiza o cambia el estado de una subtarea. |
+| `DELETE /api/subtareas/{id}` | Elimina una subtarea. |
+| `/swagger-ui.html` | Documentación OpenAPI (Swagger UI). |
+| `/v3/api-docs` | JSON de la especificación OpenAPI. |
 
 Ejemplo de respuesta de `/api/health`:
 
@@ -99,12 +109,14 @@ Ejemplo de respuesta de `/api/health`:
 - Infraestructura: capas Spring, conexión a Supabase (vía directa y pooler), CORS, Docker + `render.yaml`
 - Endpoint `/api/health` con verificación real de la base
 - Modelo de datos (Bloque 1): entidades JPA, DTOs y DDL para Supabase, verificado contra PostgreSQL real
+- Repositorios y servicios por entidad
+- API REST de eventos y subtareas con validación y manejo global de errores
 
 **Pendiente**
 
-- Bloque 2 — Repositorios y lógica de negocio (límite de horas diarias, transiciones de estado de subtarea)
-- Bloque 3 — API REST CRUD bajo `/api/**` con manejo global de errores
+- Límite de horas diarias y reglas avanzadas de reprogramación
 - Autenticación (JWT) — fuera de alcance por ahora
+- Pruebas end-to-end con el frontend y publicación del contrato en Render
 
 Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`).
 
