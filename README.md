@@ -1,6 +1,6 @@
 # Planificador de Eventos — Backend
 
-Backend del MVP (Sprint 0) para el planificador de eventos dirigido a organizadores independientes. Expone una API REST de Spring Boot que da soporte al frontend React/Vite: gestión de eventos, subtareas del plan logístico y control del límite de horas diarias del organizador.
+Backend del MVP (Sprint 1) para el planificador de eventos dirigido a organizadores independientes. Expone una API REST de Spring Boot que da soporte al frontend React/Vite: gestión de eventos, subtareas del plan logístico y control del límite de horas diarias del organizador.
 
 - Repositorio del frontend: `planificador-eventos-frontend` (deploy en Vercel)
 
@@ -48,9 +48,10 @@ Base package `uv.isj.planificadoreventosbackend`, organizado en capas al estilo 
 
 ```
 src/main/java/uv/isj/planificadoreventosbackend/
-├── controller/     # REST controllers (HealthController)
-├── service/        # Lógica de negocio (HealthService)
-├── repository/     # Repositorios Spring Data JPA
+├── controller/     # HealthController, EventoController, SubtareaController
+├── service/        # HealthService, EventoService, SubtareaService
+├── repository/     # Repositorios Spring Data JPA por entidad
+├── exception/      # Excepción de dominio y manejador global de errores
 ├── model/          # Entidades JPA (TipoEvento, Usuario, Evento, Subtarea, EstadoSubtarea)
 │   └── dto/        # DTOs con validación
 └── config/         # Configuración global (CorsConfig)
@@ -60,11 +61,29 @@ db/
 
 ## API
 
-| Endpoint        | Descripción                                                                 |
-| --------------- | --------------------------------------------------------------------------- |
-| `GET /api/health` | Estado de la aplicación y de la base (`healthy/connected` + timestamp). 503 `unhealthy/disconnected` si la BD no responde |
-| `/swagger-ui.html` | Documentación OpenAPI (Swagger UI)                                        |
-| `/v3/api-docs`  | JSON de la especificación OpenAPI                                            |
+| Método   | Endpoint                            | Descripción                                                      |
+| -------- | ----------------------------------- | ---------------------------------------------------------------- |
+| `GET`    | `/api/health`                       | Estado de la aplicación y de la base; 503 si la BD no responde  |
+| `GET`    | `/api/eventos`                      | Lista los eventos                                               |
+| `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
+| `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
+| `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
+| `DELETE` | `/api/eventos/{id}`                 | Elimina el evento y sus subtareas en cascada; devuelve 204        |
+| `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma y devuelve el conflicto de límite diario, si existe   |
+| `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado a `ejecutada` o `pospuesta`                     |
+| `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
+| `GET`    | `/v3/api-docs`                      | JSON de la especificación OpenAPI                                |
+
+### Documentación interactiva
+
+Swagger UI se genera desde el propio backend con springdoc. No se conecta a `https://swagger.io/product/why-swagger/`: esa URL es informativa; la interfaz de esta API vive en el servidor del proyecto.
+
+- **Local:** `http://localhost:8080/swagger-ui.html`
+- **Local (OpenAPI JSON):** `http://localhost:8080/v3/api-docs`
+- **Render:** `https://planificador-eventos-backend.onrender.com/swagger-ui.html`
+- **Render (OpenAPI JSON):** `https://planificador-eventos-backend.onrender.com/v3/api-docs`
+
+La opción **Try it out** está habilitada. Como la especificación usa un servidor relativo, Swagger envía las solicitudes al mismo host desde el que se abrió la interfaz, tanto en localhost como en Render.
 
 Ejemplo de respuesta de `/api/health`:
 
@@ -90,7 +109,7 @@ Ejemplo de respuesta de `/api/health`:
 - CORS: `app.cors.allowed-origins=https://*.vercel.app,http://localhost:5173`, aplicado a `/api/**` por `config/CorsConfig.java`.
 - URL pública: `https://planificador-eventos-backend.onrender.com`
 
-> **Estado actual:** el servicio en Render está creado pero **pendiente de aplicar las variables de entorno** en el dashboard y re-desplegar; al momento del último cambio el endpoint `/api/health` responde todavía un build anterior.
+> **Estado actual (24 de septiembre de 2026):** la URL pública `https://planificador-eventos-backend.onrender.com` responde con otro servicio **Django REST Framework** (`/api/health` devuelve `status: ok`), no con esta aplicación Spring. `/v3/api-docs` y `/swagger-ui.html` devuelven 404. Se debe crear o corregir el servicio Render de este repositorio, configurar `DB_PASSWORD` en el dashboard y volver a desplegar antes de usar la documentación pública.
 
 ## Estado y hoja de ruta
 
@@ -98,12 +117,14 @@ Ejemplo de respuesta de `/api/health`:
 
 - Infraestructura: capas Spring, conexión a Supabase (vía directa y pooler), CORS, Docker + `render.yaml`
 - Endpoint `/api/health` con verificación real de la base
-- Modelo de datos (Bloque 1): entidades JPA, DTOs y DDL para Supabase, verificado contra PostgreSQL real
+- Modelo de datos: entidades JPA, DTOs y DDL para Supabase, verificado contra PostgreSQL real
+- Repositorios JPA con consultas por usuario, evento, fecha y estado
+- Servicios de eventos y subtareas con validación, mapeo de relaciones y control de límite diario
+- API REST de eventos y subtareas con validación, cascada y manejo global de errores
 
 **Pendiente**
 
-- Bloque 2 — Repositorios y lógica de negocio (límite de horas diarias, transiciones de estado de subtarea)
-- Bloque 3 — API REST CRUD bajo `/api/**` con manejo global de errores
+- Exponer mediante endpoints la consulta JPQL de la vista «Hoy» ya disponible en el repositorio
 - Autenticación (JWT) — fuera de alcance por ahora
 
 Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`).
