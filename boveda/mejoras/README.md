@@ -15,3 +15,5 @@
 | 2026-09-24  | 012 | Compatibilidad de la API con el frontend     | [2026-09-24-012-compatibilidad-api-frontend](2026-09-24-012-compatibilidad-api-frontend.md) |
 | 2026-09-24  | 013 | Edición de subtareas y catálogo de tipos     | [2026-09-24-013-edicion-y-catalogo-tipos](2026-09-24-013-edicion-y-catalogo-tipos.md) |
 | 2026-09-24  | 014 | Validación conexión front-back-Supabase      | [2026-09-24-014-validacion-conexion-front-back-db](2026-09-24-014-validacion-conexion-front-back-db.md) |
+| 2026-09-24  | 015 | Pruebas e2e y fix del pooler                 | [2026-09-24-015-pruebas-e2e-fix-pooler](2026-09-24-015-pruebas-e2e-fix-pooler.md) |
+| 2026-09-24  | 016 | Workflow de desarrollo descentralizado      | [2026-09-24-016-workflow-desarrollo-descentralizado](2026-09-24-016-workflow-desarrollo-descentralizado.md) |
