@@ -24,7 +24,7 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
 - **Spring Boot 4.x renamed starters** — do NOT "fix" `spring-boot-starter-webmvc`, `spring-boot-starter-data-jpa`, `spring-boot-starter-validation` back to Boot 3 names (`spring-boot-starter-web`, `spring-boot-starter-test`). Test bundles use a `-test` suffix (`spring-boot-starter-webmvc-test`, `spring-boot-starter-data-jpa-test`, ...). Renaming them breaks the build.
 - Local default JDK is 26; project targets Java 21 via `<java.version>21</java.version>` (compiles under 26 with `--release 21`).
 - `HELP.md` is Spring Initializr boilerplate — ignore; `.gitignore` already excludes it from git.
-- springdoc UI (when running): `/swagger-ui.html` (redirect → `/swagger-ui/index.html`), OpenAPI JSON at `/v3/api-docs`.
+- springdoc UI (when running): `/swagger-ui.html` (redirect → `/swagger-ui/index.html`), OpenAPI JSON at `/v3/api-docs`. `OpenApiConfig` publishes metadata and uses the current host as a relative server, so the same spec works locally and on Render.
 - PostgreSQL driver is `runtime` scope. `spring-boot-devtools` is active in dev (auto-restart).
 - PID cleanup note: Ctrl-C does not always kill child JVM on exit; use `pkill -9 -f PlanificadorEventosBackendApplication` if stray instances linger.
 
@@ -43,10 +43,11 @@ Spring Boot 4.1.1 backend (Java 21, Maven) for the "Planificador de Eventos" pro
 - Base package `uv.isj.planificadoreventosbackend`; layered packages:
 
   - `controller/` — REST controllers (views are JSON/OpenAPI, no JSP) — `HealthController`, `EventoController`, `SubtareaController`
-  - `service/` — business logic — `HealthService`, `EventoService`, `SubtareaService`, `UsuarioService`, `TipoEventoService`
-  - `repository/` — Spring Data JPA repositories for the four entities
+  - `service/` — business logic — `HealthService`, `EventoService`, `SubtareaService`
+  - `repository/` — Spring Data JPA — `EventoRepository`, `SubtareaRepository`, `TipoEventoRepository`, `UsuarioRepository`
+  - `exception/` — domain exceptions and `GlobalExceptionHandler` (ProblemDetail responses)
   - `model/` — JPA entities (`TipoEvento`, `Usuario`, `Evento`, `Subtarea`), `EstadoSubtarea` enum, DTOs in `model/dto/`
-  - `config/` — filters, interceptors, CORS (the "middlewares") — `CorsConfig`
+  - `config/` — filters, interceptors, CORS and OpenAPI — `CorsConfig`, `OpenApiConfig`
 
 - Spring routes live in `@RestController` + `@RequestMapping` annotations — there's no `routes/` dir (this is a Spring Boot repo, not Node/Express).
 - `boveda/` — Obsidian vault with per-improvement records; see AGENTS section below.

@@ -10,4 +10,6 @@
 | 2026-09-18  | 006 | README del proyecto                           | [2026-09-18-006-readme-del-proyecto](2026-09-18-006-readme-del-proyecto.md) |
 | 2026-09-18  | 007 | Repositorios JPA: TS02-BE-01                   | [2026-09-18-007-repositorios-jpa-ts02](2026-09-18-007-repositorios-jpa-ts02.md) |
 | 2026-09-18  | 008 | Capa service descentralizada                   | [2026-09-18-008-capa-service-descentralizada](2026-09-18-008-capa-service-descentralizada.md) |
-| 2026-09-24  | 010 | API REST de eventos y subtareas              | [2026-09-24-010-api-rest-eventos-subtareas](2026-09-24-010-api-rest-eventos-subtareas.md) |
+| 2026-09-23  | 010 | API REST Sprint 1: eventos y subtareas        | [2026-09-23-010-api-rest-sprint-1-eventos-subtareas](2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md) |
+| 2026-09-24  | 011 | Documentación Swagger UI y OpenAPI            | [2026-09-24-011-documentacion-swagger-openapi](2026-09-24-011-documentacion-swagger-openapi.md) |
+| 2026-09-24  | 012 | Compatibilidad de la API con el frontend     | [2026-09-24-012-compatibilidad-api-frontend](2026-09-24-012-compatibilidad-api-frontend.md) |

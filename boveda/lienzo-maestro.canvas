@@ -1,6 +1,7 @@
 {
 	"nodes":[
 		{"id":"proyecto","type":"file","file":"README.md","x":-240,"y":-120,"width":320,"height":160,"color":"3"},
+		{"id":"flujo","type":"text","text":"Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejoras/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.","x":180,"y":-220,"width":300,"height":180},
 		{"id":"indice","type":"file","file":"mejoras/README.md","x":160,"y":-20,"width":280,"height":140,"color":"2"},
 		{"id":"m001","type":"file","file":"mejoras/2026-09-18-001-agents-md-y-boveda.md","x":200,"y":180,"width":280,"height":140},
 		{"id":"p001","type":"text","text":"Mejora 001\nAGENTS.md y bóveda Obsidian\n2026-09-18","x":-240,"y":180,"width":240,"height":120,"color":"1"},
@@ -18,9 +19,12 @@
 		{"id":"p007","type":"text","text":"Mejora 007\nRepositorios JPA TS02\n2026-09-18","x":-240,"y":1260,"width":240,"height":120,"color":"1"},
 		{"id":"m008","type":"file","file":"mejoras/2026-09-18-008-capa-service-descentralizada.md","x":200,"y":1440,"width":280,"height":140},
 		{"id":"p008","type":"text","text":"Mejora 008\nCapa service descentralizada\n2026-09-18","x":-240,"y":1440,"width":240,"height":120,"color":"1"},
-		{"id":"m010","type":"file","file":"mejoras/2026-09-24-010-api-rest-eventos-subtareas.md","x":200,"y":1800,"width":280,"height":140},
-		{"id":"p010","type":"text","text":"Mejora 010\nAPI REST eventos y subtareas\n2026-09-24","x":-240,"y":1800,"width":240,"height":120,"color":"1"},
-		{"id":"flujo","type":"text","text":"Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejoras/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.","x":180,"y":-240,"width":300,"height":180}
+		{"id":"m010","type":"file","file":"mejoras/2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md","x":200,"y":1620,"width":280,"height":140},
+		{"id":"p010","type":"text","text":"Mejora 010\nAPI REST Sprint 1\n2026-09-23","x":-240,"y":1620,"width":240,"height":120,"color":"1"},
+		{"id":"m011","type":"file","file":"mejoras/2026-09-24-011-documentacion-swagger-openapi.md","x":200,"y":1800,"width":280,"height":140},
+		{"id":"p011","type":"text","text":"Mejora 011\nSwagger UI + OpenAPI\n2026-09-24","x":-240,"y":1800,"width":240,"height":120,"color":"1"},
+		{"id":"m012","type":"file","file":"mejoras/2026-09-24-012-compatibilidad-api-frontend.md","x":200,"y":1980,"width":280,"height":140},
+		{"id":"p012","type":"text","text":"Mejora 012\nCompatibilidad de API con frontend\n2026-09-24","x":-240,"y":1980,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -41,7 +45,11 @@
 		{"id":"e16","fromNode":"p007","fromSide":"right","toNode":"m007","toSide":"left"},
 		{"id":"e17","fromNode":"indice","fromSide":"bottom","toNode":"m008","toSide":"top"},
 		{"id":"e18","fromNode":"p008","fromSide":"right","toNode":"m008","toSide":"left"},
-		{"id":"e21","fromNode":"indice","fromSide":"bottom","toNode":"m010","toSide":"top"},
-		{"id":"e22","fromNode":"p010","fromSide":"right","toNode":"m010","toSide":"left"}
+		{"id":"e19","fromNode":"indice","fromSide":"bottom","toNode":"m010","toSide":"top"},
+		{"id":"e20","fromNode":"p010","fromSide":"right","toNode":"m010","toSide":"left"},
+		{"id":"e21","fromNode":"indice","fromSide":"bottom","toNode":"m011","toSide":"top"},
+		{"id":"e22","fromNode":"p011","fromSide":"right","toNode":"m011","toSide":"left"},
+		{"id":"e23","fromNode":"indice","fromSide":"bottom","toNode":"m012","toSide":"top"},
+		{"id":"e24","fromNode":"p012","fromSide":"right","toNode":"m012","toSide":"left"}
 	]
 }
