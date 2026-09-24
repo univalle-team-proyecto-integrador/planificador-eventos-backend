@@ -13,3 +13,4 @@
 | 2026-09-23  | 010 | API REST Sprint 1: eventos y subtareas        | [2026-09-23-010-api-rest-sprint-1-eventos-subtareas](2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md) |
 | 2026-09-24  | 011 | Documentación Swagger UI y OpenAPI            | [2026-09-24-011-documentacion-swagger-openapi](2026-09-24-011-documentacion-swagger-openapi.md) |
 | 2026-09-24  | 012 | Compatibilidad de la API con el frontend     | [2026-09-24-012-compatibilidad-api-frontend](2026-09-24-012-compatibilidad-api-frontend.md) |
+| 2026-09-24  | 013 | Edición de subtareas y catálogo de tipos     | [2026-09-24-013-edicion-y-catalogo-tipos](2026-09-24-013-edicion-y-catalogo-tipos.md) |

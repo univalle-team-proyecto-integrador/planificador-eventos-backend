@@ -48,13 +48,13 @@ Base package `uv.isj.planificadoreventosbackend`, organizado en capas al estilo 
 
 ```
 src/main/java/uv/isj/planificadoreventosbackend/
-├── controller/     # HealthController, EventoController, SubtareaController
-├── service/        # HealthService, EventoService, SubtareaService
+├── controller/     # HealthController, EventoController, SubtareaController, TipoEventoController
+├── service/        # HealthService, EventoService, SubtareaService, TipoEventoService
 ├── repository/     # Repositorios Spring Data JPA por entidad
 ├── exception/      # Excepción de dominio y manejador global de errores
 ├── model/          # Entidades JPA (TipoEvento, Usuario, Evento, Subtarea, EstadoSubtarea)
 │   └── dto/        # DTOs con validación
-└── config/         # Configuración global (CorsConfig)
+└── config/         # Configuración global (CorsConfig, OpenApiConfig)
 db/
 └── ddl-supabase.sql # DDL ejecutado en Supabase (esquema + seed)
 ```
@@ -64,6 +64,7 @@ db/
 | Método   | Endpoint                            | Descripción                                                      |
 | -------- | ----------------------------------- | ---------------------------------------------------------------- |
 | `GET`    | `/api/health`                       | Estado de la aplicación y de la base; 503 si la BD no responde  |
+| `GET`    | `/api/tipos-evento`                | Lista el catálogo de tipos de evento                            |
 | `GET`    | `/api/eventos?usuarioId={id}`       | Lista los eventos; el filtro es opcional                        |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
@@ -73,6 +74,7 @@ db/
 | `DELETE` | `/api/eventos/{id}`                 | Elimina el evento y sus subtareas en cascada; devuelve 204        |
 | `GET`    | `/api/subtareas?eventoId={id}`      | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/{id}`               | Obtiene el detalle de una subtarea                              |
+| `PUT`    | `/api/subtareas/{id}`               | Actualiza nombre, fecha objetivo y horas de una subtarea         |
 | `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma y devuelve el conflicto de límite diario, si existe   |
 | `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
@@ -125,6 +127,7 @@ Ejemplo de respuesta de `/api/health`:
 - Modelo de datos: entidades JPA, DTOs y DDL para Supabase, verificado contra PostgreSQL real
 - Repositorios JPA con consultas por usuario, evento, fecha y estado
 - Servicios de eventos y subtareas con validación, mapeo de relaciones y control de límite diario
+- Catálogo de tipos de evento y actualización completa de subtareas
 - API REST de eventos y subtareas con validación, cascada y manejo global de errores
 
 **Pendiente**
