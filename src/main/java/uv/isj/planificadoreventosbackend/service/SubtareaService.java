@@ -1,6 +1,7 @@
 package uv.isj.planificadoreventosbackend.service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,14 @@ public class SubtareaService {
             EventoRepository eventoRepository) {
         this.subtareaRepository = subtareaRepository;
         this.eventoRepository = eventoRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubtareaDTO> obtenerPorEvento(Integer eventoId) {
+        buscarEvento(eventoId);
+        return subtareaRepository.findByEventoId(eventoId).stream()
+                .map(this::aDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -101,16 +110,20 @@ public class SubtareaService {
         if (dto == null || dto.estado() == null) {
             throw new IllegalArgumentException("El nuevo estado es obligatorio");
         }
-        if (dto.estado() != EstadoSubtarea.ejecutada
-                && dto.estado() != EstadoSubtarea.pospuesta) {
-            throw new IllegalArgumentException(
-                    "El estado solo puede cambiar a ejecutada o pospuesta");
-        }
 
         Subtarea subtarea = buscarEntidad(id);
         subtarea.setEstado(dto.estado());
         subtarea.setNotaExplicativa(dto.notaExplicativa());
         return aDto(subtareaRepository.save(subtarea));
+    }
+
+    @Transactional
+    public void eliminarSubtarea(Integer id) {
+        Subtarea subtarea = buscarEntidad(id);
+        Evento evento = subtarea.getEvento();
+        evento.getSubtareas().remove(subtarea);
+        subtareaRepository.delete(subtarea);
+        subtareaRepository.flush();
     }
 
     private Evento buscarEvento(Integer eventoId) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,6 +29,16 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "Solicitud inválida",
                 ex.getMessage());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleCuerpoInvalido(
+            HttpMessageNotReadableException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.BAD_REQUEST,
+                "Solicitud inválida",
+                "El cuerpo de la solicitud no contiene un JSON válido");
         return ResponseEntity.badRequest().body(problem);
     }
 

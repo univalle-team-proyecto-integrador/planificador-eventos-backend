@@ -29,8 +29,11 @@ public class EventoService {
     }
 
     @Transactional(readOnly = true)
-    public List<EventoDTO> obtenerTodos() {
-        return eventoRepository.findAll().stream()
+    public List<EventoDTO> obtenerTodos(Integer usuarioId) {
+        List<Evento> eventos = usuarioId == null
+                ? eventoRepository.findAll()
+                : eventoRepository.findByUsuarioId(usuarioId);
+        return eventos.stream()
                 .map(this::aDto)
                 .toList();
     }
@@ -38,6 +41,26 @@ public class EventoService {
     @Transactional(readOnly = true)
     public EventoDTO obtenerPorId(Integer id) {
         return aDto(buscarEntidad(id));
+    }
+
+    @Transactional
+    public EventoDTO actualizarEvento(Integer id, EventoDTO dto) {
+        validar(dto);
+        Evento evento = buscarEntidad(id);
+        Usuario usuario = usuarioRepository.findById(dto.idUsuario())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe el usuario con id " + dto.idUsuario()));
+        TipoEvento tipoEvento = tipoEventoRepository.findById(dto.idTipoEvento())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe el tipo de evento con id " + dto.idTipoEvento()));
+
+        evento.setUsuario(usuario);
+        evento.setTipoEvento(tipoEvento);
+        evento.setNombre(dto.nombre().trim());
+        evento.setCliente(dto.cliente().trim());
+        evento.setFechaEvento(dto.fechaEvento());
+        evento.setLugar(dto.lugar().trim());
+        return aDto(eventoRepository.save(evento));
     }
 
     @Transactional

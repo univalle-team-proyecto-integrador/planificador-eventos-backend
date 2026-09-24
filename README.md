@@ -64,13 +64,18 @@ db/
 | Método   | Endpoint                            | Descripción                                                      |
 | -------- | ----------------------------------- | ---------------------------------------------------------------- |
 | `GET`    | `/api/health`                       | Estado de la aplicación y de la base; 503 si la BD no responde  |
-| `GET`    | `/api/eventos`                      | Lista los eventos                                               |
+| `GET`    | `/api/eventos?usuarioId={id}`       | Lista los eventos; el filtro es opcional                        |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
+| `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
+| `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
 | `DELETE` | `/api/eventos/{id}`                 | Elimina el evento y sus subtareas en cascada; devuelve 204        |
+| `GET`    | `/api/subtareas?eventoId={id}`      | Lista las subtareas de un evento                               |
+| `GET`    | `/api/subtareas/{id}`               | Obtiene el detalle de una subtarea                              |
 | `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma y devuelve el conflicto de límite diario, si existe   |
-| `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado a `ejecutada` o `pospuesta`                     |
+| `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
+| `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
 | `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
 | `GET`    | `/v3/api-docs`                      | JSON de la especificación OpenAPI                                |
 

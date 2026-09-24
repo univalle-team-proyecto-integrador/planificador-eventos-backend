@@ -18,6 +18,7 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     @EntityGraph(attributePaths = {"usuario", "tipoEvento"})
     Optional<Evento> findById(Integer id);
 
+    @EntityGraph(attributePaths = {"usuario", "tipoEvento"})
     @Query("SELECT e FROM Evento e WHERE e.usuario.idUsuario = :usuarioId")
     List<Evento> findByUsuarioId(@Param("usuarioId") Integer usuarioId);
 }

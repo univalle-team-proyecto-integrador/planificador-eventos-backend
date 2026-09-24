@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -152,6 +153,40 @@ class ApiSprint1Test {
     }
 
     @Test
+    void actualizaEventoYExponeSubtareasYEliminacion() throws Exception {
+        BaseFixture base = crearBase(6);
+        EventoDTO request = dtoEvento(base, "Boda actualizada");
+
+        mockMvc.perform(get("/api/eventos")
+                        .param("usuarioId", String.valueOf(base.usuario().getIdUsuario())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idEvento").value(base.evento().getIdEvento()));
+
+        mockMvc.perform(put("/api/eventos/{id}", base.evento().getIdEvento())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Boda actualizada"));
+
+        Subtarea subtarea = crearSubtarea(
+                base.evento(), "Tarea para consultar", LocalDate.of(2026, 11, 12), 2,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(get("/api/eventos/{id}/subtareas", base.evento().getIdEvento()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idSubtarea").value(subtarea.getIdSubtarea()));
+        mockMvc.perform(get("/api/subtareas")
+                        .param("eventoId", String.valueOf(base.evento().getIdEvento())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idSubtarea").value(subtarea.getIdSubtarea()));
+
+        mockMvc.perform(delete("/api/subtareas/{id}", subtarea.getIdSubtarea()))
+                .andExpect(status().isNoContent());
+        entityManager.clear();
+        assertThat(subtareaRepository.findById(subtarea.getIdSubtarea())).isEmpty();
+    }
+
+    @Test
     void validaLosDatosEnLosServicios() {
         BaseFixture base = crearBase(6);
         EventoDTO nombreVacio = new EventoDTO(
@@ -181,6 +216,16 @@ class ApiSprint1Test {
         assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.evento().getIdEvento(), horasInvalidas))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
+    }
+
+    @Test
+    void rechazaCuerposJsonInvalidosConProblemDetail() throws Exception {
+        mockMvc.perform(post("/api/eventos")
+                        .contentType("application/json")
+                        .content("{"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Solicitud inválida"))
+                .andExpect(jsonPath("$.detail").value("El cuerpo de la solicitud no contiene un JSON válido"));
     }
 
     @Test
@@ -249,7 +294,7 @@ class ApiSprint1Test {
     }
 
     @Test
-    void cambiaEstadoYRechazaPendienteEnElEndpointDeCambio() throws Exception {
+    void cambiaEstadoYPermiteReabrirUnaSubtarea() throws Exception {
         BaseFixture base = crearBase(6);
         Subtarea subtarea = crearSubtarea(
                 base.evento(), "Tarea para completar", LocalDate.of(2026, 11, 12), 2,
@@ -258,8 +303,8 @@ class ApiSprint1Test {
         mockMvc.perform(patch("/api/subtareas/{id}/estado", subtarea.getIdSubtarea())
                         .contentType("application/json")
                         .content("{\"estado\":\"pendiente\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value("Solicitud inválida"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("pendiente"));
 
         mockMvc.perform(patch("/api/subtareas/{id}/estado", subtarea.getIdSubtarea())
                         .contentType("application/json")

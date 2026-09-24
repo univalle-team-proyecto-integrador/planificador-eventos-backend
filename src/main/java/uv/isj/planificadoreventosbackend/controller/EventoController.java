@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
@@ -38,8 +40,10 @@ public class EventoController {
     @GetMapping
     @Operation(summary = "Listar eventos")
     @ApiResponse(responseCode = "200", description = "Lista de eventos")
-    public List<EventoDTO> obtenerTodos() {
-        return eventoService.obtenerTodos();
+    public List<EventoDTO> obtenerTodos(
+            @Parameter(description = "Filtra por organizador", example = "1")
+            @RequestParam(required = false) Integer usuarioId) {
+        return eventoService.obtenerTodos(usuarioId);
     }
 
     @GetMapping("/{id}")
@@ -65,6 +69,32 @@ public class EventoController {
         EventoDTO evento = eventoService.crearEvento(dto);
         URI ubicacion = URI.create("/api/eventos/" + evento.idEvento());
         return ResponseEntity.created(ubicacion).body(evento);
+    }
+
+    @GetMapping("/{id}/subtareas")
+    @Operation(summary = "Listar subtareas de un evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Subtareas del evento"),
+            @ApiResponse(responseCode = "404", description = "El evento no existe")
+    })
+    public List<SubtareaDTO> obtenerSubtareas(
+            @Parameter(description = "Identificador del evento", example = "1")
+            @PathVariable Integer id) {
+        return subtareaService.obtenerPorEvento(id);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar un evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Evento actualizado"),
+            @ApiResponse(responseCode = "400", description = "Los datos no son válidos"),
+            @ApiResponse(responseCode = "404", description = "El evento no existe")
+    })
+    public EventoDTO actualizar(
+            @Parameter(description = "Identificador del evento", example = "1")
+            @PathVariable Integer id,
+            @Valid @RequestBody EventoDTO dto) {
+        return eventoService.actualizarEvento(id, dto);
     }
 
     @PostMapping("/{id}/subtareas")
