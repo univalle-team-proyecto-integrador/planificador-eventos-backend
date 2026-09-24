@@ -35,6 +35,7 @@ import uv.isj.planificadoreventosbackend.model.Subtarea;
 import uv.isj.planificadoreventosbackend.model.TipoEvento;
 import uv.isj.planificadoreventosbackend.model.Usuario;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
+import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
 import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
@@ -88,11 +89,15 @@ class ApiSprint1Test {
         assertThat(subtareaRepository.findByEventoId(base.evento().getIdEvento()))
                 .hasSize(4);
         assertThat(subtareaRepository.findNoEjecutadasParaHoy(
-                LocalDate.of(2026, 11, 10), EstadoSubtarea.ejecutada))
+                base.usuario().getIdUsuario(),
+                LocalDate.of(2026, 11, 10),
+                EstadoSubtarea.ejecutada))
                 .extracting(Subtarea::getNombreGestion)
                 .containsExactly("Tarea pospuesta", "Tarea de tres horas");
-        assertThat(subtareaRepository.sumarHorasNoEjecutadasPorFecha(
-                LocalDate.of(2026, 11, 10), EstadoSubtarea.ejecutada))
+        assertThat(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
+                base.usuario().getIdUsuario(),
+                LocalDate.of(2026, 11, 10),
+                EstadoSubtarea.ejecutada))
                 .isEqualTo(4L);
     }
 
@@ -124,6 +129,16 @@ class ApiSprint1Test {
     }
 
     @Test
+    void listaTiposDeEventoParaElFormulario() throws Exception {
+        BaseFixture base = crearBase(6);
+
+        mockMvc.perform(get("/api/tipos-evento"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idTipoEvento").value(base.tipoEvento().getIdTipoEvento()))
+                .andExpect(jsonPath("$[0].nombre").value(base.tipoEvento().getNombre()));
+    }
+
+    @Test
     void agregaSubtareaConEstadoInicialPendiente() throws Exception {
         BaseFixture base = crearBase(6);
         SubtareaDTO request = new SubtareaDTO(
@@ -150,6 +165,25 @@ class ApiSprint1Test {
                 .get()
                 .extracting(Subtarea::getEstado)
                 .isEqualTo(EstadoSubtarea.pendiente);
+    }
+
+    @Test
+    void actualizaLosCamposEditablesDeUnaSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+        Subtarea subtarea = crearSubtarea(
+                base.evento(), "Gestión anterior", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pendiente);
+        SubtareaActualizacionDTO request = new SubtareaActualizacionDTO(
+                "Gestión actualizada", LocalDate.of(2026, 11, 15), 4);
+
+        mockMvc.perform(put("/api/subtareas/{id}", subtarea.getIdSubtarea())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idSubtarea").value(subtarea.getIdSubtarea()))
+                .andExpect(jsonPath("$.nombreGestion").value("Gestión actualizada"))
+                .andExpect(jsonPath("$.fechaObjetivo").value("2026-11-15"))
+                .andExpect(jsonPath("$.horasEstimadas").value(4));
     }
 
     @Test
@@ -254,6 +288,27 @@ class ApiSprint1Test {
                 .get()
                 .extracting(Subtarea::getFechaObjetivo)
                 .isEqualTo(LocalDate.of(2026, 11, 11));
+    }
+
+    @Test
+    void elLimiteDiarioNoIncluyeSubtareasDeOtroOrganizador() {
+        BaseFixture primerOrganizador = crearBase(2);
+        BaseFixture segundoOrganizador = crearBase(2);
+        LocalDate fecha = LocalDate.of(2026, 11, 20);
+        Subtarea actual = crearSubtarea(
+                primerOrganizador.evento(), "Tarea propia", fecha, 1,
+                EstadoSubtarea.pendiente);
+        crearSubtarea(
+                segundoOrganizador.evento(), "Tarea ajena", fecha, 2,
+                EstadoSubtarea.pendiente);
+
+        var resultado = subtareaService.reprogramar(
+                actual.getIdSubtarea(),
+                new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
+                2.0);
+
+        assertThat(resultado.get("conflicto")).isEqualTo(false);
+        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(2.0);
     }
 
     @Test

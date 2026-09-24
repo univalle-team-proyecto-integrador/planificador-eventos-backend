@@ -14,7 +14,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Planificador de Eventos API")
-                        .description("API REST para gestionar eventos, subtareas y la carga diaria del organizador.")
+                        .description("API REST para gestionar eventos, tipos de evento, subtareas y la carga diaria del organizador.")
                         .version("1.0.0"))
                 .addServersItem(new Server()
                         .description("Servidor actual")

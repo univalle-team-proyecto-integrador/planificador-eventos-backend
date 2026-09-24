@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
+import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
@@ -43,6 +45,20 @@ public class SubtareaController {
             @Parameter(description = "Identificador del evento", example = "1")
             @RequestParam Integer eventoId) {
         return subtareaService.obtenerPorEvento(eventoId);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar los datos editables de una subtarea")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Subtarea actualizada"),
+            @ApiResponse(responseCode = "400", description = "Los datos no son válidos"),
+            @ApiResponse(responseCode = "404", description = "La subtarea no existe")
+    })
+    public SubtareaDTO actualizar(
+            @Parameter(description = "Identificador de la subtarea", example = "1")
+            @PathVariable Integer id,
+            @Valid @RequestBody SubtareaActualizacionDTO dto) {
+        return subtareaService.actualizarSubtarea(id, dto);
     }
 
     @PatchMapping("/{id}/reprogramar")

@@ -11,6 +11,7 @@ import uv.isj.planificadoreventosbackend.model.EstadoSubtarea;
 import uv.isj.planificadoreventosbackend.model.Subtarea;
 import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
+import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
 import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
@@ -65,6 +66,18 @@ public class SubtareaService {
     }
 
     @Transactional
+    public SubtareaDTO actualizarSubtarea(
+            Integer id,
+            SubtareaActualizacionDTO dto) {
+        validarActualizacion(dto);
+        Subtarea subtarea = buscarEntidad(id);
+        subtarea.setNombreGestion(dto.nombreGestion().trim());
+        subtarea.setFechaObjetivo(dto.fechaObjetivo());
+        subtarea.setHorasEstimadas(dto.horasEstimadas());
+        return aDto(subtareaRepository.save(subtarea));
+    }
+
+    @Transactional
     public Map<String, Object> reprogramar(
             Integer id,
             ReprogramarDTO dto,
@@ -72,7 +85,9 @@ public class SubtareaService {
         Subtarea subtarea = buscarEntidad(id);
         validarReprogramacion(dto, limiteDiario);
 
-        long horasExistentes = subtareaRepository.sumarHorasNoEjecutadasPorFecha(
+        Evento evento = subtarea.getEvento();
+        long horasExistentes = subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
+                evento.getUsuario().getIdUsuario(),
                 dto.nuevaFecha(),
                 EstadoSubtarea.ejecutada);
 
@@ -136,6 +151,21 @@ public class SubtareaService {
         return subtareaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe la subtarea con id " + id));
+    }
+
+    private void validarActualizacion(SubtareaActualizacionDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("Los datos de la subtarea son obligatorios");
+        }
+        if (dto.nombreGestion() == null || dto.nombreGestion().isBlank()) {
+            throw new IllegalArgumentException("El nombre de la subtarea es obligatorio");
+        }
+        if (dto.fechaObjetivo() == null) {
+            throw new IllegalArgumentException("La fecha objetivo es obligatoria");
+        }
+        if (dto.horasEstimadas() == null || dto.horasEstimadas() <= 0) {
+            throw new IllegalArgumentException("Las horas estimadas deben ser mayores que cero");
+        }
     }
 
     private void validarSubtarea(Integer eventoId, SubtareaDTO dto) {
