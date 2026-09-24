@@ -18,3 +18,4 @@
 | 2026-09-24  | 015 | Pruebas e2e y fix del pooler                 | [2026-09-24-015-pruebas-e2e-fix-pooler](2026-09-24-015-pruebas-e2e-fix-pooler.md) |
 | 2026-09-24  | 016 | Workflow de desarrollo descentralizado      | [2026-09-24-016-workflow-desarrollo-descentralizado](2026-09-24-016-workflow-desarrollo-descentralizado.md) |
 | 2026-09-24  | 017 | Evidencias Swagger + Postman + Chrome        | [2026-09-24-017-evidencias-postman-chrome-y-swagger](2026-09-24-017-evidencias-postman-chrome-y-swagger.md) |
+| 2026-09-24  | 018 | Rendimiento frontend (sin delay/lazy/timeout) | [2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy](2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md) |
