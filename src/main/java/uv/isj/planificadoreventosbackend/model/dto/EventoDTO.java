@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(name = "EventoDTO", description = "Datos de un evento del planificador")
 public record EventoDTO(
@@ -28,5 +29,7 @@ public record EventoDTO(
         @NotBlank @Size(max = 255) String lugar,
         @Schema(description = "Fecha de creación", example = "2026-09-24T10:15:30",
                 accessMode = Schema.AccessMode.READ_ONLY)
-        LocalDateTime fechaCreacion) {
+        LocalDateTime fechaCreacion,
+        @Schema(description = "Subtareas asociadas al evento", accessMode = Schema.AccessMode.READ_ONLY)
+        List<SubtareaDTO> subtareas) {
 }

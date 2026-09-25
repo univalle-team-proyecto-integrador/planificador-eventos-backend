@@ -5,10 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uv.isj.planificadoreventosbackend.exception.RecursoNoEncontradoException;
 import uv.isj.planificadoreventosbackend.model.Evento;
+import uv.isj.planificadoreventosbackend.model.Subtarea;
 import uv.isj.planificadoreventosbackend.model.TipoEvento;
 import uv.isj.planificadoreventosbackend.model.Usuario;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
+import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
+import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
 import uv.isj.planificadoreventosbackend.repository.TipoEventoRepository;
 import uv.isj.planificadoreventosbackend.repository.UsuarioRepository;
 
@@ -18,14 +21,17 @@ public class EventoService {
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
     private final TipoEventoRepository tipoEventoRepository;
+    private final SubtareaRepository subtareaRepository;
 
     public EventoService(
             EventoRepository eventoRepository,
             UsuarioRepository usuarioRepository,
-            TipoEventoRepository tipoEventoRepository) {
+            TipoEventoRepository tipoEventoRepository,
+            SubtareaRepository subtareaRepository) {
         this.eventoRepository = eventoRepository;
         this.usuarioRepository = usuarioRepository;
         this.tipoEventoRepository = tipoEventoRepository;
+        this.subtareaRepository = subtareaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -34,13 +40,17 @@ public class EventoService {
                 ? eventoRepository.findAll()
                 : eventoRepository.findByUsuarioId(usuarioId);
         return eventos.stream()
-                .map(this::aDto)
+                .map(evento -> aDto(evento, List.of()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public EventoDTO obtenerPorId(Integer id) {
-        return aDto(buscarEntidad(id));
+        Evento evento = buscarEntidad(id);
+        List<SubtareaDTO> subtareas = subtareaRepository.findByEventoId(id).stream()
+                .map(this::aSubtareaDto)
+                .toList();
+        return aDto(evento, subtareas);
     }
 
     @Transactional
@@ -60,7 +70,7 @@ public class EventoService {
         evento.setCliente(dto.cliente().trim());
         evento.setFechaEvento(dto.fechaEvento());
         evento.setLugar(dto.lugar().trim());
-        return aDto(eventoRepository.save(evento));
+        return aDto(eventoRepository.save(evento), List.of());
     }
 
     @Transactional
@@ -82,7 +92,7 @@ public class EventoService {
         evento.setFechaEvento(dto.fechaEvento());
         evento.setLugar(dto.lugar().trim());
 
-        return aDto(eventoRepository.save(evento));
+        return aDto(eventoRepository.save(evento), List.of());
     }
 
     @Transactional
@@ -122,7 +132,7 @@ public class EventoService {
         }
     }
 
-    private EventoDTO aDto(Evento evento) {
+    private EventoDTO aDto(Evento evento, List<SubtareaDTO> subtareas) {
         return new EventoDTO(
                 evento.getIdEvento(),
                 evento.getUsuario().getIdUsuario(),
@@ -131,6 +141,19 @@ public class EventoService {
                 evento.getCliente(),
                 evento.getFechaEvento(),
                 evento.getLugar(),
-                evento.getFechaCreacion());
+                evento.getFechaCreacion(),
+                subtareas);
+    }
+
+    private SubtareaDTO aSubtareaDto(Subtarea subtarea) {
+        return new SubtareaDTO(
+                subtarea.getIdSubtarea(),
+                subtarea.getEvento().getIdEvento(),
+                subtarea.getNombreGestion(),
+                subtarea.getFechaObjetivo(),
+                subtarea.getHorasEstimadas(),
+                subtarea.getEstado(),
+                subtarea.getNotaExplicativa(),
+                subtarea.getFechaCreacion());
     }
 }

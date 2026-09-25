@@ -19,3 +19,4 @@
 | 2026-09-24  | 016 | Workflow de desarrollo descentralizado      | [2026-09-24-016-workflow-desarrollo-descentralizado](2026-09-24-016-workflow-desarrollo-descentralizado.md) |
 | 2026-09-24  | 017 | Evidencias Swagger + Postman + Chrome        | [2026-09-24-017-evidencias-postman-chrome-y-swagger](2026-09-24-017-evidencias-postman-chrome-y-swagger.md) |
 | 2026-09-24  | 018 | Rendimiento frontend (sin delay/lazy/timeout) | [2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy](2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md) |
+| 2026-09-25  | 019 | Cierre brechas Sprint 1: detalle con subtareas y pruebas de horas | [2026-09-25-019-cierre-brechas-sprint-1](2026-09-25-019-cierre-brechas-sprint-1.md) |

@@ -122,10 +122,21 @@ class ApiSprint1Test {
         mockMvc.perform(get("/api/eventos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].idEvento", hasItem(eventoId)));
+
+        SubtareaDTO subtarea = new SubtareaDTO(
+                null, null, "Confirmar banquete", LocalDate.of(2026, 11, 12), 3,
+                null, null, null);
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", eventoId)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(subtarea)))
+                .andExpect(status().isCreated());
+
         mockMvc.perform(get("/api/eventos/{id}", eventoId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idEvento").value(eventoId))
-                .andExpect(jsonPath("$.cliente").value("Cliente de prueba"));
+                .andExpect(jsonPath("$.cliente").value("Cliente de prueba"))
+                .andExpect(jsonPath("$.subtareas[0].nombreGestion").value("Confirmar banquete"))
+                .andExpect(jsonPath("$.subtareas[0].estado").value("pendiente"));
     }
 
     @Test
@@ -231,6 +242,7 @@ class ApiSprint1Test {
                 "Cliente",
                 LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
+                null,
                 null);
 
         assertThatThrownBy(() -> eventoService.crearEvento(nombreVacio))
@@ -260,6 +272,62 @@ class ApiSprint1Test {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Solicitud inválida"))
                 .andExpect(jsonPath("$.detail").value("El cuerpo de la solicitud no contiene un JSON válido"));
+    }
+
+    @Test
+    void rechazaHorasCeroAlCrearSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+        SubtareaDTO request = new SubtareaDTO(
+                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), 0,
+                null, null, null);
+
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Datos inválidos"))
+                .andExpect(jsonPath("$.errors.horasEstimadas").isNotEmpty());
+    }
+
+    @Test
+    void rechazaHorasNegativasAlCrearSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+        SubtareaDTO request = new SubtareaDTO(
+                null, null, "Tarea con horas negativas", LocalDate.of(2026, 11, 10), -2,
+                null, null, null);
+
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Datos inválidos"))
+                .andExpect(jsonPath("$.errors.horasEstimadas").isNotEmpty());
+    }
+
+    @Test
+    void rechazaHorasAlfanumericasAlCrearSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
+                        .contentType("application/json")
+                        .content("{\"nombreGestion\":\"Tarea\",\"fechaObjetivo\":\"2026-11-10\",\"horasEstimadas\":\"abc\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Solicitud inválida"));
+    }
+
+    @Test
+    void rechazaHorasNulasAlCrearSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+        SubtareaDTO request = new SubtareaDTO(
+                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), null,
+                null, null, null);
+
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Datos inválidos"))
+                .andExpect(jsonPath("$.errors.horasEstimadas").isNotEmpty());
     }
 
     @Test
@@ -399,6 +467,7 @@ class ApiSprint1Test {
                 "Cliente",
                 LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
+                null,
                 null);
 
         mockMvc.perform(post("/api/eventos")
@@ -470,6 +539,7 @@ class ApiSprint1Test {
                 "Cliente de prueba",
                 LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
+                null,
                 null);
     }
 
