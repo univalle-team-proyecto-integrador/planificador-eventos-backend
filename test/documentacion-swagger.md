@@ -19,6 +19,7 @@ Swagger **no está entre** el frontend y el backend:
 - El SPA (Vercel) llama **directo** a `/api/**` del backend; nunca pasa por Swagger.
 - Swagger es una UI que sirve **el propio backend** en su misma URL y sirve para que una persona documente y pruebe la API a mano, en **paralelo** al frontend, no como intermediario.
 - Al abrir *Try it out*, las peticiones salen del navegador hacia el **mismo host** (servidor relativo `/`), por lo que no hay CORS (mismo origen). Se comporta igual que un cliente cualquiera llamando a `/api/**`.
+- Las operaciones con cuerpo y las respuestas JSON se documentan como `application/json`; Swagger no debe mostrar `*/*` como media type de respuesta.
 
 ```
 Frontend (Vercel) ──HTTPS──▶ /api/**         ──▶ Controllers ▶ Services ▶ Supabase

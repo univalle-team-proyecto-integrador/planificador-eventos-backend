@@ -21,3 +21,4 @@
 | 2026-09-24  | 018 | Rendimiento frontend (sin delay/lazy/timeout) | [2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy](2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md) |
 | 2026-09-25  | 019 | Cierre brechas Sprint 1: detalle con subtareas y pruebas de horas | [2026-09-25-019-cierre-brechas-sprint-1](2026-09-25-019-cierre-brechas-sprint-1.md) |
 | 2026-09-25  | 020 | Endpoint de consulta de la vista Hoy         | [2026-09-25-020-consulta-hoy](2026-09-25-020-consulta-hoy.md) |
+| 2026-09-25  | 021 | Media type JSON en Swagger UI                | [2026-09-25-021-media-type-json-swagger](2026-09-25-021-media-type-json-swagger.md) |

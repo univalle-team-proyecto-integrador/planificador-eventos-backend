@@ -40,7 +40,9 @@
 		{"id":"m019","type":"file","file":"mejoras/2026-09-25-019-cierre-brechas-sprint-1.md","x":200,"y":3240,"width":280,"height":140},
 		{"id":"p019","type":"text","text":"Mejora 019\nCierre brechas Sprint 1\n2026-09-25","x":-240,"y":3240,"width":240,"height":120,"color":"1"},
 		{"id":"m020","type":"file","file":"mejoras/2026-09-25-020-consulta-hoy.md","x":200,"y":3420,"width":280,"height":140},
-		{"id":"p020","type":"text","text":"Mejora 020\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":3420,"width":240,"height":120,"color":"1"}
+		{"id":"p020","type":"text","text":"Mejora 020\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":3420,"width":240,"height":120,"color":"1"},
+		{"id":"m021","type":"file","file":"mejoras/2026-09-25-021-media-type-json-swagger.md","x":200,"y":3600,"width":280,"height":140},
+		{"id":"p021","type":"text","text":"Mejora 021\nMedia type JSON en Swagger\n2026-09-25","x":-240,"y":3600,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -82,6 +84,8 @@
 		{"id":"e37","fromNode":"indice","fromSide":"bottom","toNode":"m019","toSide":"top"},
 		{"id":"e38","fromNode":"p019","fromSide":"right","toNode":"m019","toSide":"left"},
 		{"id":"e39","fromNode":"indice","fromSide":"bottom","toNode":"m020","toSide":"top"},
-		{"id":"e40","fromNode":"p020","fromSide":"right","toNode":"m020","toSide":"left"}
+		{"id":"e40","fromNode":"p020","fromSide":"right","toNode":"m020","toSide":"left"},
+		{"id":"e41","fromNode":"indice","fromSide":"bottom","toNode":"m021","toSide":"top"},
+		{"id":"e42","fromNode":"p021","fromSide":"right","toNode":"m021","toSide":"left"}
 	]
 }
