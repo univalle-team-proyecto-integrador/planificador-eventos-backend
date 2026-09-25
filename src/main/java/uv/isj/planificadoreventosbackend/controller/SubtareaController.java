@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +35,21 @@ public class SubtareaController {
 
     public SubtareaController(SubtareaService subtareaService) {
         this.subtareaService = subtareaService;
+    }
+
+    @GetMapping("/hoy")
+    @Operation(summary = "Listar las gestiones no ejecutadas de hoy")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Gestiones no ejecutadas para la fecha consultada"),
+            @ApiResponse(responseCode = "400", description = "La fecha o el organizador no son válidos")
+    })
+    public List<SubtareaDTO> listarParaHoy(
+            @Parameter(description = "Identificador del organizador", example = "1")
+            @RequestParam Integer usuarioId,
+            @Parameter(description = "Fecha objetivo en formato ISO", example = "2026-09-25")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return subtareaService.obtenerParaHoy(usuarioId, fecha);
     }
 
     @GetMapping

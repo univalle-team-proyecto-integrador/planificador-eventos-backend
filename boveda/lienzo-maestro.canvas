@@ -8,7 +8,7 @@
 		{"id":"m002","type":"file","file":"mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md","x":200,"y":360,"width":280,"height":140},
 		{"id":"p002","type":"text","text":"Mejora 002\nEstructura por capas y Supabase\n2026-09-18","x":-240,"y":360,"width":240,"height":120,"color":"1"},
 		{"id":"m003","type":"file","file":"mejoras/2026-09-18-003-endpoint-api-health.md","x":200,"y":540,"width":280,"height":140},
-		{"id":"p003","type":"text","text":"Mejora 003\nEndpoint de estado /api/health\n2026-09-18","x":-240,"y":540,"width":240,"height":120,"color":"1"},
+		{"id":"p003","type":"text","text":"Mejora 003\nEndpoint /api/health\n2026-09-18","x":-240,"y":540,"width":240,"height":120,"color":"1"},
 		{"id":"m004","type":"file","file":"mejoras/2026-09-18-004-deploy-render-docker-y-cors.md","x":200,"y":720,"width":280,"height":140},
 		{"id":"p004","type":"text","text":"Mejora 004\nDeploy en Render: Docker, CORS, pooler\n2026-09-18","x":-240,"y":720,"width":240,"height":120,"color":"1"},
 		{"id":"m005","type":"file","file":"mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md","x":200,"y":900,"width":280,"height":140},
@@ -38,7 +38,9 @@
 		{"id":"m018","type":"file","file":"mejoras/2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md","x":200,"y":3060,"width":280,"height":140},
 		{"id":"p018","type":"text","text":"Mejora 018\nRendimiento frontend (lazy + timeout)\n2026-09-24","x":-240,"y":3060,"width":240,"height":120,"color":"1"},
 		{"id":"m019","type":"file","file":"mejoras/2026-09-25-019-cierre-brechas-sprint-1.md","x":200,"y":3240,"width":280,"height":140},
-		{"id":"p019","type":"text","text":"Mejora 019\nCierre brechas Sprint 1\n2026-09-25","x":-240,"y":3240,"width":240,"height":120,"color":"1"}
+		{"id":"p019","type":"text","text":"Mejora 019\nCierre brechas Sprint 1\n2026-09-25","x":-240,"y":3240,"width":240,"height":120,"color":"1"},
+		{"id":"m020","type":"file","file":"mejoras/2026-09-25-020-consulta-hoy.md","x":200,"y":3420,"width":280,"height":140},
+		{"id":"p020","type":"text","text":"Mejora 020\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":3420,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -78,6 +80,8 @@
 		{"id":"e35","fromNode":"indice","fromSide":"bottom","toNode":"m018","toSide":"top"},
 		{"id":"e36","fromNode":"p018","fromSide":"right","toNode":"m018","toSide":"left"},
 		{"id":"e37","fromNode":"indice","fromSide":"bottom","toNode":"m019","toSide":"top"},
-		{"id":"e38","fromNode":"p019","fromSide":"right","toNode":"m019","toSide":"left"}
+		{"id":"e38","fromNode":"p019","fromSide":"right","toNode":"m019","toSide":"left"},
+		{"id":"e39","fromNode":"indice","fromSide":"bottom","toNode":"m020","toSide":"top"},
+		{"id":"e40","fromNode":"p020","fromSide":"right","toNode":"m020","toSide":"left"}
 	]
 }

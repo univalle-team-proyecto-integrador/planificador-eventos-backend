@@ -102,6 +102,29 @@ class ApiSprint1Test {
     }
 
     @Test
+    void listaGestionesNoEjecutadasParaHoyPorOrganizadorYFecha() throws Exception {
+        BaseFixture base = crearBase(6);
+        LocalDate hoy = LocalDate.of(2026, 9, 25);
+        crearSubtarea(base.evento(), "Gestión pendiente de hoy", hoy, 3,
+                EstadoSubtarea.pendiente);
+        crearSubtarea(base.evento(), "Gestión pospuesta de hoy", hoy, 1,
+                EstadoSubtarea.pospuesta);
+        crearSubtarea(base.evento(), "Gestión completada de hoy", hoy, 2,
+                EstadoSubtarea.ejecutada);
+        crearSubtarea(base.evento(), "Gestión de otro día", hoy.plusDays(1), 1,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(get("/api/subtareas/hoy")
+                        .param("usuarioId", String.valueOf(base.usuario().getIdUsuario()))
+                        .param("fecha", hoy.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].nombreGestion", hasItem("Gestión pendiente de hoy")))
+                .andExpect(jsonPath("$[*].nombreGestion", hasItem("Gestión pospuesta de hoy")))
+                .andExpect(jsonPath("$[*].fechaObjetivo").value(hasItem(hoy.toString())));
+    }
+
+    @Test
     void creaConsultaYDetalleDeEvento() throws Exception {
         BaseFixture base = crearBase(6);
         EventoDTO request = dtoEvento(base, "Boda de prueba");

@@ -1,5 +1,7 @@
 package uv.isj.planificadoreventosbackend.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,25 @@ public class SubtareaService {
     public List<SubtareaDTO> obtenerPorEvento(Integer eventoId) {
         buscarEvento(eventoId);
         return subtareaRepository.findByEventoId(eventoId).stream()
+                .map(this::aDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubtareaDTO> obtenerParaHoy(Integer usuarioId, LocalDate fecha) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("El organizador es obligatorio");
+        }
+
+        LocalDate fechaConsulta = fecha == null
+                ? LocalDate.now(ZoneId.of("America/Bogota"))
+                : fecha;
+        return subtareaRepository
+                .findNoEjecutadasParaHoy(
+                        usuarioId,
+                        fechaConsulta,
+                        EstadoSubtarea.ejecutada)
+                .stream()
                 .map(this::aDto)
                 .toList();
     }

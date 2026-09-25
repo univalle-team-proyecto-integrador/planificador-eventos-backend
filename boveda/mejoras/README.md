@@ -8,7 +8,7 @@
 | 2026-09-18  | 004 | Despliegue en Render: Docker, CORS y pooler   | [2026-09-18-004-deploy-render-docker-y-cors](2026-09-18-004-deploy-render-docker-y-cors.md) |
 | 2026-09-18  | 005 | Modelo de datos JPA y DDL para Supabase       | [2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase](2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md) |
 | 2026-09-18  | 006 | README del proyecto                           | [2026-09-18-006-readme-del-proyecto](2026-09-18-006-readme-del-proyecto.md) |
-| 2026-09-18  | 007 | Repositorios JPA: TS02-BE-01                   | [2026-09-18-007-repositorios-jpa-ts02](2026-09-18-007-repositorios-jpa-ts02.md) |
+| 2026-09-18  | 007 | Repositorios JPA: TS02-BE-01                 | [2026-09-18-007-repositorios-jpa-ts02](2026-09-18-007-repositorios-jpa-ts02.md) |
 | 2026-09-18  | 008 | Capa service descentralizada                   | [2026-09-18-008-capa-service-descentralizada](2026-09-18-008-capa-service-descentralizada.md) |
 | 2026-09-23  | 010 | API REST Sprint 1: eventos y subtareas        | [2026-09-23-010-api-rest-sprint-1-eventos-subtareas](2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md) |
 | 2026-09-24  | 011 | Documentación Swagger UI y OpenAPI            | [2026-09-24-011-documentacion-swagger-openapi](2026-09-24-011-documentacion-swagger-openapi.md) |
@@ -20,3 +20,4 @@
 | 2026-09-24  | 017 | Evidencias Swagger + Postman + Chrome        | [2026-09-24-017-evidencias-postman-chrome-y-swagger](2026-09-24-017-evidencias-postman-chrome-y-swagger.md) |
 | 2026-09-24  | 018 | Rendimiento frontend (sin delay/lazy/timeout) | [2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy](2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md) |
 | 2026-09-25  | 019 | Cierre brechas Sprint 1: detalle con subtareas y pruebas de horas | [2026-09-25-019-cierre-brechas-sprint-1](2026-09-25-019-cierre-brechas-sprint-1.md) |
+| 2026-09-25  | 020 | Endpoint de consulta de la vista Hoy         | [2026-09-25-020-consulta-hoy](2026-09-25-020-consulta-hoy.md) |
