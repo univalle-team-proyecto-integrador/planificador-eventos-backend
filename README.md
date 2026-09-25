@@ -68,6 +68,7 @@ db/
 | `GET`    | `/api/eventos?usuarioId={id}`       | Lista los eventos; el filtro es opcional                        |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
+| `GET`    | `/api/subtareas/hoy?usuarioId={id}&fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
@@ -129,10 +130,10 @@ Ejemplo de respuesta de `/api/health`:
 - Servicios de eventos y subtareas con validación, mapeo de relaciones y control de límite diario
 - Catálogo de tipos de evento y actualización completa de subtareas
 - API REST de eventos y subtareas con validación, cascada y manejo global de errores
+- Endpoint `/api/subtareas/hoy` para consultar las gestiones no ejecutadas por fecha
 
 **Pendiente**
 
-- Exponer mediante endpoints la consulta JPQL de la vista «Hoy» ya disponible en el repositorio
 - Autenticación (JWT) — fuera de alcance por ahora
 
 Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`).

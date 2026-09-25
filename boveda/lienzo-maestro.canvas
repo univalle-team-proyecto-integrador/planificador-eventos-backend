@@ -26,7 +26,9 @@
 		{"id":"m012","type":"file","file":"mejoras/2026-09-24-012-compatibilidad-api-frontend.md","x":200,"y":1980,"width":280,"height":140},
 		{"id":"p012","type":"text","text":"Mejora 012\nCompatibilidad de API con frontend\n2026-09-24","x":-240,"y":1980,"width":240,"height":120,"color":"1"},
 		{"id":"m013","type":"file","file":"mejoras/2026-09-24-013-edicion-y-catalogo-tipos.md","x":200,"y":2160,"width":280,"height":140},
-		{"id":"p013","type":"text","text":"Mejora 013\nEdición y catálogo de tipos\n2026-09-24","x":-240,"y":2160,"width":240,"height":120,"color":"1"}
+		{"id":"p013","type":"text","text":"Mejora 013\nEdición y catálogo de tipos\n2026-09-24","x":-240,"y":2160,"width":240,"height":120,"color":"1"},
+		{"id":"m014","type":"file","file":"mejoras/2026-09-25-014-consulta-hoy.md","x":200,"y":2340,"width":280,"height":140},
+		{"id":"p014","type":"text","text":"Mejora 014\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":2340,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -54,6 +56,8 @@
 		{"id":"e23","fromNode":"indice","fromSide":"bottom","toNode":"m012","toSide":"top"},
 		{"id":"e24","fromNode":"p012","fromSide":"right","toNode":"m012","toSide":"left"},
 		{"id":"e25","fromNode":"indice","fromSide":"bottom","toNode":"m013","toSide":"top"},
-		{"id":"e26","fromNode":"p013","fromSide":"right","toNode":"m013","toSide":"left"}
+		{"id":"e26","fromNode":"p013","fromSide":"right","toNode":"m013","toSide":"left"},
+		{"id":"e27","fromNode":"indice","fromSide":"bottom","toNode":"m014","toSide":"top"},
+		{"id":"e28","fromNode":"p014","fromSide":"right","toNode":"m014","toSide":"left"}
 	]
 }
