@@ -22,3 +22,5 @@
 | 2026-09-25  | 019 | Cierre brechas Sprint 1: detalle con subtareas y pruebas de horas | [2026-09-25-019-cierre-brechas-sprint-1](2026-09-25-019-cierre-brechas-sprint-1.md) |
 | 2026-09-25  | 020 | Endpoint de consulta de la vista Hoy         | [2026-09-25-020-consulta-hoy](2026-09-25-020-consulta-hoy.md) |
 | 2026-09-25  | 021 | Media type JSON en Swagger UI                | [2026-09-25-021-media-type-json-swagger](2026-09-25-021-media-type-json-swagger.md) |
+| 2026-09-29  | 022 | Pruebas de CORS, salud, parámetros y OpenAPI    | [2026-09-29-022-pruebas-cors-salud-parametros-y-openapi](2026-09-29-022-pruebas-cors-salud-parametros-y-openapi.md) |
+| 2026-09-29  | 023 | CORS para 127.0.0.1 y ProblemDetail en parámetros | [2026-09-29-023-cors-127-y-problemdetail-parametros](2026-09-29-023-cors-127-y-problemdetail-parametros.md) |

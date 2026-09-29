@@ -42,7 +42,11 @@
 		{"id":"m020","type":"file","file":"mejoras/2026-09-25-020-consulta-hoy.md","x":200,"y":3420,"width":280,"height":140},
 		{"id":"p020","type":"text","text":"Mejora 020\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":3420,"width":240,"height":120,"color":"1"},
 		{"id":"m021","type":"file","file":"mejoras/2026-09-25-021-media-type-json-swagger.md","x":200,"y":3600,"width":280,"height":140},
-		{"id":"p021","type":"text","text":"Mejora 021\nMedia type JSON en Swagger\n2026-09-25","x":-240,"y":3600,"width":240,"height":120,"color":"1"}
+		{"id":"p021","type":"text","text":"Mejora 021\nMedia type JSON en Swagger\n2026-09-25","x":-240,"y":3600,"width":240,"height":120,"color":"1"},
+		{"id":"m022","type":"file","file":"mejoras/2026-09-29-022-pruebas-cors-salud-parametros-y-openapi.md","x":200,"y":3780,"width":280,"height":140},
+		{"id":"p022","type":"text","text":"Mejora 022\nPruebas CORS, salud, parámetros, OpenAPI\n2026-09-29","x":-240,"y":3780,"width":240,"height":120,"color":"1"},
+		{"id":"m023","type":"file","file":"mejoras/2026-09-29-023-cors-127-y-problemdetail-parametros.md","x":200,"y":3960,"width":280,"height":140},
+		{"id":"p023","type":"text","text":"Mejora 023\nCORS 127.0.0.1 + ProblemDetail\n2026-09-29","x":-240,"y":3960,"width":240,"height":120,"color":"1"}
 	],
 	"edges":[
 		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
@@ -86,6 +90,10 @@
 		{"id":"e39","fromNode":"indice","fromSide":"bottom","toNode":"m020","toSide":"top"},
 		{"id":"e40","fromNode":"p020","fromSide":"right","toNode":"m020","toSide":"left"},
 		{"id":"e41","fromNode":"indice","fromSide":"bottom","toNode":"m021","toSide":"top"},
-		{"id":"e42","fromNode":"p021","fromSide":"right","toNode":"m021","toSide":"left"}
+		{"id":"e42","fromNode":"p021","fromSide":"right","toNode":"m021","toSide":"left"},
+		{"id":"e43","fromNode":"indice","fromSide":"bottom","toNode":"m022","toSide":"top"},
+		{"id":"e44","fromNode":"p022","fromSide":"right","toNode":"m022","toSide":"left"},
+		{"id":"e45","fromNode":"indice","fromSide":"bottom","toNode":"m023","toSide":"top"},
+		{"id":"e46","fromNode":"p023","fromSide":"right","toNode":"m023","toSide":"left"}
 	]
 }

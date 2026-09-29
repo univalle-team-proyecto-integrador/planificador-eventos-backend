@@ -3,17 +3,21 @@ package uv.isj.planificadoreventosbackend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uv.isj.planificadoreventosbackend.exception.RecursoNoEncontradoException;
@@ -208,6 +212,76 @@ class SubtareaServiceTest {
         assertThatThrownBy(() -> subtareaService.obtenerPorEvento(9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
+    }
+
+    @Test
+    void obtenerPorIdDevuelveElMapeoCompletoDeLaSubtarea() {
+        Subtarea subtarea = subtareaCreada(9, "Tarea de detalle", LocalDate.of(2026, 11, 18), 2,
+                EstadoSubtarea.ejecutada);
+        subtarea.setNotaExplicativa("Detalle entregado");
+        when(subtareaRepository.findById(9)).thenReturn(Optional.of(subtarea));
+
+        SubtareaDTO resultado = subtareaService.obtenerPorId(9);
+
+        assertThat(resultado.idSubtarea()).isEqualTo(9);
+        assertThat(resultado.idEvento()).isEqualTo(10);
+        assertThat(resultado.nombreGestion()).isEqualTo("Tarea de detalle");
+        assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 18));
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
+        assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.ejecutada);
+        assertThat(resultado.notaExplicativa()).isEqualTo("Detalle entregado");
+    }
+
+    @Test
+    void obtenerPorIdDeSubtareaInexistenteLanzaExcepcion() {
+        when(subtareaRepository.findById(9999)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subtareaService.obtenerPorId(9999))
+                .isInstanceOf(RecursoNoEncontradoException.class)
+                .hasMessageContaining("9999");
+    }
+
+    @Test
+    void listarGestionesParaHoyUsaLaFechaDeBogotaCuandoNoSeEnvia() {
+        LocalDate esperada = LocalDate.now(ZoneId.of("America/Bogota"));
+        when(subtareaRepository.findNoEjecutadasParaHoy(
+                eq(1), any(LocalDate.class), eq(EstadoSubtarea.ejecutada)))
+                .thenReturn(List.of());
+
+        subtareaService.obtenerParaHoy(1, null);
+
+        ArgumentCaptor<LocalDate> fecha = ArgumentCaptor.forClass(LocalDate.class);
+        verify(subtareaRepository).findNoEjecutadasParaHoy(
+                eq(1), fecha.capture(), eq(EstadoSubtarea.ejecutada));
+        assertThat(fecha.getValue())
+                .isBetween(esperada.minusDays(1), esperada.plusDays(1));
+    }
+
+    @Test
+    void listarGestionesParaHoyRespetaLaFechaEnviada() {
+        LocalDate solicitada = LocalDate.of(2026, 9, 25);
+        when(subtareaRepository.findNoEjecutadasParaHoy(
+                1, solicitada, EstadoSubtarea.ejecutada))
+                .thenReturn(List.of());
+
+        subtareaService.obtenerParaHoy(1, solicitada);
+
+        verify(subtareaRepository)
+                .findNoEjecutadasParaHoy(1, solicitada, EstadoSubtarea.ejecutada);
+    }
+
+    @Test
+    void listarGestionesParaHoyRechazaOrganizadoresInvalidos() {
+        assertThatThrownBy(() -> subtareaService.obtenerParaHoy(null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("organizador");
+
+        assertThatThrownBy(() -> subtareaService.obtenerParaHoy(0, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("organizador");
+
+        verify(subtareaRepository, never())
+                .findNoEjecutadasParaHoy(anyInt(), any(LocalDate.class), any(EstadoSubtarea.class));
     }
 
     @Test

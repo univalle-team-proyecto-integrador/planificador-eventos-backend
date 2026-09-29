@@ -35,15 +35,59 @@ hdrs=$(curl -s -i -X OPTIONS -m 60 "$BACKEND/api/eventos" \
   -H "Origin: $FRONTEND" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: Content-Type")
 echo "$hdrs" | grep -qi "access-control-allow-origin: $FRONTEND" && ok "preflight autoriza $FRONTEND" || bad "preflight sin access-control-allow-origin"
 
-echo "== 4. Frontend apunta al backend correcto (bundle) =="
+echo "== 4. Frontend apunta al backend correcto (bundles) =="
+# Vite separa el cliente HTTP en un chunk lazy (assets/api-*.js) que NO aparece
+# como script en el HTML inicial: hay que recorrer el grafo de imports.
+normalizar() {
+  local pila=() parte
+  for parte in $(echo "$1" | tr '/' '\n'); do
+    case "$parte" in
+      ""|".") ;;
+      "..") if [ "${#pila[@]}" -gt 0 ]; then pila=("${pila[@]:0:${#pila[@]}-1}"); fi ;;
+      *) pila+=("$parte") ;;
+    esac
+  done
+  local salida=""
+  for parte in "${pila[@]:-}"; do salida="$salida/$parte"; done
+  echo "$salida"
+}
+
+resolver() {
+  case "$1" in
+    /*) echo "$1" ;;
+    http*) echo "$1" ;;
+    ./*|../*) normalizar "$(dirname "$2")/$1" ;;
+    assets/*) echo "/$1" ;;
+    *) echo "" ;;
+  esac
+}
+
 index=$(curl -sL -m 30 "$FRONTEND")
-js=$(echo "$index" | grep -o 'src="[^"]*\.js"' | head -1 | sed 's/src="//;s/"//')
-if [ -n "$js" ]; then
-  curl -sL -m 60 "$FRONTEND$js" | grep -q "$BACKEND" \
-    && ok "bundle $js contiene $BACKEND" \
-    || bad "bundle $js NO contiene $BACKEND"
-else
+entrada=$(echo "$index" | grep -oE 'src="[^"]+\.js"' | head -1 | sed 's/src="//;s/"//')
+vistos=""
+encontrado=""
+cola="$entrada"
+while [ -n "$(echo "$cola" | tr -s ' ')" ]; do
+  actual=$(echo "$cola" | tr -s ' ' '\n' | grep -v '^$' | head -1)
+  cola=$(echo "$cola" | tr -s ' ' '\n' | grep -v '^$' | tail -n +2 | tr '\n' ' ')
+  [ -z "$actual" ] && continue
+  case " $vistos " in *" $actual "*) continue ;; esac
+  vistos="$vistos $actual"
+  [ "$(echo "$vistos" | wc -w)" -gt 40 ] && { warn "límite de 40 bundles alcanzado"; break; }
+  cuerpo=$(curl -sL -m 60 "$FRONTEND$actual")
+  echo "$cuerpo" | grep -q "$BACKEND" && encontrado="$encontrado $actual"
+  for token in $(echo "$cuerpo" | grep -aoE '[A-Za-z0-9_./-]*\.js' | sort -u); do
+    hijo=$(resolver "$token" "$actual")
+    [ -n "$hijo" ] && cola="$cola $hijo"
+  done
+done
+total=$(echo "$vistos" | wc -w)
+if [ -z "$entrada" ]; then
   bad "no se encontró bundle JS en $FRONTEND"
+elif [ -n "$encontrado" ]; then
+  ok "$BACKEND referenciado en:$encontrado (de $total bundles revisados)"
+else
+  bad "ningún bundle de $total revisados referencia $BACKEND"
 fi
 
 echo

@@ -202,6 +202,23 @@ class ApiSprint1Test {
     }
 
     @Test
+    void consultaElDetalleDeUnaSubtarea() throws Exception {
+        BaseFixture base = crearBase(6);
+        Subtarea subtarea = crearSubtarea(
+                base.evento(), "Tarea que se consulta", LocalDate.of(2026, 11, 12), 3,
+                EstadoSubtarea.ejecutada);
+
+        mockMvc.perform(get("/api/subtareas/{id}", subtarea.getIdSubtarea()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idSubtarea").value(subtarea.getIdSubtarea()))
+                .andExpect(jsonPath("$.idEvento").value(base.evento().getIdEvento()))
+                .andExpect(jsonPath("$.nombreGestion").value("Tarea que se consulta"))
+                .andExpect(jsonPath("$.fechaObjetivo").value("2026-11-12"))
+                .andExpect(jsonPath("$.horasEstimadas").value(3))
+                .andExpect(jsonPath("$.estado").value("ejecutada"));
+    }
+
+    @Test
     void actualizaLosCamposEditablesDeUnaSubtarea() throws Exception {
         BaseFixture base = crearBase(6);
         Subtarea subtarea = crearSubtarea(
