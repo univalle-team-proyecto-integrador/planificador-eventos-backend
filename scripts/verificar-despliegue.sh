@@ -3,8 +3,14 @@
 # Uso: bash scripts/verificar-despliegue.sh
 set -uo pipefail
 
-BACKEND="https://planificador-eventos-backend-1.onrender.com"
-FRONTEND="https://planificador-eventos-frontend-ten.vercel.app"
+BACKEND="${PDE_BACKEND:-https://planificador-eventos-backend-1.onrender.com}"
+FRONTEND="${PDE_FRONTEND:-https://planificador-eventos-frontend-ten.vercel.app}"
+
+# Cuenta fija de verificación para US-11. Se reutiliza en cada ejecución: el
+# primer intento la crea y los siguientes solo inician sesión. Se puede evitar
+# por completo pasando un token ya válido en PDE_VERIFY_TOKEN.
+VERIFY_USER="${PDE_VERIFY_USER:-verificacion.despliegue@eventflow.co}"
+VERIFY_PASS="${PDE_VERIFY_PASS:-Despliegue2026}"
 
 ROJO='\033[0;31m'; VERDE='\033[0;32m'; AMARILLO='\033[0;33m'; SIN='\033[0m'
 PASS=0; FAIL=0
@@ -24,18 +30,98 @@ for i in 1 2 3; do
 done
 if [ "$(echo "$body" | grep -c 'healthy')" -gt 0 ] && [ "$(echo "$body" | grep -c 'connected')" -gt 0 ]; then ok "/api/health → $body"; else bad "/api/health → ${body:-sin respuesta}"; fi
 
-echo "== 2. Supabase real: /api/tipos-evento y eventos del usuario 1 =="
-tipos=$(curl -s -m 90 "$BACKEND/api/tipos-evento")
-eventos=$(curl -s -m 90 "$BACKEND/api/eventos?usuarioId=1")
-[ -n "$tipos" ] && [ "$tipos" != "[]" ] && ok "catálogo devuelve datos (${#tipos} bytes)" || bad "catálogo vacío o sin respuesta"
-[ -n "$eventos" ] && [ "$eventos" != "[]" ] && ok "eventos del usuario 1 devuelven datos (${#eventos} bytes)" || warn "eventos del usuario 1 vacíos (puede ser normal)"
+echo "== 2. Autenticación US-11: registro/login, perfil y token =="
+TOKEN="${PDE_VERIFY_TOKEN:-}"
+AUTH_OK=0
+if [ -z "$TOKEN" ]; then
+  # Registrar primero: si la cuenta ya existe responde 409 y no es un fallo.
+  registro=$(curl -s -m 60 -X POST "$BACKEND/api/users/register" \
+    -H "Content-Type: application/json" \
+    -d "{\"nombre\":\"Verificacion de despliegue\",\"email\":\"$VERIFY_USER\",\"password\":\"$VERIFY_PASS\"}")
+  if echo "$registro" | grep -q '"token"'; then
+    TOKEN=$(echo "$registro" | jq -r '.token')
+    ok "registro devolvió token"
+  elif echo "$registro" | grep -q 'correo'; then
+    warn "la cuenta de verificación ya existe; se inicia sesión"
+  else
+    bad "registro inesperado → ${registro:-sin respuesta}"
+  fi
 
-echo "== 3. CORS desde el frontend real =="
+  if [ -z "$TOKEN" ]; then
+    login=$(curl -s -m 60 -X POST "$BACKEND/api/users/login" \
+      -H "Content-Type: application/json" \
+      -d "{\"email\":\"$VERIFY_USER\",\"password\":\"$VERIFY_PASS\"}")
+    TOKEN=$(echo "$login" | jq -r '.token // empty')
+    [ -n "$TOKEN" ] && ok "login devolvió token" || bad "login falló → ${login:-sin respuesta}"
+  fi
+else
+  ok "usando PDE_VERIFY_TOKEN del entorno"
+fi
+
+perfil=$(curl -s -m 60 "$BACKEND/api/users/profile" -H "Authorization: Bearer $TOKEN")
+if echo "$perfil" | grep -q '"email"'; then
+  AUTH_OK=1
+  ok "/api/users/profile responde con el usuario del token"
+elif echo "$perfil" | grep -q '"status":401'; then
+  bad "/api/users/profile → 401: el token no sirve en el backend desplegado (¿JWT_SECRET distinto?)"
+elif echo "$perfil" | grep -q '"status":404'; then
+  bad "/api/users/profile → 404: el backend desplegado no tiene US-11 (falta hacer push y redesplegar)"
+else
+  bad "/api/users/profile inesperado → ${perfil:-sin respuesta}"
+fi
+
+echo "== 3. Supabase real: /api/tipos-evento y /api/eventos con token =="
+tipos=$(curl -s -m 90 "$BACKEND/api/tipos-evento")
+[ -n "$tipos" ] && [ "$tipos" != "[]" ] && ok "catálogo devuelve datos (${#tipos} bytes)" || bad "catálogo vacío o sin respuesta"
+
+# Sin un token válido los datos no dicen nada: un backend viejo con
+# PROTECT_SUBTAREAS=false responde igual sin autenticación y parecería sano.
+if [ "$AUTH_OK" -ne 1 ]; then
+  bad "omitido: no se pudo autenticar, así que /api/eventos y /api/subtareas/hoy no son verificables (revisa el paso 2)"
+else
+
+# Un ProblemDetail 401 también es "no vacío", así que comparar con [] no basta:
+# hay que comprobar que la respuesta es un arreglo JSON de verdad.
+eventos=$(curl -s -m 90 "$BACKEND/api/eventos" -H "Authorization: Bearer $TOKEN")
+case "$eventos" in
+  \[*) if [ "$eventos" != "[]" ]; then
+        ok "/api/eventos devuelve datos del titular del token (${#eventos} bytes)"
+      else
+        warn "/api/eventos vacío: normal si la cuenta de verificación no tiene eventos"
+      fi ;;
+  *)  bad "/api/eventos no devolvió un arreglo (revisa si exige token) → $(echo "$eventos" | head -c 200)" ;;
+esac
+
+# /api/subtareas/hoy todavía exige usuarioId en el query por compatibilidad,
+# aunque con token se ignora: se envía para no caer en el 400 de validación.
+hoy=$(curl -s -m 90 "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)&usuarioId=1" \
+  -H "Authorization: Bearer $TOKEN")
+# Solo un arreglo es válido: un ProblemDetail empieza por { y un 401 pasaría
+# por una respuesta sana si no se distingue.
+case "$hoy" in
+  \[*) ok "/api/subtareas/hoy responde con el token (${#hoy} bytes)" ;;
+  *)    bad "/api/subtareas/hoy → $(echo "$hoy" | head -c 200)" ;;
+esac
+
+# El usuarioId del query se ignora por diseño: el token manda. Esta comprobación
+# solo avisa, porque exigir 200 aquí sería depender de un token ajeno.
+ajeno=$(curl -s -m 90 "$BACKEND/api/eventos?usuarioId=1" -H "Authorization: Bearer $TOKEN")
+case "$eventos" in
+  \[*) if [ "$ajeno" = "$eventos" ]; then
+         ok "el usuarioId del query se ignora: misma respuesta con usuarioId=1"
+       else
+         warn "el usuarioId del query cambió la respuesta; revisa el aislamiento por propietario"
+       fi ;;
+  *) bad "no se puede comprobar el aislamiento: /api/eventos no devolvió un arreglo" ;;
+esac
+fi
+
+echo "== 4. CORS desde el frontend real =="
 hdrs=$(curl -s -i -X OPTIONS -m 60 "$BACKEND/api/eventos" \
   -H "Origin: $FRONTEND" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: Content-Type")
 echo "$hdrs" | grep -qi "access-control-allow-origin: $FRONTEND" && ok "preflight autoriza $FRONTEND" || bad "preflight sin access-control-allow-origin"
 
-echo "== 4. Frontend apunta al backend correcto (bundles) =="
+echo "== 5. Frontend apunta al backend correcto (bundles) =="
 # Vite separa el cliente HTTP en un chunk lazy (assets/api-*.js) que NO aparece
 # como script en el HTML inicial: hay que recorrer el grafo de imports.
 normalizar() {

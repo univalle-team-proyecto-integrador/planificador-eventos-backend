@@ -6,6 +6,138 @@
 	},
 	"item": [
 		{
+			"name": "0. Autenticación (US-11)",
+			"item": [
+				{
+					"name": "POST /api/users/register (crea la cuenta y guarda el token)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"register"
+							]
+						},
+						"description": "Alta de cuenta. Devuelve 201 con { token, tokenType, expiresIn, usuario }. Si el correo ya existe responde 409: en ese caso usar el login de abajo. El script de test guarda el token en la variable de colección {{token}}.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"{{nombre}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"event": "test",
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.token) {",
+									"    pm.collectionVariables.set('token', json.token);",
+									"    console.log('Token guardado en {{token}}');",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "POST /api/users/login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						},
+						"description": "Autenticación. Devuelve 200 con el mismo cuerpo que el registro. Sin Authorization es público. Un 401 significa correo o contraseña incorrectos.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"event": "test",
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.token) {",
+									"    pm.collectionVariables.set('token', json.token);",
+									"    console.log('Token guardado en {{token}}');",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET /api/users/profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Ruta que SIEMPRE exige token. Devuelve el usuario del token; 401 sin cabecera Bearer.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "1. Health",
 			"item": [
 				{
@@ -15,8 +147,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/health",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "health"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
 						},
 						"description": "Esperado: 200 con {\"status\":\"healthy\",\"database\":\"connected\",...}. 503 si la BD no responde."
 					}
@@ -33,8 +170,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/tipos-evento",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "tipos-evento"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tipos-evento"
+							]
 						},
 						"description": "Esperado: 200 con el catálogo de tipos de evento."
 					}
@@ -51,8 +193,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos?usuarioId={{usuarioId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos"
+							],
 							"query": [
 								{
 									"key": "usuarioId",
@@ -60,7 +207,17 @@
 								}
 							]
 						},
-						"description": "Esperado: 200 con la lista de eventos del usuario."
+						"description": "Esperado: 200 con la lista de eventos del usuario.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -79,11 +236,42 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos"
+							]
 						},
-						"description": "Esperado: 201 con idEvento. Copiar idEvento en el entorno para las siguientes llamadas."
-					}
+						"description": "Esperado: 201 con idEvento. Copiar idEvento en el entorno para las siguientes llamadas. El script de test guarda el id en {{idEvento}} para las peticiones siguientes.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"event": "test",
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.idEvento !== undefined) {",
+									"    pm.collectionVariables.set('idEvento', json.idEvento);",
+									"    console.log('idEvento = ' + json.idEvento);",
+									"}"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Detalle de evento",
@@ -92,10 +280,26 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}"
+							]
 						},
-						"description": "Esperado: 200 con el detalle del evento INCLUYENDO el campo subtareas:[] (cierre de brechas del Sprint 1: las subtareas viajan embebidas)."
+						"description": "Esperado: 200 con el detalle del evento INCLUYENDO el campo subtareas:[] (cierre de brechas del Sprint 1: las subtareas viajan embebidas).",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -105,10 +309,27 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "Esperado: 200 con las subtareas del evento."
+						"description": "Esperado: 200 con las subtareas del evento.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -127,10 +348,26 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}"
+							]
 						},
-						"description": "Esperado: 200 con el evento actualizado."
+						"description": "Esperado: 200 con el evento actualizado.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -149,24 +386,44 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "Esperado: 201 con idSubtarea. Copiar idSubtarea en el entorno para las siguientes llamadas."
-					}
-				},
-				{
-					"name": "Eliminar evento",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}"]
-						},
-						"description": "Esperado: 204 (sin cuerpo). Limpieza tras crear."
-					}
+						"description": "Esperado: 201 con idSubtarea. Copiar idSubtarea en el entorno para las siguientes llamadas.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"event": "test",
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.idSubtarea !== undefined) {",
+									"    pm.collectionVariables.set('idSubtarea', json.idSubtarea);",
+									"    console.log('idSubtarea = ' + json.idSubtarea);",
+									"}"
+								]
+							}
+						}
+					]
 				}
 			]
 		},
@@ -180,8 +437,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas?eventoId={{idEvento}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas"
+							],
 							"query": [
 								{
 									"key": "eventoId",
@@ -189,7 +451,17 @@
 								}
 							]
 						},
-						"description": "Esperado: 200 con las subtareas del evento."
+						"description": "Esperado: 200 con las subtareas del evento.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -199,10 +471,26 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}"
+							]
 						},
-						"description": "Esperado: 200 con el detalle de la subtarea."
+						"description": "Esperado: 200 con el detalle de la subtarea.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -221,10 +509,26 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}"
+							]
 						},
-						"description": "Esperado: 200 con la subtarea actualizada."
+						"description": "Esperado: 200 con la subtarea actualizada.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -243,10 +547,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/estado",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}", "estado"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}",
+								"estado"
+							]
 						},
-						"description": "Esperado: 200. Estados: pendiente, ejecutada, pospuesta."
+						"description": "Esperado: 200. Estados: pendiente, ejecutada, pospuesta.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -261,14 +582,31 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"fechaObjetivo\": \"2026-12-10\",\n  \"horasEstimadas\": 4\n}"
+							"raw": "{\n  \"nuevaFecha\": \"2026-12-10\",\n  \"nuevasHoras\": 6\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/reprogramar",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}", "reprogramar"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}",
+								"reprogramar"
+							]
 						},
-						"description": "Esperado: 200. Reprogramar fecha objetivo y horas estimadas. Body del ReprogramarDTO: fechaObjetivo (LocalDate) + horasEstimadas."
+						"description": "Esperado: 200. Reprogramar fecha objetivo y horas estimadas. Body del ReprogramarDTO: fechaObjetivo (LocalDate) + horasEstimadas. El body usa nuevaFecha y nuevasHoras, los nombres de ReprogramarDTO; antes enviaba fechaObjetivo/horasEstimadas y recibía 400 por validación.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -278,10 +616,55 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}"
+							]
 						},
-						"description": "Esperado: 204 (sin cuerpo). Limpieza."
+						"description": "Esperado: 204 (sin cuerpo). Limpieza.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Eliminar evento (limpieza: va al final a propósito)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}"
+							]
+						},
+						"description": "Va al final de la colección porque borra en cascada las subtareas: si se ejecutara en el grupo de Eventos, las peticiones de subtareas posteriores recibirían 404.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				}
 			]
@@ -305,10 +688,25 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos"
+							]
 						},
-						"description": "Esperado: 400 (ProblemDetail con violaciones de validación)."
+						"description": "Esperado: 400 (ProblemDetail con violaciones de validación).",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -318,10 +716,26 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/999999",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "999999"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"999999"
+							]
 						},
-						"description": "Esperado: 404 (ProblemDetail)."
+						"description": "Esperado: 404 (ProblemDetail).",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -340,10 +754,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "SCRUM-8-QA-1. Esperado: 400 con \"Las horas estimadas deben ser mayores que cero\". No se crea en BD."
+						"description": "SCRUM-8-QA-1. Esperado: 400 con \"Las horas estimadas deben ser mayores que cero\". No se crea en BD.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -362,10 +793,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "SCRUM-8-QA-1. Esperado: 400."
+						"description": "SCRUM-8-QA-1. Esperado: 400.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -384,10 +832,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "SCRUM-8-QA-1. Esperado: 400."
+						"description": "SCRUM-8-QA-1. Esperado: 400.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -406,10 +871,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"{{idEvento}}",
+								"subtareas"
+							]
 						},
-						"description": "SCRUM-8-QA-1. Esperado: 400."
+						"description": "SCRUM-8-QA-1. Esperado: 400.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -428,10 +910,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/estado",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "{{idSubtarea}}", "estado"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"{{idSubtarea}}",
+								"estado"
+							]
 						},
-						"description": "Esperado: 400 (estados válidos: pendiente, ejecutada, pospuesta)."
+						"description": "Esperado: 400 (estados válidos: pendiente, ejecutada, pospuesta).",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -450,10 +949,27 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/999999/subtareas",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "eventos", "999999", "subtareas"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"eventos",
+								"999999",
+								"subtareas"
+							]
 						},
-						"description": "Esperado: 404."
+						"description": "Esperado: 404.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -472,10 +988,26 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/999999",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "999999"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"999999"
+							]
 						},
-						"description": "Esperado: 404."
+						"description": "Esperado: 404.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				},
 				{
@@ -485,10 +1017,26 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/999999",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "subtareas", "999999"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"999999"
+							]
 						},
-						"description": "Esperado: 404."
+						"description": "Esperado: 404.",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						}
 					}
 				}
 			]
@@ -503,8 +1051,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/v3/api-docs",
-							"host": ["{{baseUrl}}"],
-							"path": ["v3", "api-docs"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v3",
+								"api-docs"
+							]
 						},
 						"description": "Esperado: 200 con la spec OpenAPI 3 (usa \"servers\": [{\"url\": \"/\"}])."
 					}
@@ -516,13 +1069,65 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/v3/api-docs.yaml",
-							"host": ["{{baseUrl}}"],
-							"path": ["v3", "api-docs.yaml"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v3",
+								"api-docs.yaml"
+							]
 						},
 						"description": "Esperado: 200 con la spec en YAML."
 					}
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://planificador-eventos-backend-1.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "verificacion.despliegue@eventflow.co",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "Despliegue2026",
+			"type": "string"
+		},
+		{
+			"key": "nombre",
+			"value": "Verificacion de despliegue",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "usuarioId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "idTipoEvento",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "idEvento",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idSubtarea",
+			"value": "",
+			"type": "string"
 		}
 	]
 }

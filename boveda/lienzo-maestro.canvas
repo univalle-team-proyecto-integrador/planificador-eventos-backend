@@ -464,6 +464,24 @@
    "y": 4140,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m025",
+   "type": "file",
+   "file": "mejoras/2026-09-30-025-arreglo-script-verificacion-y-postman-us11.md",
+   "x": 200,
+   "y": 4320,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p025",
+   "type": "text",
+   "text": "Mejora 025\nArreglo script de verificación y Postman (US-11)\n2026-09-30",
+   "x": 540,
+   "y": 4320,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -801,6 +819,20 @@
    "fromNode": "p024",
    "fromSide": "right",
    "toNode": "m024",
+   "toSide": "left"
+  },
+  {
+   "id": "e49",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m025",
+   "toSide": "top"
+  },
+  {
+   "id": "e50",
+   "fromNode": "p025",
+   "fromSide": "right",
+   "toNode": "m025",
    "toSide": "left"
   }
  ]
