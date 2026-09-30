@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uv.isj.planificadoreventosbackend.model.Evento;
 import uv.isj.planificadoreventosbackend.model.EstadoSubtarea;
 import uv.isj.planificadoreventosbackend.model.Subtarea;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import uv.isj.planificadoreventosbackend.model.TipoEvento;
 import uv.isj.planificadoreventosbackend.model.Usuario;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
@@ -55,11 +56,17 @@ class JwtSecurityIntegrationTest {
 
     private static final String CONTRASENA = "Planificador2026";
 
+    /** Debe coincidir con app.security.jwt.expiration-seconds del perfil test. */
+    private static final long EXPIRATION_SEGUNDOS = 3600L;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -190,6 +197,29 @@ class JwtSecurityIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.nombre").value("Nueva Organizadora"));
+    }
+
+    @Test
+    @DisplayName("La caducidad sale de JWT_EXPIRATION_SECONDS y el token la respeta")
+    void caducidadVieneDeLaConfiguracionEnSegundos() throws Exception {
+        String email = "caduca-" + UUID.randomUUID().toString().substring(0, 8) + "@uni.edu";
+
+        var registro = mockMvc.perform(post("/api/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","nombre":"Caduca","password":"%s"}
+                                """.formatted(email, CONTRASENA)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        // expiresIn es la unidad de la configuracion, en segundos.
+        assertThat(json(registro).path("expiresIn").asLong()).isEqualTo(EXPIRATION_SEGUNDOS);
+
+        // El claim exp del token tiene que coincidir con expiresIn: si la
+        // conversion se desincroniza, el DTO miente sobre la caducidad real.
+        var decodificado = jwtDecoder.decode(json(registro).path("token").asText());
+        assertThat(decodificado.getExpiresAt().getEpochSecond()
+                - decodificado.getIssuedAt().getEpochSecond()).isEqualTo(EXPIRATION_SEGUNDOS);
     }
 
     @Test

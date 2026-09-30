@@ -29,15 +29,15 @@ public class JwtService {
 
     private final JwtEncoder jwtEncoder;
     private final String issuer;
-    private final long expirationMinutes;
+    private final long expirationSegundos;
 
     public JwtService(
             JwtEncoder jwtEncoder,
             @Value("${app.security.jwt.issuer}") String issuer,
-            @Value("${app.security.jwt.expiration-minutes}") long expirationMinutes) {
+            @Value("${app.security.jwt.expiration-seconds}") long expirationSegundos) {
         this.jwtEncoder = jwtEncoder;
         this.issuer = issuer;
-        this.expirationMinutes = expirationMinutes;
+        this.expirationSegundos = expirationSegundos;
     }
 
     public String generarToken(Integer idUsuario, String email) {
@@ -45,7 +45,7 @@ public class JwtService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .issuedAt(ahora)
-                .expiresAt(ahora.plus(expirationMinutes, ChronoUnit.MINUTES))
+                .expiresAt(ahora.plus(expirationSegundos, ChronoUnit.SECONDS))
                 .subject(String.valueOf(idUsuario))
                 .claim("email", email)
                 .claim("scope", "ROLE_USUARIO")
@@ -56,7 +56,7 @@ public class JwtService {
     }
 
     public long getExpirationSegundos() {
-        return expirationMinutes * 60;
+        return expirationSegundos;
     }
 
     /**

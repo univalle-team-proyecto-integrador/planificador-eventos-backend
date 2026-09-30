@@ -482,6 +482,24 @@
    "y": 4320,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m026",
+   "type": "file",
+   "file": "mejoras/2026-09-30-026-caducidad-jwt-en-segundos.md",
+   "x": 200,
+   "y": 4500,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p026",
+   "type": "text",
+   "text": "Mejora 026\nCaducidad del token en segundos (JWT_EXPIRATION_SECONDS)\n2026-09-30",
+   "x": 540,
+   "y": 4500,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -833,6 +851,20 @@
    "fromNode": "p025",
    "fromSide": "right",
    "toNode": "m025",
+   "toSide": "left"
+  },
+  {
+   "id": "e51",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m026",
+   "toSide": "top"
+  },
+  {
+   "id": "e52",
+   "fromNode": "p026",
+   "fromSide": "right",
+   "toNode": "m026",
    "toSide": "left"
   }
  ]

@@ -26,3 +26,4 @@
 | 2026-09-29  | 023 | CORS para 127.0.0.1 y ProblemDetail en parámetros | [2026-09-29-023-cors-127-y-problemdetail-parametros](2026-09-29-023-cors-127-y-problemdetail-parametros.md) |
 | 2026-09-29  | 024 | US-11: autenticación JWT y aislamiento por propietario | [2026-09-29-024-autenticacion-jwt-y-aislamiento](2026-09-29-024-autenticacion-jwt-y-aislamiento.md) |
 | 2026-09-30  | 025 | Arreglo del script de verificación y Postman de US-11 | [2026-09-30-025-arreglo-script-verificacion-y-postman-us11](2026-09-30-025-arreglo-script-verificacion-y-postman-us11.md) |
+| 2026-09-30  | 026 | Caducidad del token en segundos (JWT_EXPIRATION_SECONDS) | [2026-09-30-026-caducidad-jwt-en-segundos](2026-09-30-026-caducidad-jwt-en-segundos.md) |
