@@ -32,9 +32,9 @@ public class SubtareaService {
     }
 
     @Transactional(readOnly = true)
-    public List<SubtareaDTO> obtenerPorEvento(Integer eventoId) {
-        buscarEvento(eventoId);
-        return subtareaRepository.findByEventoId(eventoId).stream()
+    public List<SubtareaDTO> obtenerPorEvento(Integer usuarioId, Integer eventoId) {
+        buscarEvento(usuarioId, eventoId);
+        return subtareaRepository.findByEventoIdYUsuarioId(eventoId, usuarioId).stream()
                 .map(this::aDto)
                 .toList();
     }
@@ -59,21 +59,21 @@ public class SubtareaService {
     }
 
     @Transactional(readOnly = true)
-    public SubtareaDTO obtenerPorId(Integer id) {
-        return aDto(buscarEntidad(id));
+    public SubtareaDTO obtenerPorId(Integer usuarioId, Integer id) {
+        return aDto(buscarEntidad(usuarioId, id));
     }
 
     @Transactional(readOnly = true)
-    public Integer obtenerLimiteDiario(Integer id) {
-        Subtarea subtarea = buscarEntidad(id);
+    public Integer obtenerLimiteDiario(Integer usuarioId, Integer id) {
+        Subtarea subtarea = buscarEntidad(usuarioId, id);
         Evento evento = subtarea.getEvento();
         return evento.getUsuario().getLimiteHorasDiarias();
     }
 
     @Transactional
-    public SubtareaDTO agregarSubtarea(Integer eventoId, SubtareaDTO dto) {
+    public SubtareaDTO agregarSubtarea(Integer usuarioId, Integer eventoId, SubtareaDTO dto) {
         validarSubtarea(eventoId, dto);
-        Evento evento = buscarEvento(eventoId);
+        Evento evento = buscarEvento(usuarioId, eventoId);
 
         Subtarea subtarea = new Subtarea();
         evento.agregarSubtarea(subtarea);
@@ -88,10 +88,11 @@ public class SubtareaService {
 
     @Transactional
     public SubtareaDTO actualizarSubtarea(
+            Integer usuarioId,
             Integer id,
             SubtareaActualizacionDTO dto) {
         validarActualizacion(dto);
-        Subtarea subtarea = buscarEntidad(id);
+        Subtarea subtarea = buscarEntidad(usuarioId, id);
         subtarea.setNombreGestion(dto.nombreGestion().trim());
         subtarea.setFechaObjetivo(dto.fechaObjetivo());
         subtarea.setHorasEstimadas(dto.horasEstimadas());
@@ -100,10 +101,11 @@ public class SubtareaService {
 
     @Transactional
     public Map<String, Object> reprogramar(
+            Integer usuarioId,
             Integer id,
             ReprogramarDTO dto,
             Double limiteDiario) {
-        Subtarea subtarea = buscarEntidad(id);
+        Subtarea subtarea = buscarEntidad(usuarioId, id);
         validarReprogramacion(dto, limiteDiario);
 
         Evento evento = subtarea.getEvento();
@@ -142,34 +144,39 @@ public class SubtareaService {
     }
 
     @Transactional
-    public SubtareaDTO cambiarEstado(Integer id, EstadoSubtareaDTO dto) {
+    public SubtareaDTO cambiarEstado(Integer usuarioId, Integer id, EstadoSubtareaDTO dto) {
         if (dto == null || dto.estado() == null) {
             throw new IllegalArgumentException("El nuevo estado es obligatorio");
         }
 
-        Subtarea subtarea = buscarEntidad(id);
+        Subtarea subtarea = buscarEntidad(usuarioId, id);
         subtarea.setEstado(dto.estado());
         subtarea.setNotaExplicativa(dto.notaExplicativa());
         return aDto(subtareaRepository.save(subtarea));
     }
 
     @Transactional
-    public void eliminarSubtarea(Integer id) {
-        Subtarea subtarea = buscarEntidad(id);
+    public void eliminarSubtarea(Integer usuarioId, Integer id) {
+        Subtarea subtarea = buscarEntidad(usuarioId, id);
         Evento evento = subtarea.getEvento();
         evento.getSubtareas().remove(subtarea);
         subtareaRepository.delete(subtarea);
         subtareaRepository.flush();
     }
 
-    private Evento buscarEvento(Integer eventoId) {
-        return eventoRepository.findById(eventoId)
+    /**
+     * Busca el evento ya filtrado por propietario. Un evento ajeno responde con
+     * el mismo mensaje que uno inexistente para no confirmar que el id existe
+     * en la cuenta de otro usuario.
+     */
+    private Evento buscarEvento(Integer usuarioId, Integer eventoId) {
+        return eventoRepository.findByIdYUsuarioId(eventoId, usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe el evento con id " + eventoId));
     }
 
-    private Subtarea buscarEntidad(Integer id) {
-        return subtareaRepository.findById(id)
+    private Subtarea buscarEntidad(Integer usuarioId, Integer id) {
+        return subtareaRepository.findByIdYUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe la subtarea con id " + id));
     }

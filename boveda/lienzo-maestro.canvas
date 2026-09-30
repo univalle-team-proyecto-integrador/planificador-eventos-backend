@@ -1,99 +1,807 @@
 {
-	"nodes":[
-		{"id":"proyecto","type":"file","file":"README.md","x":-240,"y":-120,"width":320,"height":160,"color":"3"},
-		{"id":"flujo","type":"text","text":"Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejoras/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.","x":180,"y":-220,"width":300,"height":180},
-		{"id":"indice","type":"file","file":"mejoras/README.md","x":160,"y":-20,"width":280,"height":140,"color":"2"},
-		{"id":"m001","type":"file","file":"mejoras/2026-09-18-001-agents-md-y-boveda.md","x":200,"y":180,"width":280,"height":140},
-		{"id":"p001","type":"text","text":"Mejora 001\nAGENTS.md y bóveda Obsidian\n2026-09-18","x":-240,"y":180,"width":240,"height":120,"color":"1"},
-		{"id":"m002","type":"file","file":"mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md","x":200,"y":360,"width":280,"height":140},
-		{"id":"p002","type":"text","text":"Mejora 002\nEstructura por capas y Supabase\n2026-09-18","x":-240,"y":360,"width":240,"height":120,"color":"1"},
-		{"id":"m003","type":"file","file":"mejoras/2026-09-18-003-endpoint-api-health.md","x":200,"y":540,"width":280,"height":140},
-		{"id":"p003","type":"text","text":"Mejora 003\nEndpoint /api/health\n2026-09-18","x":-240,"y":540,"width":240,"height":120,"color":"1"},
-		{"id":"m004","type":"file","file":"mejoras/2026-09-18-004-deploy-render-docker-y-cors.md","x":200,"y":720,"width":280,"height":140},
-		{"id":"p004","type":"text","text":"Mejora 004\nDeploy en Render: Docker, CORS, pooler\n2026-09-18","x":-240,"y":720,"width":240,"height":120,"color":"1"},
-		{"id":"m005","type":"file","file":"mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md","x":200,"y":900,"width":280,"height":140},
-		{"id":"p005","type":"text","text":"Mejora 005\nModelo de datos JPA + DDL Supabase\n2026-09-18","x":-240,"y":900,"width":240,"height":120,"color":"1"},
-		{"id":"m006","type":"file","file":"mejoras/2026-09-18-006-readme-del-proyecto.md","x":200,"y":1080,"width":280,"height":140},
-		{"id":"p006","type":"text","text":"Mejora 006\nREADME del proyecto\n2026-09-18","x":-240,"y":1080,"width":240,"height":120,"color":"1"},
-		{"id":"m007","type":"file","file":"mejoras/2026-09-18-007-repositorios-jpa-ts02.md","x":200,"y":1260,"width":280,"height":140},
-		{"id":"p007","type":"text","text":"Mejora 007\nRepositorios JPA TS02\n2026-09-18","x":-240,"y":1260,"width":240,"height":120,"color":"1"},
-		{"id":"m008","type":"file","file":"mejoras/2026-09-18-008-capa-service-descentralizada.md","x":200,"y":1440,"width":280,"height":140},
-		{"id":"p008","type":"text","text":"Mejora 008\nCapa service descentralizada\n2026-09-18","x":-240,"y":1440,"width":240,"height":120,"color":"1"},
-		{"id":"m010","type":"file","file":"mejoras/2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md","x":200,"y":1620,"width":280,"height":140},
-		{"id":"p010","type":"text","text":"Mejora 010\nAPI REST Sprint 1\n2026-09-23","x":-240,"y":1620,"width":240,"height":120,"color":"1"},
-		{"id":"m011","type":"file","file":"mejoras/2026-09-24-011-documentacion-swagger-openapi.md","x":200,"y":1800,"width":280,"height":140},
-		{"id":"p011","type":"text","text":"Mejora 011\nSwagger UI + OpenAPI\n2026-09-24","x":-240,"y":1800,"width":240,"height":120,"color":"1"},
-		{"id":"m012","type":"file","file":"mejoras/2026-09-24-012-compatibilidad-api-frontend.md","x":200,"y":1980,"width":280,"height":140},
-		{"id":"p012","type":"text","text":"Mejora 012\nCompatibilidad de API con frontend\n2026-09-24","x":-240,"y":1980,"width":240,"height":120,"color":"1"},
-		{"id":"m013","type":"file","file":"mejoras/2026-09-24-013-edicion-y-catalogo-tipos.md","x":200,"y":2160,"width":280,"height":140},
-		{"id":"p013","type":"text","text":"Mejora 013\nEdición y catálogo de tipos\n2026-09-24","x":-240,"y":2160,"width":240,"height":120,"color":"1"},
-		{"id":"m014","type":"file","file":"mejoras/2026-09-24-014-validacion-conexion-front-back-db.md","x":200,"y":2340,"width":280,"height":140},
-		{"id":"p014","type":"text","text":"Mejora 014\nValidación front-back-Supabase\n2026-09-24","x":-240,"y":2340,"width":240,"height":120,"color":"1"},
-		{"id":"m015","type":"file","file":"mejoras/2026-09-24-015-pruebas-e2e-fix-pooler.md","x":200,"y":2520,"width":280,"height":140},
-		{"id":"p015","type":"text","text":"Mejora 015\nPruebas e2e y fix del pooler\n2026-09-24","x":-240,"y":2520,"width":240,"height":120,"color":"1"},
-		{"id":"m016","type":"file","file":"mejoras/2026-09-24-016-workflow-desarrollo-descentralizado.md","x":200,"y":2700,"width":280,"height":140},
-		{"id":"p016","type":"text","text":"Mejora 016\nWorkflow descentralizado\n2026-09-24","x":-240,"y":2700,"width":240,"height":120,"color":"1"},
-		{"id":"m017","type":"file","file":"mejoras/2026-09-24-017-evidencias-postman-chrome-y-swagger.md","x":200,"y":2880,"width":280,"height":140},
-		{"id":"p017","type":"text","text":"Mejora 017\nEvidencias Postman + Chrome + Swagger\n2026-09-24","x":-240,"y":2880,"width":240,"height":120,"color":"1"},
-		{"id":"m018","type":"file","file":"mejoras/2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md","x":200,"y":3060,"width":280,"height":140},
-		{"id":"p018","type":"text","text":"Mejora 018\nRendimiento frontend (lazy + timeout)\n2026-09-24","x":-240,"y":3060,"width":240,"height":120,"color":"1"},
-		{"id":"m019","type":"file","file":"mejoras/2026-09-25-019-cierre-brechas-sprint-1.md","x":200,"y":3240,"width":280,"height":140},
-		{"id":"p019","type":"text","text":"Mejora 019\nCierre brechas Sprint 1\n2026-09-25","x":-240,"y":3240,"width":240,"height":120,"color":"1"},
-		{"id":"m020","type":"file","file":"mejoras/2026-09-25-020-consulta-hoy.md","x":200,"y":3420,"width":280,"height":140},
-		{"id":"p020","type":"text","text":"Mejora 020\nConsulta de la vista Hoy\n2026-09-25","x":-240,"y":3420,"width":240,"height":120,"color":"1"},
-		{"id":"m021","type":"file","file":"mejoras/2026-09-25-021-media-type-json-swagger.md","x":200,"y":3600,"width":280,"height":140},
-		{"id":"p021","type":"text","text":"Mejora 021\nMedia type JSON en Swagger\n2026-09-25","x":-240,"y":3600,"width":240,"height":120,"color":"1"},
-		{"id":"m022","type":"file","file":"mejoras/2026-09-29-022-pruebas-cors-salud-parametros-y-openapi.md","x":200,"y":3780,"width":280,"height":140},
-		{"id":"p022","type":"text","text":"Mejora 022\nPruebas CORS, salud, parámetros, OpenAPI\n2026-09-29","x":-240,"y":3780,"width":240,"height":120,"color":"1"},
-		{"id":"m023","type":"file","file":"mejoras/2026-09-29-023-cors-127-y-problemdetail-parametros.md","x":200,"y":3960,"width":280,"height":140},
-		{"id":"p023","type":"text","text":"Mejora 023\nCORS 127.0.0.1 + ProblemDetail\n2026-09-29","x":-240,"y":3960,"width":240,"height":120,"color":"1"}
-	],
-	"edges":[
-		{"id":"e1","fromNode":"proyecto","fromSide":"right","toNode":"flujo","toSide":"left"},
-		{"id":"e2","fromNode":"proyecto","fromSide":"right","toNode":"indice","toSide":"left"},
-		{"id":"e3","fromNode":"indice","fromSide":"bottom","toNode":"m001","toSide":"top"},
-		{"id":"e4","fromNode":"p001","fromSide":"right","toNode":"m001","toSide":"left"},
-		{"id":"e5","fromNode":"indice","fromSide":"bottom","toNode":"m002","toSide":"top"},
-		{"id":"e6","fromNode":"p002","fromSide":"right","toNode":"m002","toSide":"left"},
-		{"id":"e7","fromNode":"indice","fromSide":"bottom","toNode":"m003","toSide":"top"},
-		{"id":"e8","fromNode":"p003","fromSide":"right","toNode":"m003","toSide":"left"},
-		{"id":"e9","fromNode":"indice","fromSide":"bottom","toNode":"m004","toSide":"top"},
-		{"id":"e10","fromNode":"p004","fromSide":"right","toNode":"m004","toSide":"left"},
-		{"id":"e11","fromNode":"indice","fromSide":"bottom","toNode":"m005","toSide":"top"},
-		{"id":"e12","fromNode":"p005","fromSide":"right","toNode":"m005","toSide":"left"},
-		{"id":"e13","fromNode":"indice","fromSide":"bottom","toNode":"m006","toSide":"top"},
-		{"id":"e14","fromNode":"p006","fromSide":"right","toNode":"m006","toSide":"left"},
-		{"id":"e15","fromNode":"indice","fromSide":"bottom","toNode":"m007","toSide":"top"},
-		{"id":"e16","fromNode":"p007","fromSide":"right","toNode":"m007","toSide":"left"},
-		{"id":"e17","fromNode":"indice","fromSide":"bottom","toNode":"m008","toSide":"top"},
-		{"id":"e18","fromNode":"p008","fromSide":"right","toNode":"m008","toSide":"left"},
-		{"id":"e19","fromNode":"indice","fromSide":"bottom","toNode":"m010","toSide":"top"},
-		{"id":"e20","fromNode":"p010","fromSide":"right","toNode":"m010","toSide":"left"},
-		{"id":"e21","fromNode":"indice","fromSide":"bottom","toNode":"m011","toSide":"top"},
-		{"id":"e22","fromNode":"p011","fromSide":"right","toNode":"m011","toSide":"left"},
-		{"id":"e23","fromNode":"indice","fromSide":"bottom","toNode":"m012","toSide":"top"},
-		{"id":"e24","fromNode":"p012","fromSide":"right","toNode":"m012","toSide":"left"},
-		{"id":"e25","fromNode":"indice","fromSide":"bottom","toNode":"m013","toSide":"top"},
-		{"id":"e26","fromNode":"p013","fromSide":"right","toNode":"m013","toSide":"left"},
-		{"id":"e27","fromNode":"indice","fromSide":"bottom","toNode":"m014","toSide":"top"},
-		{"id":"e28","fromNode":"p014","fromSide":"right","toNode":"m014","toSide":"left"},
-		{"id":"e29","fromNode":"indice","fromSide":"bottom","toNode":"m015","toSide":"top"},
-		{"id":"e30","fromNode":"p015","fromSide":"right","toNode":"m015","toSide":"left"},
-		{"id":"e31","fromNode":"indice","fromSide":"bottom","toNode":"m016","toSide":"top"},
-		{"id":"e32","fromNode":"p016","fromSide":"right","toNode":"m016","toSide":"left"},
-		{"id":"e33","fromNode":"indice","fromSide":"bottom","toNode":"m017","toSide":"top"},
-		{"id":"e34","fromNode":"p017","fromSide":"right","toNode":"m017","toSide":"left"},
-		{"id":"e35","fromNode":"indice","fromSide":"bottom","toNode":"m018","toSide":"top"},
-		{"id":"e36","fromNode":"p018","fromSide":"right","toNode":"m018","toSide":"left"},
-		{"id":"e37","fromNode":"indice","fromSide":"bottom","toNode":"m019","toSide":"top"},
-		{"id":"e38","fromNode":"p019","fromSide":"right","toNode":"m019","toSide":"left"},
-		{"id":"e39","fromNode":"indice","fromSide":"bottom","toNode":"m020","toSide":"top"},
-		{"id":"e40","fromNode":"p020","fromSide":"right","toNode":"m020","toSide":"left"},
-		{"id":"e41","fromNode":"indice","fromSide":"bottom","toNode":"m021","toSide":"top"},
-		{"id":"e42","fromNode":"p021","fromSide":"right","toNode":"m021","toSide":"left"},
-		{"id":"e43","fromNode":"indice","fromSide":"bottom","toNode":"m022","toSide":"top"},
-		{"id":"e44","fromNode":"p022","fromSide":"right","toNode":"m022","toSide":"left"},
-		{"id":"e45","fromNode":"indice","fromSide":"bottom","toNode":"m023","toSide":"top"},
-		{"id":"e46","fromNode":"p023","fromSide":"right","toNode":"m023","toSide":"left"}
-	]
+ "nodes": [
+  {
+   "id": "proyecto",
+   "type": "file",
+   "file": "README.md",
+   "x": -240,
+   "y": -120,
+   "width": 320,
+   "height": 160,
+   "color": "3"
+  },
+  {
+   "id": "flujo",
+   "type": "text",
+   "text": "Cada mejora sobre el código se registra en la bóveda:\n\n1. Crear un archivo en mejoras/ con la plantilla.\n2. Actualizar el índice.\n3. Añadir aquí un nodo enlazado al registro.\n\nNotas en español.",
+   "x": 180,
+   "y": -220,
+   "width": 300,
+   "height": 180
+  },
+  {
+   "id": "indice",
+   "type": "file",
+   "file": "mejoras/README.md",
+   "x": 160,
+   "y": -20,
+   "width": 280,
+   "height": 140,
+   "color": "2"
+  },
+  {
+   "id": "m001",
+   "type": "file",
+   "file": "mejoras/2026-09-18-001-agents-md-y-boveda.md",
+   "x": 200,
+   "y": 180,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p001",
+   "type": "text",
+   "text": "Mejora 001\nAGENTS.md y bóveda Obsidian\n2026-09-18",
+   "x": -240,
+   "y": 180,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m002",
+   "type": "file",
+   "file": "mejoras/2026-09-18-002-estructura-capas-y-db-supabase.md",
+   "x": 200,
+   "y": 360,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p002",
+   "type": "text",
+   "text": "Mejora 002\nEstructura por capas y Supabase\n2026-09-18",
+   "x": -240,
+   "y": 360,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m003",
+   "type": "file",
+   "file": "mejoras/2026-09-18-003-endpoint-api-health.md",
+   "x": 200,
+   "y": 540,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p003",
+   "type": "text",
+   "text": "Mejora 003\nEndpoint /api/health\n2026-09-18",
+   "x": -240,
+   "y": 540,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m004",
+   "type": "file",
+   "file": "mejoras/2026-09-18-004-deploy-render-docker-y-cors.md",
+   "x": 200,
+   "y": 720,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p004",
+   "type": "text",
+   "text": "Mejora 004\nDeploy en Render: Docker, CORS, pooler\n2026-09-18",
+   "x": -240,
+   "y": 720,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m005",
+   "type": "file",
+   "file": "mejoras/2026-09-18-005-modelo-de-datos-jpa-y-ddl-supabase.md",
+   "x": 200,
+   "y": 900,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p005",
+   "type": "text",
+   "text": "Mejora 005\nModelo de datos JPA + DDL Supabase\n2026-09-18",
+   "x": -240,
+   "y": 900,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m006",
+   "type": "file",
+   "file": "mejoras/2026-09-18-006-readme-del-proyecto.md",
+   "x": 200,
+   "y": 1080,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p006",
+   "type": "text",
+   "text": "Mejora 006\nREADME del proyecto\n2026-09-18",
+   "x": -240,
+   "y": 1080,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m007",
+   "type": "file",
+   "file": "mejoras/2026-09-18-007-repositorios-jpa-ts02.md",
+   "x": 200,
+   "y": 1260,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p007",
+   "type": "text",
+   "text": "Mejora 007\nRepositorios JPA TS02\n2026-09-18",
+   "x": -240,
+   "y": 1260,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m008",
+   "type": "file",
+   "file": "mejoras/2026-09-18-008-capa-service-descentralizada.md",
+   "x": 200,
+   "y": 1440,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p008",
+   "type": "text",
+   "text": "Mejora 008\nCapa service descentralizada\n2026-09-18",
+   "x": -240,
+   "y": 1440,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m010",
+   "type": "file",
+   "file": "mejoras/2026-09-23-010-api-rest-sprint-1-eventos-subtareas.md",
+   "x": 200,
+   "y": 1620,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p010",
+   "type": "text",
+   "text": "Mejora 010\nAPI REST Sprint 1\n2026-09-23",
+   "x": -240,
+   "y": 1620,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m011",
+   "type": "file",
+   "file": "mejoras/2026-09-24-011-documentacion-swagger-openapi.md",
+   "x": 200,
+   "y": 1800,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p011",
+   "type": "text",
+   "text": "Mejora 011\nSwagger UI + OpenAPI\n2026-09-24",
+   "x": -240,
+   "y": 1800,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m012",
+   "type": "file",
+   "file": "mejoras/2026-09-24-012-compatibilidad-api-frontend.md",
+   "x": 200,
+   "y": 1980,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p012",
+   "type": "text",
+   "text": "Mejora 012\nCompatibilidad de API con frontend\n2026-09-24",
+   "x": -240,
+   "y": 1980,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m013",
+   "type": "file",
+   "file": "mejoras/2026-09-24-013-edicion-y-catalogo-tipos.md",
+   "x": 200,
+   "y": 2160,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p013",
+   "type": "text",
+   "text": "Mejora 013\nEdición y catálogo de tipos\n2026-09-24",
+   "x": -240,
+   "y": 2160,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m014",
+   "type": "file",
+   "file": "mejoras/2026-09-24-014-validacion-conexion-front-back-db.md",
+   "x": 200,
+   "y": 2340,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p014",
+   "type": "text",
+   "text": "Mejora 014\nValidación front-back-Supabase\n2026-09-24",
+   "x": -240,
+   "y": 2340,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m015",
+   "type": "file",
+   "file": "mejoras/2026-09-24-015-pruebas-e2e-fix-pooler.md",
+   "x": 200,
+   "y": 2520,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p015",
+   "type": "text",
+   "text": "Mejora 015\nPruebas e2e y fix del pooler\n2026-09-24",
+   "x": -240,
+   "y": 2520,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m016",
+   "type": "file",
+   "file": "mejoras/2026-09-24-016-workflow-desarrollo-descentralizado.md",
+   "x": 200,
+   "y": 2700,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p016",
+   "type": "text",
+   "text": "Mejora 016\nWorkflow descentralizado\n2026-09-24",
+   "x": -240,
+   "y": 2700,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m017",
+   "type": "file",
+   "file": "mejoras/2026-09-24-017-evidencias-postman-chrome-y-swagger.md",
+   "x": 200,
+   "y": 2880,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p017",
+   "type": "text",
+   "text": "Mejora 017\nEvidencias Postman + Chrome + Swagger\n2026-09-24",
+   "x": -240,
+   "y": 2880,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m018",
+   "type": "file",
+   "file": "mejoras/2026-09-24-018-rendimiento-frontend-sin-delay-ficticio-y-lazy.md",
+   "x": 200,
+   "y": 3060,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p018",
+   "type": "text",
+   "text": "Mejora 018\nRendimiento frontend (lazy + timeout)\n2026-09-24",
+   "x": -240,
+   "y": 3060,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m019",
+   "type": "file",
+   "file": "mejoras/2026-09-25-019-cierre-brechas-sprint-1.md",
+   "x": 200,
+   "y": 3240,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p019",
+   "type": "text",
+   "text": "Mejora 019\nCierre brechas Sprint 1\n2026-09-25",
+   "x": -240,
+   "y": 3240,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m020",
+   "type": "file",
+   "file": "mejoras/2026-09-25-020-consulta-hoy.md",
+   "x": 200,
+   "y": 3420,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p020",
+   "type": "text",
+   "text": "Mejora 020\nConsulta de la vista Hoy\n2026-09-25",
+   "x": -240,
+   "y": 3420,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m021",
+   "type": "file",
+   "file": "mejoras/2026-09-25-021-media-type-json-swagger.md",
+   "x": 200,
+   "y": 3600,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p021",
+   "type": "text",
+   "text": "Mejora 021\nMedia type JSON en Swagger\n2026-09-25",
+   "x": -240,
+   "y": 3600,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m022",
+   "type": "file",
+   "file": "mejoras/2026-09-29-022-pruebas-cors-salud-parametros-y-openapi.md",
+   "x": 200,
+   "y": 3780,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p022",
+   "type": "text",
+   "text": "Mejora 022\nPruebas CORS, salud, parámetros, OpenAPI\n2026-09-29",
+   "x": -240,
+   "y": 3780,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m023",
+   "type": "file",
+   "file": "mejoras/2026-09-29-023-cors-127-y-problemdetail-parametros.md",
+   "x": 200,
+   "y": 3960,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p023",
+   "type": "text",
+   "text": "Mejora 023\nCORS 127.0.0.1 + ProblemDetail\n2026-09-29",
+   "x": -240,
+   "y": 3960,
+   "width": 240,
+   "height": 120,
+   "color": "1"
+  },
+  {
+   "id": "m024",
+   "type": "file",
+   "file": "mejoras/2026-09-29-024-autenticacion-jwt-y-aislamiento.md",
+   "x": 200,
+   "y": 4140,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p024",
+   "type": "text",
+   "text": "Mejora 024\nUS-11: JWT + aislamiento por propietario\n2026-09-29",
+   "x": 540,
+   "y": 4140,
+   "width": 340,
+   "height": 140
+  }
+ ],
+ "edges": [
+  {
+   "id": "e1",
+   "fromNode": "proyecto",
+   "fromSide": "right",
+   "toNode": "flujo",
+   "toSide": "left"
+  },
+  {
+   "id": "e2",
+   "fromNode": "proyecto",
+   "fromSide": "right",
+   "toNode": "indice",
+   "toSide": "left"
+  },
+  {
+   "id": "e3",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m001",
+   "toSide": "top"
+  },
+  {
+   "id": "e4",
+   "fromNode": "p001",
+   "fromSide": "right",
+   "toNode": "m001",
+   "toSide": "left"
+  },
+  {
+   "id": "e5",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m002",
+   "toSide": "top"
+  },
+  {
+   "id": "e6",
+   "fromNode": "p002",
+   "fromSide": "right",
+   "toNode": "m002",
+   "toSide": "left"
+  },
+  {
+   "id": "e7",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m003",
+   "toSide": "top"
+  },
+  {
+   "id": "e8",
+   "fromNode": "p003",
+   "fromSide": "right",
+   "toNode": "m003",
+   "toSide": "left"
+  },
+  {
+   "id": "e9",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m004",
+   "toSide": "top"
+  },
+  {
+   "id": "e10",
+   "fromNode": "p004",
+   "fromSide": "right",
+   "toNode": "m004",
+   "toSide": "left"
+  },
+  {
+   "id": "e11",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m005",
+   "toSide": "top"
+  },
+  {
+   "id": "e12",
+   "fromNode": "p005",
+   "fromSide": "right",
+   "toNode": "m005",
+   "toSide": "left"
+  },
+  {
+   "id": "e13",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m006",
+   "toSide": "top"
+  },
+  {
+   "id": "e14",
+   "fromNode": "p006",
+   "fromSide": "right",
+   "toNode": "m006",
+   "toSide": "left"
+  },
+  {
+   "id": "e15",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m007",
+   "toSide": "top"
+  },
+  {
+   "id": "e16",
+   "fromNode": "p007",
+   "fromSide": "right",
+   "toNode": "m007",
+   "toSide": "left"
+  },
+  {
+   "id": "e17",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m008",
+   "toSide": "top"
+  },
+  {
+   "id": "e18",
+   "fromNode": "p008",
+   "fromSide": "right",
+   "toNode": "m008",
+   "toSide": "left"
+  },
+  {
+   "id": "e19",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m010",
+   "toSide": "top"
+  },
+  {
+   "id": "e20",
+   "fromNode": "p010",
+   "fromSide": "right",
+   "toNode": "m010",
+   "toSide": "left"
+  },
+  {
+   "id": "e21",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m011",
+   "toSide": "top"
+  },
+  {
+   "id": "e22",
+   "fromNode": "p011",
+   "fromSide": "right",
+   "toNode": "m011",
+   "toSide": "left"
+  },
+  {
+   "id": "e23",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m012",
+   "toSide": "top"
+  },
+  {
+   "id": "e24",
+   "fromNode": "p012",
+   "fromSide": "right",
+   "toNode": "m012",
+   "toSide": "left"
+  },
+  {
+   "id": "e25",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m013",
+   "toSide": "top"
+  },
+  {
+   "id": "e26",
+   "fromNode": "p013",
+   "fromSide": "right",
+   "toNode": "m013",
+   "toSide": "left"
+  },
+  {
+   "id": "e27",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m014",
+   "toSide": "top"
+  },
+  {
+   "id": "e28",
+   "fromNode": "p014",
+   "fromSide": "right",
+   "toNode": "m014",
+   "toSide": "left"
+  },
+  {
+   "id": "e29",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m015",
+   "toSide": "top"
+  },
+  {
+   "id": "e30",
+   "fromNode": "p015",
+   "fromSide": "right",
+   "toNode": "m015",
+   "toSide": "left"
+  },
+  {
+   "id": "e31",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m016",
+   "toSide": "top"
+  },
+  {
+   "id": "e32",
+   "fromNode": "p016",
+   "fromSide": "right",
+   "toNode": "m016",
+   "toSide": "left"
+  },
+  {
+   "id": "e33",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m017",
+   "toSide": "top"
+  },
+  {
+   "id": "e34",
+   "fromNode": "p017",
+   "fromSide": "right",
+   "toNode": "m017",
+   "toSide": "left"
+  },
+  {
+   "id": "e35",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m018",
+   "toSide": "top"
+  },
+  {
+   "id": "e36",
+   "fromNode": "p018",
+   "fromSide": "right",
+   "toNode": "m018",
+   "toSide": "left"
+  },
+  {
+   "id": "e37",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m019",
+   "toSide": "top"
+  },
+  {
+   "id": "e38",
+   "fromNode": "p019",
+   "fromSide": "right",
+   "toNode": "m019",
+   "toSide": "left"
+  },
+  {
+   "id": "e39",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m020",
+   "toSide": "top"
+  },
+  {
+   "id": "e40",
+   "fromNode": "p020",
+   "fromSide": "right",
+   "toNode": "m020",
+   "toSide": "left"
+  },
+  {
+   "id": "e41",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m021",
+   "toSide": "top"
+  },
+  {
+   "id": "e42",
+   "fromNode": "p021",
+   "fromSide": "right",
+   "toNode": "m021",
+   "toSide": "left"
+  },
+  {
+   "id": "e43",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m022",
+   "toSide": "top"
+  },
+  {
+   "id": "e44",
+   "fromNode": "p022",
+   "fromSide": "right",
+   "toNode": "m022",
+   "toSide": "left"
+  },
+  {
+   "id": "e45",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m023",
+   "toSide": "top"
+  },
+  {
+   "id": "e46",
+   "fromNode": "p023",
+   "fromSide": "right",
+   "toNode": "m023",
+   "toSide": "left"
+  },
+  {
+   "id": "e47",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m024",
+   "toSide": "top"
+  },
+  {
+   "id": "e48",
+   "fromNode": "p024",
+   "fromSide": "right",
+   "toNode": "m024",
+   "toSide": "left"
+  }
+ ]
 }

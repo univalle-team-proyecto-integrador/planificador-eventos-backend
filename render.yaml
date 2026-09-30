@@ -16,3 +16,17 @@ services:
         sync: false
       - key: JAVA_OPTS
         value: -XX:MaxRAMPercentage=60
+      # US-11 · El servicio NO arranca sin este valor. Mínimo 32 caracteres.
+      # Generar: openssl rand -base64 48. Fijar a mano en el dashboard de Render.
+      - key: JWT_SECRET
+        sync: false
+      # Caducidad del token en segundos (8 horas).
+      - key: JWT_EXPIRATION_SECONDS
+        value: "28800"
+      # Interruptor de US-11. Dejar en false hasta que el frontend deployed
+      # envíe Authorization: Bearer; después subir a true desde el dashboard.
+      - key: PROTECT_SUBTAREAS
+        value: "false"
+      # Usuario legado, solo se usa mientras PROTECT_SUBTAREAS=false.
+      - key: LEGACY_USER_ID
+        value: "1"

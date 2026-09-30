@@ -105,6 +105,34 @@ public class GlobalExceptionHandler {
         return respuesta.body(problem);
     }
 
+    @ExceptionHandler(SinAutenticacionException.class)
+    public ResponseEntity<ProblemDetail> handleSinAutenticacion(SinAutenticacionException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.UNAUTHORIZED,
+                "No autenticado",
+                ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ProblemDetail> handleCredencialesInvalidas(
+            CredencialesInvalidasException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.UNAUTHORIZED,
+                "Credenciales inválidas",
+                ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(EmailDuplicadoException.class)
+    public ResponseEntity<ProblemDetail> handleEmailDuplicado(EmailDuplicadoException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.CONFLICT,
+                "Correo ya registrado",
+                ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
     private ProblemDetail crearProblema(HttpStatus status, String titulo, String detalle) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detalle);
         problem.setTitle(titulo);

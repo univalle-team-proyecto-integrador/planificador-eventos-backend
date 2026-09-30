@@ -18,6 +18,7 @@ import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,6 +61,24 @@ class ApiSprint1Test {
     @Autowired
     private EventoRepository eventoRepository;
 
+    /**
+     * La ventana de compatibilidad sin token (app.security.legacy-user-id=1)
+     * asume que la cuenta demo es ladueña de los datos, igual que el frontend
+     * con VITE_USER_ID=1. H2 no reinicia las secuencias IDENTITY al deshacer la
+     * transacción, así que sin esto el primer usuario de cada test dejaría de
+     * ser el 1 y el aislamiento por propietario lo rechazaría.
+     */
+    @BeforeEach
+    void reiniciarSecuenciasParaElUsuarioDemo() {
+        entityManager.createNativeQuery("ALTER TABLE usuario ALTER COLUMN id_usuario RESTART WITH 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE evento ALTER COLUMN id_evento RESTART WITH 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE subtarea ALTER COLUMN id_subtarea RESTART WITH 1")
+                .executeUpdate();
+    }
+
+
     @Autowired
     private SubtareaRepository subtareaRepository;
 
@@ -86,7 +105,9 @@ class ApiSprint1Test {
         assertThat(eventoRepository.findByUsuarioId(base.usuario().getIdUsuario()))
                 .extracting(Evento::getIdEvento)
                 .containsExactly(base.evento().getIdEvento());
-        assertThat(subtareaRepository.findByEventoId(base.evento().getIdEvento()))
+        assertThat(subtareaRepository.findByEventoIdYUsuarioId(
+                base.evento().getIdEvento(),
+                base.usuario().getIdUsuario()))
                 .hasSize(4);
         assertThat(subtareaRepository.findNoEjecutadasParaHoy(
                 base.usuario().getIdUsuario(),
@@ -194,7 +215,7 @@ class ApiSprint1Test {
                 .andReturn();
 
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
-        assertThat(subtareaRepository.findById(body.path("idSubtarea").asInt()))
+        assertThat(subtareaRepository.findByIdYUsuarioId(body.path("idSubtarea").asInt(), base.usuario().getIdUsuario()))
                 .isPresent()
                 .get()
                 .extracting(Subtarea::getEstado)
@@ -268,7 +289,7 @@ class ApiSprint1Test {
         mockMvc.perform(delete("/api/subtareas/{id}", subtarea.getIdSubtarea()))
                 .andExpect(status().isNoContent());
         entityManager.clear();
-        assertThat(subtareaRepository.findById(subtarea.getIdSubtarea())).isEmpty();
+        assertThat(subtareaRepository.findByIdYUsuarioId(subtarea.getIdSubtarea(), base.usuario().getIdUsuario())).isEmpty();
     }
 
     @Test
@@ -285,21 +306,21 @@ class ApiSprint1Test {
                 null,
                 null);
 
-        assertThatThrownBy(() -> eventoService.crearEvento(nombreVacio))
+        assertThatThrownBy(() -> eventoService.crearEvento(1, nombreVacio))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
         SubtareaDTO nombreInvalido = new SubtareaDTO(
                 null, null, " ", LocalDate.of(2026, 11, 10), 2,
                 null, null, null);
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.evento().getIdEvento(), nombreInvalido))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.usuario().getIdUsuario(), base.evento().getIdEvento(), nombreInvalido))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
         SubtareaDTO horasInvalidas = new SubtareaDTO(
                 null, null, "Tarea", LocalDate.of(2026, 11, 10), 0,
                 null, null, null);
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.evento().getIdEvento(), horasInvalidas))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.usuario().getIdUsuario(), base.evento().getIdEvento(), horasInvalidas))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
     }
@@ -391,7 +412,7 @@ class ApiSprint1Test {
                 .andExpect(jsonPath("$.horasTotalesCalculadas").value(6.0))
                 .andExpect(jsonPath("$.mensaje").isNotEmpty());
 
-        assertThat(subtareaRepository.findById(actual.getIdSubtarea()))
+        assertThat(subtareaRepository.findByIdYUsuarioId(actual.getIdSubtarea(), base.usuario().getIdUsuario()))
                 .isPresent()
                 .get()
                 .extracting(Subtarea::getFechaObjetivo)
@@ -411,6 +432,7 @@ class ApiSprint1Test {
                 EstadoSubtarea.pendiente);
 
         var resultado = subtareaService.reprogramar(
+                primerOrganizador.usuario().getIdUsuario(),
                 actual.getIdSubtarea(),
                 new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
                 2.0);
@@ -448,6 +470,7 @@ class ApiSprint1Test {
         crearSubtarea(base.evento(), "Otra tarea", fecha, 1, EstadoSubtarea.pendiente);
 
         var resultado = subtareaService.reprogramar(
+                base.usuario().getIdUsuario(),
                 actual.getIdSubtarea(),
                 new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
                 3.0);
@@ -487,8 +510,11 @@ class ApiSprint1Test {
         mockMvc.perform(delete("/api/eventos/{id}", base.evento().getIdEvento()))
                 .andExpect(status().isNoContent());
 
-        assertThat(eventoRepository.findById(base.evento().getIdEvento())).isEmpty();
-        assertThat(subtareaRepository.findById(subtarea.getIdSubtarea())).isEmpty();
+        assertThat(eventoRepository
+                .findByIdYUsuarioId(
+                        base.evento().getIdEvento(), base.usuario().getIdUsuario()))
+                .isEmpty();
+        assertThat(subtareaRepository.findByIdYUsuarioId(subtarea.getIdSubtarea(), base.usuario().getIdUsuario())).isEmpty();
     }
 
     @Test
@@ -520,7 +546,7 @@ class ApiSprint1Test {
 
     @Test
     void eliminarEventoInexistenteLanzaLaExcepcionDeDominio() {
-        assertThatThrownBy(() -> eventoService.eliminarEvento(9999))
+        assertThatThrownBy(() -> eventoService.eliminarEvento(1, 9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }

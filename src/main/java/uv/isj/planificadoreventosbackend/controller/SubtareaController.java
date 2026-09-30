@@ -24,6 +24,7 @@ import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
+import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
 @RestController
@@ -32,9 +33,22 @@ import uv.isj.planificadoreventosbackend.service.SubtareaService;
 public class SubtareaController {
 
     private final SubtareaService subtareaService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public SubtareaController(SubtareaService subtareaService) {
+    public SubtareaController(
+            SubtareaService subtareaService,
+            CurrentUserProvider currentUserProvider) {
         this.subtareaService = subtareaService;
+        this.currentUserProvider = currentUserProvider;
+    }
+
+    /**
+     * Propietario efectivo de la petición. Si hay token manda el del token y se
+     * ignora el query param, de modo que pedir los datos de otra cuenta
+     * cambiando la URL no da resultado.
+     */
+    private Integer propietario() {
+        return currentUserProvider.idUsuarioActual();
     }
 
     @GetMapping("/hoy")
@@ -49,7 +63,7 @@ public class SubtareaController {
             @Parameter(description = "Fecha objetivo en formato ISO", example = "2026-09-25")
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
-        return subtareaService.obtenerParaHoy(usuarioId, fecha);
+        return subtareaService.obtenerParaHoy(propietarioDeHoy(usuarioId), fecha);
     }
 
     @GetMapping
@@ -61,7 +75,7 @@ public class SubtareaController {
     public List<SubtareaDTO> listarPorEvento(
             @Parameter(description = "Identificador del evento", example = "1")
             @RequestParam Integer eventoId) {
-        return subtareaService.obtenerPorEvento(eventoId);
+        return subtareaService.obtenerPorEvento(propietario(), eventoId);
     }
 
     @PutMapping("/{id}")
@@ -75,7 +89,7 @@ public class SubtareaController {
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody SubtareaActualizacionDTO dto) {
-        return subtareaService.actualizarSubtarea(id, dto);
+        return subtareaService.actualizarSubtarea(propietario(), id, dto);
     }
 
     @PatchMapping("/{id}/reprogramar")
@@ -89,9 +103,10 @@ public class SubtareaController {
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody ReprogramarDTO dto) {
-        Integer limiteDiario = subtareaService.obtenerLimiteDiario(id);
+        Integer usuarioId = propietario();
+        Integer limiteDiario = subtareaService.obtenerLimiteDiario(usuarioId, id);
         Map<String, Object> resultado =
-                subtareaService.reprogramar(id, dto, limiteDiario.doubleValue());
+                subtareaService.reprogramar(usuarioId, id, dto, limiteDiario.doubleValue());
         return ResponseEntity.ok(resultado);
     }
 
@@ -104,7 +119,7 @@ public class SubtareaController {
     public SubtareaDTO obtenerPorId(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id) {
-        return subtareaService.obtenerPorId(id);
+        return subtareaService.obtenerPorId(propietario(), id);
     }
 
     @DeleteMapping("/{id}")
@@ -116,7 +131,7 @@ public class SubtareaController {
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id) {
-        subtareaService.eliminarSubtarea(id);
+        subtareaService.eliminarSubtarea(propietario(), id);
         return ResponseEntity.noContent().build();
     }
 
@@ -131,6 +146,17 @@ public class SubtareaController {
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody EstadoSubtareaDTO dto) {
-        return subtareaService.cambiarEstado(id, dto);
+        return subtareaService.cambiarEstado(propietario(), id, dto);
+    }
+
+    /**
+     * Con token manda el del token y el query param se ignora. Sin token se
+     * respeta el parametro, que sigue siendo obligatorio para conservar el 400
+     * documentado en ParametrosApiTest.
+     */
+    private Integer propietarioDeHoy(Integer usuarioIdSolicitado) {
+        return currentUserProvider.esAutenticado()
+                ? currentUserProvider.idUsuarioRequerido()
+                : usuarioIdSolicitado;
     }
 }

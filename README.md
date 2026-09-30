@@ -35,6 +35,17 @@ La configuración es de estilo **12-factor**: cada entorno aporta el JDBC URL co
 | `DB_USER`     | Usuario de la base de datos                      |
 | `DB_PASSWORD` | Contraseña de la base de datos                   |
 
+Además, desde US-11 la autenticación exige un secreto propio:
+
+| Variable                 | Requerida | Descripción                                                                     |
+| ------------------------ | --------- | ------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | sí        | Clave HMAC-SHA256. **Mínimo 32 caracteres**; la app no arranca sin ella          |
+| `JWT_EXPIRATION_SECONDS` | no        | Caducidad del token en segundos (por defecto `28800`, 8 horas)                    |
+| `PROTECT_SUBTAREAS`      | no        | Interruptor de despliegue de US-11 (`false` por defecto)                          |
+| `LEGACY_USER_ID`         | no        | Usuario legado acotado mientras `PROTECT_SUBTAREAS=false` (por defecto `1`)      |
+
+Generar el secreto con `openssl rand -base64 48`. En Render se deja `sync: false` y se fija a mano en el panel: **el valor real jamás se versiona**.
+
 Existen **dos vías de conexión** a Supabase (ver `boveda/mejoras/2026-09-18-004-deploy-render-docker-y-cors.md`):
 
 - **Directa (local)** — `db.<ref>.supabase.co:5432` con usuario `postgres`. El DNS solo resuelve **IPv6**, así que funciona solo donde el host tenga IPv6 (falla en Docker/Render).
@@ -64,6 +75,9 @@ db/
 | Método   | Endpoint                            | Descripción                                                      |
 | -------- | ----------------------------------- | ---------------------------------------------------------------- |
 | `GET`    | `/api/health`                       | Estado de la aplicación y de la base; 503 si la BD no responde  |
+| `POST`   | `/api/users/register`               | Crea una cuenta y devuelve el token; 409 si el correo ya existe |
+| `POST`   | `/api/users/login`                  | Autentica y devuelve el token; 401 si las credenciales fallan  |
+| `GET`    | `/api/users/profile`                | Devuelve el usuario del token; 401 sin cabecera `Bearer`        |
 | `GET`    | `/api/tipos-evento`                | Lista el catálogo de tipos de evento                            |
 | `GET`    | `/api/eventos?usuarioId={id}`       | Lista los eventos; el filtro es opcional                        |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
@@ -81,6 +95,52 @@ db/
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
 | `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
 | `GET`    | `/v3/api-docs`                      | JSON de la especificación OpenAPI                                |
+
+### Autenticación (US-11)
+
+La API es **stateless con JWT**: no hay cookies ni sesiones en el servidor. Tras `register` o `login` hay que enviar el token en cada llamada:
+
+```
+Authorization: Bearer <token>
+```
+
+Login y registro aceptan `password` (no `contrasena`) y responden con el mismo cuerpo:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 28800,
+  "usuario": {
+    "idUsuario": 1,
+    "email": "santiago@correo.com",
+    "nombre": "Santiago Pérez",
+    "limiteHorasDiarias": 8
+  }
+}
+```
+
+Rutas públicas (sin token): `/api/health`, `/api/tipos-evento`, `/api/users/register`, `/api/users/login`, `/v3/api-docs/**`, `/swagger-ui/**` y el preflight `OPTIONS`. En Swagger UI el botón **Authorize** usa el esquema `bearerAuth`.
+
+### Aislamiento por propietario
+
+Todos los datos se acotan al usuario del token; los parámetros `usuarioId` del query y del cuerpo se aceptan por compatibilidad pero **se ignoran**:
+
+- `GET /api/eventos` devuelve solo los eventos del token (antes devolvía todos).
+- `POST /api/eventos` asigna el propietario desde el token, ignorando el `idUsuario` del cuerpo.
+- `PUT /api/eventos/{id}` y `DELETE /api/eventos/{id}` no pueden tocar eventos ajenos: responden **404**, no 403, para no confirmar que el id existe en otra cuenta.
+- `EventoRepository` y `SubtareaRepository` extienden `Repository`, no `JpaRepository`, para que `findAll()` y `findById(id)` **no existan** y no se pueda leer o borrar una cuenta ajena por descuido.
+
+### Activación gradual
+
+`PROTECT_SUBTAREAS` permite activar la protección sin romper el frontend:
+
+| `PROTECT_SUBTAREAS` | Comportamiento                                                                    |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `false` (por defecto) | `/api/subtareas/**` sigue abierta, pero los datos se acotan a `LEGACY_USER_ID`   |
+| `true`              | `/api/subtareas/**` exige `Authorization: Bearer`; sin token responde 401           |
+
+Orden de despliegue: subir el backend con la bandera en `false` → desplegar el frontend que ya manda el token → verificar → subir `PROTECT_SUBTAREAS=true`.
 
 ### Documentación interactiva
 
@@ -113,7 +173,8 @@ Ejemplo de respuesta de `/api/health`:
 
 - Servicio web **Docker**, blueprint `render.yaml` (región `oregon`, plan free, branch `main`, health check `/api/health`).
 - `Dockerfile` multi-stage (build `maven:3.9-eclipse-temurin-21` → runtime `eclipse-temurin:21-jre`) que corre como usuario no-root `appuser` (uid 10001).
-- Variables de entorno en Render: `DB_URL`/`DB_USER` (**pooler transaccional**), `JAVA_OPTS=-XX:MaxRAMPercentage=60`; `DB_PASSWORD` se fija a mano en el dashboard (nunca en el repo).
+- Variables de entorno en Render: `DB_URL`/`DB_USER` (**pooler transaccional**), `JAVA_OPTS=-XX:MaxRAMPercentage=60`, `JWT_EXPIRATION_SECONDS=28800`, `PROTECT_SUBTAREAS=false` y `LEGACY_USER_ID=1`; `DB_PASSWORD` y **`JWT_SECRET`** se fijan a mano en el dashboard (`sync: false`, nunca en el repo).
+- El servicio **no arranca sin `JWT_SECRET`**: es el único secreto nuevo que hay que crear en el panel de Render (`openssl rand -base64 48`).
 - CORS: `app.cors.allowed-origins=https://*.vercel.app,http://localhost:5173`, aplicado a `/api/**` por `config/CorsConfig.java`.
 - URL pública: `https://planificador-eventos-backend-1.onrender.com` (servicio Spring de este repositorio).
 
@@ -150,10 +211,12 @@ Más detalles de la validación en `boveda/mejoras/2026-09-24-014-validacion-con
 - Catálogo de tipos de evento y actualización completa de subtareas
 - API REST de eventos y subtareas con validación, cascada y manejo global de errores
 - Endpoint `/api/subtareas/hoy` para consultar las gestiones no ejecutadas por fecha
+- US-11: autenticación JWT stateless (registro, login, perfil), Swagger con `bearerAuth` y aislamiento real por propietario en eventos y subtareas
 
 **Pendiente**
 
-- Autenticación (JWT) — fuera de alcance por ahora
+- Consolidar los usuarios existentes de Supabase con `password_hash` válido (hoy se resuelven registrando una cuenta nueva)
+- Subir `PROTECT_SUBTAREAS=true` en Render una vez el frontend esté desplegado con el token
 
 Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`).
 

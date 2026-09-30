@@ -36,35 +36,35 @@ public class EventoService {
 
     @Transactional(readOnly = true)
     public List<EventoDTO> obtenerTodos(Integer usuarioId) {
-        List<Evento> eventos = usuarioId == null
-                ? eventoRepository.findAll()
-                : eventoRepository.findByUsuarioId(usuarioId);
-        return eventos.stream()
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("El organizador es obligatorio");
+        }
+
+        return eventoRepository.findByUsuarioId(usuarioId).stream()
                 .map(evento -> aDto(evento, List.of()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public EventoDTO obtenerPorId(Integer id) {
-        Evento evento = buscarEntidad(id);
-        List<SubtareaDTO> subtareas = subtareaRepository.findByEventoId(id).stream()
+    public EventoDTO obtenerPorId(Integer usuarioId, Integer id) {
+        Evento evento = buscarEntidadDeUsuario(usuarioId, id);
+        List<SubtareaDTO> subtareas = subtareaRepository
+                .findByEventoIdYUsuarioId(id, usuarioId).stream()
                 .map(this::aSubtareaDto)
                 .toList();
         return aDto(evento, subtareas);
     }
 
     @Transactional
-    public EventoDTO actualizarEvento(Integer id, EventoDTO dto) {
+    public EventoDTO actualizarEvento(Integer usuarioId, Integer id, EventoDTO dto) {
         validar(dto);
-        Evento evento = buscarEntidad(id);
-        Usuario usuario = usuarioRepository.findById(dto.idUsuario())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe el usuario con id " + dto.idUsuario()));
+        Evento evento = buscarEntidadDeUsuario(usuarioId, id);
         TipoEvento tipoEvento = tipoEventoRepository.findById(dto.idTipoEvento())
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe el tipo de evento con id " + dto.idTipoEvento()));
 
-        evento.setUsuario(usuario);
+        // El propietario no se reasigna: el idUsuario del cuerpo se ignora para
+        // que una cuenta no robe el evento de otra.
         evento.setTipoEvento(tipoEvento);
         evento.setNombre(dto.nombre().trim());
         evento.setCliente(dto.cliente().trim());
@@ -74,12 +74,18 @@ public class EventoService {
     }
 
     @Transactional
-    public EventoDTO crearEvento(EventoDTO dto) {
+    public EventoDTO crearEvento(Integer usuarioId, EventoDTO dto) {
         validar(dto);
 
-        Usuario usuario = usuarioRepository.findById(dto.idUsuario())
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("El organizador es obligatorio");
+        }
+
+        // El evento siempre nace a nombre de quien llama: el idUsuario del
+        // cuerpo se acepta por compatibilidad pero no decide el propietario.
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe el usuario con id " + dto.idUsuario()));
+                        "No existe el usuario con id " + usuarioId));
         TipoEvento tipoEvento = tipoEventoRepository.findById(dto.idTipoEvento())
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe el tipo de evento con id " + dto.idTipoEvento()));
@@ -96,14 +102,18 @@ public class EventoService {
     }
 
     @Transactional
-    public void eliminarEvento(Integer id) {
-        Evento evento = buscarEntidad(id);
+    public void eliminarEvento(Integer usuarioId, Integer id) {
+        Evento evento = buscarEntidadDeUsuario(usuarioId, id);
         eventoRepository.delete(evento);
         eventoRepository.flush();
     }
 
-    private Evento buscarEntidad(Integer id) {
-        return eventoRepository.findById(id)
+    /**
+     * Un evento ajeno se reporta como inexistente, no como prohibido: un 403
+     * confirmaría que el id existe en la cuenta de otro usuario.
+     */
+    private Evento buscarEntidadDeUsuario(Integer usuarioId, Integer id) {
+        return eventoRepository.findByIdYUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No existe el evento con id " + id));
     }

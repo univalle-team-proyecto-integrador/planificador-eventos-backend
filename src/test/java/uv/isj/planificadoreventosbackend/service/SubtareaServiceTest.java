@@ -82,13 +82,13 @@ class SubtareaServiceTest {
 
     @Test
     void agregarSubtareaFuerzaEstadoPendienteYRecortaElNombre() {
-        when(eventoRepository.findById(10)).thenReturn(Optional.of(evento));
+        when(eventoRepository.findByIdYUsuarioId(10, 1)).thenReturn(Optional.of(evento));
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
         SubtareaDTO dto = new SubtareaDTO(
                 null, null, "  Confirmar catering  ", LocalDate.of(2026, 11, 15), 4,
                 EstadoSubtarea.ejecutada, "Nota previa", null);
 
-        SubtareaDTO resultado = subtareaService.agregarSubtarea(10, dto);
+        SubtareaDTO resultado = subtareaService.agregarSubtarea(1, 10, dto);
 
         assertThat(resultado.nombreGestion()).isEqualTo("Confirmar catering");
         assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.pendiente);
@@ -99,31 +99,31 @@ class SubtareaServiceTest {
 
     @Test
     void agregarSubtareaRechazaDatosIncompletos() {
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(null, dtoAgregar("T", LocalDate.of(2026, 11, 10), 2)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, null, dtoAgregar("T", LocalDate.of(2026, 11, 10), 2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("evento");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, null))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("obligatorios");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, dtoAgregar("  ", LocalDate.of(2026, 11, 10), 2)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, dtoAgregar("  ", LocalDate.of(2026, 11, 10), 2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, dtoAgregar("T", null, 2)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, dtoAgregar("T", null, 2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, dtoAgregar("T", LocalDate.of(2026, 11, 10), null)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, dtoAgregar("T", LocalDate.of(2026, 11, 10), null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, dtoAgregar("T", LocalDate.of(2026, 11, 10), 0)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, dtoAgregar("T", LocalDate.of(2026, 11, 10), 0)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(10, dtoAgregar("T", LocalDate.of(2026, 11, 10), -3)))
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 10, dtoAgregar("T", LocalDate.of(2026, 11, 10), -3)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
 
@@ -132,9 +132,9 @@ class SubtareaServiceTest {
 
     @Test
     void agregarSubtareaAEventoInexistenteLanzaExcepcion() {
-        when(eventoRepository.findById(9999)).thenReturn(Optional.empty());
+        when(eventoRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.agregarSubtarea(
+        assertThatThrownBy(() -> subtareaService.agregarSubtarea(1, 
                         9999, dtoAgregar("T", LocalDate.of(2026, 11, 10), 2)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
@@ -144,10 +144,10 @@ class SubtareaServiceTest {
     void actualizarSubtareaModificaLosCamposEditables() {
         Subtarea subtarea = subtareaCreada(3, "Gestión anterior", LocalDate.of(2026, 11, 10), 2,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(3)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(3, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        SubtareaDTO resultado = subtareaService.actualizarSubtarea(
+        SubtareaDTO resultado = subtareaService.actualizarSubtarea(1, 
                 3, new SubtareaActualizacionDTO("  Gestión nueva  ", LocalDate.of(2026, 11, 15), 4));
 
         assertThat(resultado.nombreGestion()).isEqualTo("Gestión nueva");
@@ -157,21 +157,21 @@ class SubtareaServiceTest {
 
     @Test
     void actualizarSubtareaRechazaDatosIncompletos() {
-        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(3, null))
+        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(1, 3, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("obligatorios");
 
-        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(
+        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(1, 
                         3, new SubtareaActualizacionDTO(" ", LocalDate.of(2026, 11, 15), 4)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
-        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(
+        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(1, 
                         3, new SubtareaActualizacionDTO("T", null, 4)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(
+        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(1, 
                         3, new SubtareaActualizacionDTO("T", LocalDate.of(2026, 11, 15), 0)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("mayores que cero");
@@ -181,9 +181,9 @@ class SubtareaServiceTest {
 
     @Test
     void actualizarSubtareaInexistenteLanzaExcepcion() {
-        when(subtareaRepository.findById(9999)).thenReturn(Optional.empty());
+        when(subtareaRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(
+        assertThatThrownBy(() -> subtareaService.actualizarSubtarea(1, 
                         9999, new SubtareaActualizacionDTO("T", LocalDate.of(2026, 11, 15), 2)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
@@ -195,10 +195,10 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         Subtarea segunda = subtareaCreada(2, "Segunda", LocalDate.of(2026, 11, 11), 3,
                 EstadoSubtarea.ejecutada);
-        when(eventoRepository.findById(10)).thenReturn(Optional.of(evento));
-        when(subtareaRepository.findByEventoId(10)).thenReturn(List.of(primera, segunda));
+        when(eventoRepository.findByIdYUsuarioId(10, 1)).thenReturn(Optional.of(evento));
+        when(subtareaRepository.findByEventoIdYUsuarioId(10, 1)).thenReturn(List.of(primera, segunda));
 
-        List<SubtareaDTO> resultado = subtareaService.obtenerPorEvento(10);
+        List<SubtareaDTO> resultado = subtareaService.obtenerPorEvento(1, 10);
 
         assertThat(resultado).hasSize(2);
         assertThat(resultado.get(0).nombreGestion()).isEqualTo("Primera");
@@ -207,9 +207,9 @@ class SubtareaServiceTest {
 
     @Test
     void listarSubtareasDeEventoInexistenteLanzaExcepcion() {
-        when(eventoRepository.findById(9999)).thenReturn(Optional.empty());
+        when(eventoRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.obtenerPorEvento(9999))
+        assertThatThrownBy(() -> subtareaService.obtenerPorEvento(1, 9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
@@ -219,9 +219,9 @@ class SubtareaServiceTest {
         Subtarea subtarea = subtareaCreada(9, "Tarea de detalle", LocalDate.of(2026, 11, 18), 2,
                 EstadoSubtarea.ejecutada);
         subtarea.setNotaExplicativa("Detalle entregado");
-        when(subtareaRepository.findById(9)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(9, 1)).thenReturn(Optional.of(subtarea));
 
-        SubtareaDTO resultado = subtareaService.obtenerPorId(9);
+        SubtareaDTO resultado = subtareaService.obtenerPorId(1, 9);
 
         assertThat(resultado.idSubtarea()).isEqualTo(9);
         assertThat(resultado.idEvento()).isEqualTo(10);
@@ -234,9 +234,9 @@ class SubtareaServiceTest {
 
     @Test
     void obtenerPorIdDeSubtareaInexistenteLanzaExcepcion() {
-        when(subtareaRepository.findById(9999)).thenReturn(Optional.empty());
+        when(subtareaRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.obtenerPorId(9999))
+        assertThatThrownBy(() -> subtareaService.obtenerPorId(1, 9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
@@ -288,19 +288,19 @@ class SubtareaServiceTest {
     void obtenerLimiteDiarioVieneDelUsuarioDelEvento() {
         Subtarea subtarea = subtareaCreada(1, "T", LocalDate.of(2026, 11, 10), 2,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
 
-        assertThat(subtareaService.obtenerLimiteDiario(1)).isEqualTo(5);
+        assertThat(subtareaService.obtenerLimiteDiario(1, 1)).isEqualTo(5);
     }
 
     @Test
     void cambiarEstadoActualizaEstadoYNota() {
         Subtarea subtarea = subtareaCreada(4, "Tarea para completar", LocalDate.of(2026, 11, 12), 2,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(4)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(4, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        SubtareaDTO resultado = subtareaService.cambiarEstado(
+        SubtareaDTO resultado = subtareaService.cambiarEstado(1, 
                 4, new EstadoSubtareaDTO(EstadoSubtarea.pospuesta, "Proveedor sin disponibilidad"));
 
         assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.pospuesta);
@@ -309,11 +309,11 @@ class SubtareaServiceTest {
 
     @Test
     void cambiarEstadoRechazaDtoNuloOEstadoNulo() {
-        assertThatThrownBy(() -> subtareaService.cambiarEstado(4, null))
+        assertThatThrownBy(() -> subtareaService.cambiarEstado(1, 4, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("estado");
 
-        assertThatThrownBy(() -> subtareaService.cambiarEstado(4, new EstadoSubtareaDTO(null, null)))
+        assertThatThrownBy(() -> subtareaService.cambiarEstado(1, 4, new EstadoSubtareaDTO(null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("estado");
 
@@ -324,9 +324,9 @@ class SubtareaServiceTest {
     void eliminarSubtareaLaQuitaDelEventoYBorra() {
         Subtarea subtarea = subtareaCreada(7, "Tarea a borrar", LocalDate.of(2026, 11, 10), 2,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(7)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(7, 1)).thenReturn(Optional.of(subtarea));
 
-        subtareaService.eliminarSubtarea(7);
+        subtareaService.eliminarSubtarea(1, 7);
 
         assertThat(evento.getSubtareas()).doesNotContain(subtarea);
         verify(subtareaRepository).delete(subtarea);
@@ -337,11 +337,11 @@ class SubtareaServiceTest {
     void reprogramarDetectaConflictoSinModificarLaSubtarea() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 11), 1,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(6L);
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3), 5.0);
 
         assertThat(resultado.get("conflicto")).isEqualTo(true);
@@ -356,12 +356,12 @@ class SubtareaServiceTest {
     void reprogramarAplicaElCambioCuandoNoSuperaElLimite() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 11), 1,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 21), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 21), 3), 5.0);
 
         SubtareaDTO subtareaRespuesta = (SubtareaDTO) resultado.get("subtarea");
@@ -377,12 +377,12 @@ class SubtareaServiceTest {
     void reprogramarEnLaMismaFechaNoCuentaDosVecesLaMismaSubtarea() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 20), 2,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2), 5.0);
 
         assertThat(resultado.get("conflicto")).isEqualTo(false);
@@ -393,12 +393,12 @@ class SubtareaServiceTest {
     void reprogramarASumaMenorQueLaPropiaSatisfaceElLimite() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 20), 3,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3), 5.0);
 
         assertThat(resultado.get("conflicto")).isEqualTo(false);
@@ -409,11 +409,11 @@ class SubtareaServiceTest {
     void reprogramarUnaEjecutadaEnLaMismaFechaNoRestaSusHoras() {
         Subtarea subtarea = subtareaCreada(1, "Tarea ejecutada", LocalDate.of(2026, 11, 20), 2,
                 EstadoSubtarea.ejecutada);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2), 5.0);
 
         assertThat(resultado.get("conflicto")).isEqualTo(true);
@@ -424,12 +424,12 @@ class SubtareaServiceTest {
     void reprogramarJustoAlLimiteNoReportaConflicto() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 21), 1,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 22), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(
+        Map<String, Object> resultado = subtareaService.reprogramar(1, 
                 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3), 5.0);
 
         assertThat(resultado.get("conflicto")).isEqualTo(false);
@@ -440,38 +440,38 @@ class SubtareaServiceTest {
     void reprogramarRechazaDatosInvalidos() {
         Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 21), 1,
                 EstadoSubtarea.pendiente);
-        when(subtareaRepository.findById(1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, null, 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 1, null, 5.0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(null, 2), 5.0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), null), 5.0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("horas");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 0), 5.0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("horas");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("límite diario");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), 0.0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("límite diario");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), Double.NaN))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("límite diario");
@@ -481,9 +481,9 @@ class SubtareaServiceTest {
 
     @Test
     void reprogramarSubtareaInexistenteLanzaExcepcion() {
-        when(subtareaRepository.findById(9999)).thenReturn(Optional.empty());
+        when(subtareaRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
                         9999, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), 5.0))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");

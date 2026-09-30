@@ -89,17 +89,14 @@ class EventoServiceTest {
         assertThat(resultado.get(0).idUsuario()).isEqualTo(1);
         assertThat(resultado.get(0).subtareas()).isEmpty();
         verify(eventoRepository).findByUsuarioId(1);
-        verify(eventoRepository, never()).findAll();
     }
 
     @Test
-    void listaTodosLosEventosCuandoNoSeFiltraPorUsuario() {
-        when(eventoRepository.findAll()).thenReturn(List.of(eventoBase(1), eventoBase(2)));
+    void rechazaListarEventosSinOrganizadorParaNoDevolverCuentasAjenas() {
+        assertThatThrownBy(() -> eventoService.obtenerTodos(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("organizador");
 
-        List<EventoDTO> resultado = eventoService.obtenerTodos(null);
-
-        assertThat(resultado).hasSize(2);
-        verify(eventoRepository).findAll();
         verify(eventoRepository, never()).findByUsuarioId(any());
     }
 
@@ -111,10 +108,10 @@ class EventoServiceTest {
         subtarea.setEvento(evento);
         subtarea.setNombreGestion("Confirmar proveedor");
         subtarea.setHorasEstimadas(4);
-        when(eventoRepository.findById(7)).thenReturn(Optional.of(evento));
-        when(subtareaRepository.findByEventoId(7)).thenReturn(List.of(subtarea));
+        when(eventoRepository.findByIdYUsuarioId(7, 1)).thenReturn(Optional.of(evento));
+        when(subtareaRepository.findByEventoIdYUsuarioId(7, 1)).thenReturn(List.of(subtarea));
 
-        EventoDTO resultado = eventoService.obtenerPorId(7);
+        EventoDTO resultado = eventoService.obtenerPorId(1, 7);
 
         assertThat(resultado.idEvento()).isEqualTo(7);
         assertThat(resultado.subtareas()).hasSize(1);
@@ -124,9 +121,9 @@ class EventoServiceTest {
 
     @Test
     void elDetalleDeUnEventoInexistenteLanzaExcepcion() {
-        when(eventoRepository.findById(9999)).thenReturn(Optional.empty());
+        when(eventoRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventoService.obtenerPorId(9999))
+        assertThatThrownBy(() -> eventoService.obtenerPorId(1, 9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
@@ -137,7 +134,7 @@ class EventoServiceTest {
         when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
         when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        EventoDTO resultado = eventoService.crearEvento(dtoValido("  Boda de prueba  "));
+        EventoDTO resultado = eventoService.crearEvento(1, dtoValido("  Boda de prueba  "));
 
         assertThat(resultado.nombre()).isEqualTo("Boda de prueba");
         assertThat(resultado.cliente()).isEqualTo("María");
@@ -148,14 +145,37 @@ class EventoServiceTest {
     }
 
     @Test
-    void crearEventoConUsuarioInexistenteLanzaExcepcion() {
+    void crearEventoConOrganizadorInexistenteLanzaExcepcion() {
         when(usuarioRepository.findById(9999)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
-                        new EventoDTO(null, 9999, 2, "Boda", "María",
+        assertThatThrownBy(() -> eventoService.crearEvento(9999,
+                        new EventoDTO(null, 1, 2, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
+    }
+
+    @Test
+    void crearEventoIgnoraElUsuarioDelCuerpoParaNoAsignarloAOtraCuenta() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
+        when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EventoDTO resultado = eventoService.crearEvento(1,
+                new EventoDTO(null, 7, 2, "Boda", "María",
+                        LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null));
+
+        assertThat(resultado.idUsuario()).isEqualTo(1);
+        verify(usuarioRepository, never()).findById(7);
+    }
+
+    @Test
+    void actualizarEventoDeOtroUsuarioSeReportaComoInexistente() {
+        when(eventoRepository.findByIdYUsuarioId(8, 2)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventoService.actualizarEvento(2, 8, dtoValido("Boda")))
+                .isInstanceOf(RecursoNoEncontradoException.class)
+                .hasMessageContaining("8");
     }
 
     @Test
@@ -163,7 +183,7 @@ class EventoServiceTest {
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(tipoEventoRepository.findById(9999)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 9999, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
@@ -172,58 +192,58 @@ class EventoServiceTest {
 
     @Test
     void crearEventoRechazaDatosIncompletos() {
-        assertThatThrownBy(() -> eventoService.crearEvento(null))
+        assertThatThrownBy(() -> eventoService.crearEvento(1, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("obligatorios");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, null, "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "   ", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, null, 2, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("usuario");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, null, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("tipo de evento");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", null,
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("cliente");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "  ",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("cliente");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "María", null, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), null, null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("lugar");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(
+        assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "   ", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -235,12 +255,11 @@ class EventoServiceTest {
     @Test
     void actualizarEventoModificaTodosLosCamposEditable() {
         Evento evento = eventoBase(8);
-        when(eventoRepository.findById(8)).thenReturn(Optional.of(evento));
-        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(eventoRepository.findByIdYUsuarioId(8, 1)).thenReturn(Optional.of(evento));
         when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
         when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        EventoDTO resultado = eventoService.actualizarEvento(
+        EventoDTO resultado = eventoService.actualizarEvento(1, 
                 8, dtoValido("  Boda actualizada  "));
 
         assertThat(resultado.nombre()).isEqualTo("Boda actualizada");
@@ -250,16 +269,16 @@ class EventoServiceTest {
 
     @Test
     void actualizarEventoInexistenteLanzaExcepcion() {
-        when(eventoRepository.findById(9999)).thenReturn(Optional.empty());
+        when(eventoRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventoService.actualizarEvento(9999, dtoValido("Boda")))
+        assertThatThrownBy(() -> eventoService.actualizarEvento(1, 9999, dtoValido("Boda")))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
 
     @Test
     void actualizarEventoRechazaDatosIncompletosSinTocarElGuardado() {
-        assertThatThrownBy(() -> eventoService.actualizarEvento(
+        assertThatThrownBy(() -> eventoService.actualizarEvento(1, 
                         8, new EventoDTO(null, 1, 2, "", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -271,9 +290,9 @@ class EventoServiceTest {
     @Test
     void eliminarEventoRegexistenteBorraConFlush() {
         Evento evento = eventoBase(9);
-        when(eventoRepository.findById(9)).thenReturn(Optional.of(evento));
+        when(eventoRepository.findByIdYUsuarioId(9, 1)).thenReturn(Optional.of(evento));
 
-        eventoService.eliminarEvento(9);
+        eventoService.eliminarEvento(1, 9);
 
         verify(eventoRepository).delete(evento);
         verify(eventoRepository).flush();
@@ -281,9 +300,9 @@ class EventoServiceTest {
 
     @Test
     void eliminarEventoInexistenteLanzaExcepcion() {
-        when(eventoRepository.findById(9999)).thenReturn(Optional.empty());
+        when(eventoRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventoService.eliminarEvento(9999))
+        assertThatThrownBy(() -> eventoService.eliminarEvento(1, 9999))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }

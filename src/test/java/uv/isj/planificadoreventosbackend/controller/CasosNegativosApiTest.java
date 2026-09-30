@@ -13,6 +13,7 @@ import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +42,24 @@ class CasosNegativosApiTest {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    /**
+     * La ventana de compatibilidad sin token (app.security.legacy-user-id=1)
+     * asume que la cuenta demo es ladueña de los datos, igual que el frontend
+     * con VITE_USER_ID=1. H2 no reinicia las secuencias IDENTITY al deshacer la
+     * transacción, así que sin esto el primer usuario de cada test dejaría de
+     * ser el 1 y el aislamiento por propietario lo rechazaría.
+     */
+    @BeforeEach
+    void reiniciarSecuenciasParaElUsuarioDemo() {
+        entityManager.createNativeQuery("ALTER TABLE usuario ALTER COLUMN id_usuario RESTART WITH 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE evento ALTER COLUMN id_evento RESTART WITH 1")
+                .executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE subtarea ALTER COLUMN id_subtarea RESTART WITH 1")
+                .executeUpdate();
+    }
+
 
     private Evento crearEventoPersistido() {
         String sufijo = UUID.randomUUID().toString().substring(0, 8);
@@ -98,21 +117,31 @@ class CasosNegativosApiTest {
     }
 
     @Test
-    void crearEventoConRelacionesInexistentesDevuelveNotFound() throws Exception {
+    void crearEventoConTipoInexistenteDevuelveNotFound() throws Exception {
         Evento evento = crearEventoPersistido();
         Integer usuarioId = evento.getUsuario().getIdUsuario();
-
-        mockMvc.perform(post("/api/eventos")
-                        .contentType("application/json")
-                        .content(jsonEventoValido(9999, evento.getTipoEvento().getIdTipoEvento())))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.detail").value("No existe el usuario con id 9999"));
 
         mockMvc.perform(post("/api/eventos")
                         .contentType("application/json")
                         .content(jsonEventoValido(usuarioId, 9999)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("No existe el tipo de evento con id 9999"));
+    }
+
+    /**
+     * El propietario lo decide el token, no el cuerpo: un usuario inexistente
+     * enviado en idUsuario ya no se busca, el evento simplemente nace a nombre
+     * de quien llama.
+     */
+    @Test
+    void crearEventoIgnoraElUsuarioDelCuerpoYAsignaElPropietarioDeLaSesion() throws Exception {
+        Evento evento = crearEventoPersistido();
+
+        mockMvc.perform(post("/api/eventos")
+                        .contentType("application/json")
+                        .content(jsonEventoValido(9999, evento.getTipoEvento().getIdTipoEvento())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idUsuario").value(evento.getUsuario().getIdUsuario()));
     }
 
     @Test

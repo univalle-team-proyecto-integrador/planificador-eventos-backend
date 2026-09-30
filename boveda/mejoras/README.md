@@ -24,3 +24,4 @@
 | 2026-09-25  | 021 | Media type JSON en Swagger UI                | [2026-09-25-021-media-type-json-swagger](2026-09-25-021-media-type-json-swagger.md) |
 | 2026-09-29  | 022 | Pruebas de CORS, salud, parámetros y OpenAPI    | [2026-09-29-022-pruebas-cors-salud-parametros-y-openapi](2026-09-29-022-pruebas-cors-salud-parametros-y-openapi.md) |
 | 2026-09-29  | 023 | CORS para 127.0.0.1 y ProblemDetail en parámetros | [2026-09-29-023-cors-127-y-problemdetail-parametros](2026-09-29-023-cors-127-y-problemdetail-parametros.md) |
+| 2026-09-29  | 024 | US-11: autenticación JWT y aislamiento por propietario | [2026-09-29-024-autenticacion-jwt-y-aislamiento](2026-09-29-024-autenticacion-jwt-y-aislamiento.md) |

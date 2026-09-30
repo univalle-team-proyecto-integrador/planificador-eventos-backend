@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
+import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.EventoService;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
@@ -31,19 +32,32 @@ public class EventoController {
 
     private final EventoService eventoService;
     private final SubtareaService subtareaService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public EventoController(EventoService eventoService, SubtareaService subtareaService) {
+    public EventoController(
+            EventoService eventoService,
+            SubtareaService subtareaService,
+            CurrentUserProvider currentUserProvider) {
         this.eventoService = eventoService;
         this.subtareaService = subtareaService;
+        this.currentUserProvider = currentUserProvider;
+    }
+
+    /** Propietario efectivo: el del token si hay uno, si no el de compatibilidad. */
+    private Integer propietario() {
+        return currentUserProvider.idUsuarioActual();
     }
 
     @GetMapping
     @Operation(summary = "Listar eventos")
     @ApiResponse(responseCode = "200", description = "Lista de eventos")
     public List<EventoDTO> obtenerTodos(
-            @Parameter(description = "Filtra por organizador", example = "1")
+            @Parameter(
+                    description = "Se acepta por compatibilidad pero se ignora: "
+                            + "solo se devuelven los eventos del token",
+                    example = "1")
             @RequestParam(required = false) Integer usuarioId) {
-        return eventoService.obtenerTodos(usuarioId);
+        return eventoService.obtenerTodos(propietario());
     }
 
     @GetMapping("/{id}")
@@ -55,7 +69,7 @@ public class EventoController {
     public EventoDTO obtenerPorId(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {
-        return eventoService.obtenerPorId(id);
+        return eventoService.obtenerPorId(propietario(), id);
     }
 
     @PostMapping
@@ -66,7 +80,7 @@ public class EventoController {
             @ApiResponse(responseCode = "404", description = "El usuario o el tipo de evento no existe")
     })
     public ResponseEntity<EventoDTO> crear(@Valid @RequestBody EventoDTO dto) {
-        EventoDTO evento = eventoService.crearEvento(dto);
+        EventoDTO evento = eventoService.crearEvento(propietario(), dto);
         URI ubicacion = URI.create("/api/eventos/" + evento.idEvento());
         return ResponseEntity.created(ubicacion).body(evento);
     }
@@ -80,7 +94,7 @@ public class EventoController {
     public List<SubtareaDTO> obtenerSubtareas(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {
-        return subtareaService.obtenerPorEvento(id);
+        return subtareaService.obtenerPorEvento(propietario(), id);
     }
 
     @PutMapping("/{id}")
@@ -94,7 +108,7 @@ public class EventoController {
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody EventoDTO dto) {
-        return eventoService.actualizarEvento(id, dto);
+        return eventoService.actualizarEvento(propietario(), id, dto);
     }
 
     @PostMapping("/{id}/subtareas")
@@ -108,7 +122,7 @@ public class EventoController {
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody SubtareaDTO dto) {
-        SubtareaDTO subtarea = subtareaService.agregarSubtarea(id, dto);
+        SubtareaDTO subtarea = subtareaService.agregarSubtarea(propietario(), id, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(subtarea);
     }
 
@@ -121,7 +135,7 @@ public class EventoController {
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {
-        eventoService.eliminarEvento(id);
+        eventoService.eliminarEvento(propietario(), id);
         return ResponseEntity.noContent().build();
     }
 }
