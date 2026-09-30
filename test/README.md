@@ -17,10 +17,11 @@ Documentación descentralizada de cómo validar la conexión **frontend (Vercel)
 | [frontend-chrome.md](frontend-chrome.md) | Pruebas del **frontend** en **Chrome** (checklist de flujos + Network). |
 | [pruebas-local.md](pruebas-local.md) | Plan de pruebas **local**: banco de pruebas contra Supabase real y regresión. |
 | [validacion-e2e-sprint1.md](validacion-e2e-sprint1.md) | Acta de validación **end-to-end del Sprint 1**: mapa historia → evidencia y resultados. |
+| `casos-qa/` | Casos QA del tracker (formato ID Caso / Resultado Esperado / Obtenido / Estado). Hoy: `qa-203-validacion-envio-invalido.md` y `qa-offline-manejo-error.md`. |
 | [terminos-clave.md](terminos-clave.md) | Glosario: ref, vía directa vs pooler, publishable key, cold start, etc. |
 | [plantilla-caso-prueba.md](plantilla-caso-prueba.md) | Plantilla para registrar un caso de prueba nuevo. |
 
-Carpeta `test/postman/`: colección `planificador-eventos-backend.postman_collection.json` y entorno `planificador-eventos-backend.postman_environment.json`, listos para **Import** en Postman.
+Carpeta `test/postman/`: colección `planificador-eventos-backend.postman_collection.json` y entorno `planificador-eventos-backend.postman_environment.json`, listos para **Import** en Postman. La colección incluye la secuencia de aceptación (crear → detalle con `subtareas` embebidas → subtareas → estado → reprogramar → eliminar) y **10 casos negativos** (validación de horas 0/-2/"abc"/null, estado inválido, 404s).
 
 Carpeta `test/evidencia-jira-sprint1/`: evidencia del tablero Jira del Sprint 1 (captura/export; ver su `README.md`).
 

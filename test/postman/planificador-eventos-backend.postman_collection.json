@@ -95,7 +95,7 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "eventos", "{{idEvento}}"]
 						},
-						"description": "Esperado: 200 con el detalle del evento."
+						"description": "Esperado: 200 con el detalle del evento INCLUYENDO el campo subtareas:[] (cierre de brechas del Sprint 1: las subtareas viajan embebidas)."
 					}
 				},
 				{
@@ -261,14 +261,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nuevaFecha\": \"2026-12-10\",\n  \"nuevasHoras\": 4\n}"
+							"raw": "{\n  \"fechaObjetivo\": \"2026-12-10\",\n  \"horasEstimadas\": 4\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/reprogramar",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "subtareas", "{{idSubtarea}}", "reprogramar"]
 						},
-						"description": "Esperado: 200. Reprogramar fecha objetivo y horas estimadas."
+						"description": "Esperado: 200. Reprogramar fecha objetivo y horas estimadas. Body del ReprogramarDTO: fechaObjetivo (LocalDate) + horasEstimadas."
 					}
 				},
 				{
@@ -322,6 +322,173 @@
 							"path": ["api", "eventos", "999999"]
 						},
 						"description": "Esperado: 404 (ProblemDetail)."
+					}
+				},
+				{
+					"name": "Subtarea con horas 0",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": {{idEvento}},\n  \"nombreGestion\": \"Tarea inválida\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "SCRUM-8-QA-1. Esperado: 400 con \"Las horas estimadas deben ser mayores que cero\". No se crea en BD."
+					}
+				},
+				{
+					"name": "Subtarea con horas negativas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": {{idEvento}},\n  \"nombreGestion\": \"Tarea inválida\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": -2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "SCRUM-8-QA-1. Esperado: 400."
+					}
+				},
+				{
+					"name": "Subtarea con horas alfanuméricas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": {{idEvento}},\n  \"nombreGestion\": \"Tarea inválida\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": \"abc\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "SCRUM-8-QA-1. Esperado: 400."
+					}
+				},
+				{
+					"name": "Subtarea con horas nulas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": {{idEvento}},\n  \"nombreGestion\": \"Tarea inválida\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "SCRUM-8-QA-1. Esperado: 400."
+					}
+				},
+				{
+					"name": "Estado inexistente en subtarea",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"estado\": \"hecha\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/estado",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}", "estado"]
+						},
+						"description": "Esperado: 400 (estados válidos: pendiente, ejecutada, pospuesta)."
+					}
+				},
+				{
+					"name": "Subtarea a evento inexistente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": 999999,\n  \"nombreGestion\": \"Tarea\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/999999/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "999999", "subtareas"]
+						},
+						"description": "Esperado: 404."
+					}
+				},
+				{
+					"name": "Editar subtarea inexistente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEvento\": {{idEvento}},\n  \"nombreGestion\": \"Editada\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "999999"]
+						},
+						"description": "Esperado: 404."
+					}
+				},
+				{
+					"name": "Eliminar subtarea inexistente",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "999999"]
+						},
+						"description": "Esperado: 404."
 					}
 				}
 			]
