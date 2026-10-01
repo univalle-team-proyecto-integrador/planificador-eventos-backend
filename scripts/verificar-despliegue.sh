@@ -114,6 +114,21 @@ case "$eventos" in
        fi ;;
   *) bad "no se puede comprobar el aislamiento: /api/eventos no devolvió un arreglo" ;;
 esac
+
+# Estado de PROTECT_SUBTAREAS. Mientras sea false, /api/subtareas/** acepta
+# peticiones anónimas y las resuelve con LEGACY_USER_ID: es la ventana de
+# compatibilidad y no es un fallo. Con PDE_ESPERAR_PROTECCION=true se exige
+# que la ventana ya esté cerrada, que es el estado final de US-11.
+sin_token=$(curl -s -m 60 -o /dev/null -w "%{http_code}" \
+  "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)&usuarioId=1")
+if [ "$sin_token" = "401" ]; then
+  ok "/api/subtareas/hoy rechaza peticiones sin token (PROTECT_SUBTAREAS activo)"
+elif [ "${PDE_ESPERAR_PROTECCION:-false}" = "true" ]; then
+  bad "/api/subtareas/hoy respondió $sin_token sin token: PROTECT_SUBTAREAS sigue en false"
+  echo "      -> Render -> Environment -> PROTECT_SUBTAREAS=true -> Save"
+else
+  warn "/api/subtareas/hoy respondió $sin_token sin token: PROTECT_SUBTAREAS=false (ventana de compatibilidad abierta)"
+fi
 fi
 
 echo "== 4. CORS desde el frontend real =="

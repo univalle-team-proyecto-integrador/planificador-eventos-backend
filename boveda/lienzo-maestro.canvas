@@ -500,6 +500,24 @@
    "y": 4500,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m027",
+   "type": "file",
+   "file": "mejoras/2026-10-01-027-verificador-detecta-proteccion-subtareas.md",
+   "x": 200,
+   "y": 4680,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p027",
+   "type": "text",
+   "text": "Mejora 027\nEl verificador detecta si PROTECT_SUBTAREAS sigue abierto\n2026-10-01",
+   "x": 540,
+   "y": 4680,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -865,6 +883,20 @@
    "fromNode": "p026",
    "fromSide": "right",
    "toNode": "m026",
+   "toSide": "left"
+  },
+  {
+   "id": "e53",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m027",
+   "toSide": "top"
+  },
+  {
+   "id": "e54",
+   "fromNode": "p027",
+   "fromSide": "right",
+   "toNode": "m027",
    "toSide": "left"
   }
  ]

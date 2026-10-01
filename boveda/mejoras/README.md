@@ -27,3 +27,4 @@
 | 2026-09-29  | 024 | US-11: autenticación JWT y aislamiento por propietario | [2026-09-29-024-autenticacion-jwt-y-aislamiento](2026-09-29-024-autenticacion-jwt-y-aislamiento.md) |
 | 2026-09-30  | 025 | Arreglo del script de verificación y Postman de US-11 | [2026-09-30-025-arreglo-script-verificacion-y-postman-us11](2026-09-30-025-arreglo-script-verificacion-y-postman-us11.md) |
 | 2026-09-30  | 026 | Caducidad del token en segundos (JWT_EXPIRATION_SECONDS) | [2026-09-30-026-caducidad-jwt-en-segundos](2026-09-30-026-caducidad-jwt-en-segundos.md) |
+| 2026-10-01  | 027 | El verificador detecta si PROTECT_SUBTAREAS sigue abierto | [2026-10-01-027-verificador-detecta-proteccion-subtareas](2026-10-01-027-verificador-detecta-proteccion-subtareas.md) |
