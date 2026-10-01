@@ -518,6 +518,24 @@
    "y": 4680,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m028",
+   "type": "file",
+   "file": "mejoras/2026-10-01-028-prueba-token-expirado.md",
+   "x": 200,
+   "y": 4860,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p028",
+   "type": "text",
+   "text": "Mejora 028\nPrueba de token expirado (cierra US-11)\n2026-10-01",
+   "x": 540,
+   "y": 4860,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -897,6 +915,20 @@
    "fromNode": "p027",
    "fromSide": "right",
    "toNode": "m027",
+   "toSide": "left"
+  },
+  {
+   "id": "e55",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m028",
+   "toSide": "top"
+  },
+  {
+   "id": "e56",
+   "fromNode": "p028",
+   "fromSide": "right",
+   "toNode": "m028",
    "toSide": "left"
   }
  ]

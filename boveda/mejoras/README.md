@@ -28,3 +28,4 @@
 | 2026-09-30  | 025 | Arreglo del script de verificación y Postman de US-11 | [2026-09-30-025-arreglo-script-verificacion-y-postman-us11](2026-09-30-025-arreglo-script-verificacion-y-postman-us11.md) |
 | 2026-09-30  | 026 | Caducidad del token en segundos (JWT_EXPIRATION_SECONDS) | [2026-09-30-026-caducidad-jwt-en-segundos](2026-09-30-026-caducidad-jwt-en-segundos.md) |
 | 2026-10-01  | 027 | El verificador detecta si PROTECT_SUBTAREAS sigue abierto | [2026-10-01-027-verificador-detecta-proteccion-subtareas](2026-10-01-027-verificador-detecta-proteccion-subtareas.md) |
+| 2026-10-01  | 028 | Prueba de token expirado: el último requisito de US-11 sin evidencia | [2026-10-01-028-prueba-token-expirado](2026-10-01-028-prueba-token-expirado.md) |

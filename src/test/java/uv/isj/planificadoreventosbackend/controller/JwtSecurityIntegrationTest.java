@@ -59,6 +59,9 @@ class JwtSecurityIntegrationTest {
     /** Debe coincidir con app.security.jwt.expiration-seconds del perfil test. */
     private static final long EXPIRATION_SEGUNDOS = 3600L;
 
+    /** Debe coincidir con app.security.jwt.secret del perfil test. */
+    private static final String SECRETO_DE_PRUEBAS = "secreto-de-pruebas-us11-minimo-32-caracteres";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -197,6 +200,26 @@ class JwtSecurityIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.nombre").value("Nueva Organizadora"));
+    }
+
+    @Test
+    @DisplayName("Un token bien firmado pero vencido no autentica")
+    void tokenVencidoResponde401() throws Exception {
+        Usuario usuario = crearUsuario("vencido");
+        String vencido = tokenVencido(usuario.getIdUsuario(), usuario.getEmail());
+
+        // Con el mismo token, /api/users/profile cae en el punto exacto de la
+        // expiracion: la firma es correcta, solo caduca el claim exp.
+        mockMvc.perform(get("/api/users/profile")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + vencido))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("No autenticado"));
+
+        mockMvc.perform(get("/api/subtareas/hoy")
+                        .param("usuarioId", "1")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + vencido))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -532,6 +555,15 @@ class JwtSecurityIntegrationTest {
     /** Token firmado con un secreto distinto al configurado en la app. */
     private String tokenFirmadoConSecreto(String secreto, Integer idUsuario, String email) {
         return JwtServiceConSecretoHelper.firmar(secreto, idUsuario, email);
+    }
+
+    /**
+     * Token correctamente firmado con el secreto de la app, pero ya vencido.
+     * Distingue el rechazo por caducidad del rechazo por firma inválida: si el
+     * decoder no mirara el claim {@code exp}, esta prueba devolvería 200.
+     */
+    private String tokenVencido(Integer idUsuario, String email) {
+        return JwtServiceConSecretoHelper.firmarVencido(SECRETO_DE_PRUEBAS, idUsuario, email);
     }
 
     private tools.jackson.databind.JsonNode json(org.springframework.test.web.servlet.MvcResult result)
