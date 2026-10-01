@@ -43,7 +43,7 @@ public interface SubtareaRepository extends Repository<Subtarea, Integer> {
             FROM Subtarea s
             WHERE s.evento.idEvento = :eventoId
               AND s.evento.usuario.idUsuario = :usuarioId
-            ORDER BY s.fechaObjetivo ASC, s.idSubtarea ASC
+            ORDER BY s.fechaObjetivo ASC, s.horasEstimadas ASC, s.idSubtarea ASC
             """)
     List<Subtarea> findByEventoIdYUsuarioId(
             @Param("eventoId") Integer eventoId,
@@ -90,7 +90,7 @@ public interface SubtareaRepository extends Repository<Subtarea, Integer> {
             WHERE s.evento.usuario.idUsuario = :usuarioId
               AND s.estado <> :estado
               AND s.fechaObjetivo <= :hasta
-            ORDER BY s.fechaObjetivo ASC, s.idSubtarea ASC
+            ORDER BY s.fechaObjetivo ASC, s.horasEstimadas ASC, s.idSubtarea ASC
             """)
     List<Subtarea> findNoEjecutadasHastaFecha(
             @Param("usuarioId") Integer usuarioId,
