@@ -83,4 +83,17 @@ public interface SubtareaRepository extends Repository<Subtarea, Integer> {
             @Param("usuarioId") Integer usuarioId,
             @Param("fecha") LocalDate fecha,
             @Param("estado") EstadoSubtarea estado);
+
+    @Query("""
+            SELECT s
+            FROM Subtarea s
+            WHERE s.evento.usuario.idUsuario = :usuarioId
+              AND s.estado <> :estado
+              AND s.fechaObjetivo <= :hasta
+            ORDER BY s.fechaObjetivo ASC, s.idSubtarea ASC
+            """)
+    List<Subtarea> findNoEjecutadasHastaFecha(
+            @Param("usuarioId") Integer usuarioId,
+            @Param("hasta") LocalDate hasta,
+            @Param("estado") EstadoSubtarea estado);
 }

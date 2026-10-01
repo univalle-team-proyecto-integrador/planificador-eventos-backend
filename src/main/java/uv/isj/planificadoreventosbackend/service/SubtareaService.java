@@ -15,6 +15,8 @@ import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
+import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
+import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
 import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
 
@@ -169,6 +171,41 @@ public class SubtareaService {
      * el mismo mensaje que uno inexistente para no confirmar que el id existe
      * en la cuenta de otro usuario.
      */
+
+    @Transactional(readOnly = true)
+    public HoyResponseDTO obtenerHoyAgrupado(Integer usuarioId, LocalDate fecha) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("El organizador es obligatorio");
+        }
+        LocalDate hoy = fecha == null ? LocalDate.now() : fecha;
+        List<Subtarea> noEjecutadas = subtareaRepository.findNoEjecutadasHastaFecha(
+                usuarioId,
+                hoy.plusDays(30),
+                EstadoSubtarea.ejecutada);
+
+        List<SubtareaDTO> vencidas = new java.util.ArrayList<>();
+        List<SubtareaDTO> paraHoy = new java.util.ArrayList<>();
+        List<SubtareaDTO> proximas = new java.util.ArrayList<>();
+
+        for (Subtarea subtarea : noEjecutadas) {
+            SubtareaDTO dto = aDto(subtarea);
+            LocalDate objetivo = subtarea.getFechaObjetivo();
+            if (objetivo == null) {
+                proximas.add(dto);
+                continue;
+            }
+            if (objetivo.isBefore(hoy)) {
+                vencidas.add(dto);
+            } else if (objetivo.isEqual(hoy)) {
+                paraHoy.add(dto);
+            } else {
+                proximas.add(dto);
+            }
+        }
+
+        return new HoyResponseDTO(vencidas, paraHoy, proximas);
+    }
+
     private Evento buscarEvento(Integer usuarioId, Integer eventoId) {
         return eventoRepository.findByIdYUsuarioId(eventoId, usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(

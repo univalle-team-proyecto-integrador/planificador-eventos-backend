@@ -24,6 +24,8 @@ import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
+import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
+import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
@@ -69,7 +71,25 @@ public class SubtareaController {
         return subtareaService.obtenerParaHoy(propietarioDeHoy(usuarioId), fecha);
     }
 
-    @GetMapping
+
+    @GetMapping("/hoy/agrupado")
+    @Operation(summary = "Listar las gestiones no ejecutadas de hoy agrupadas por vencidas/para hoy/próximas")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Gestiones no ejecutadas agrupadas por fecha objetivo")
+    })
+    public HoyResponseDTO listarParaHoyAgrupado(
+            @Parameter(description = "Identificador del organizador. Opcional y solo se "
+                    + "honra en peticiones anónimas, por compatibilidad; con token manda el del token",
+                    example = "1")
+            @RequestParam(required = false) Integer usuarioId,
+            @Parameter(description = "Fecha objetivo en formato ISO", example = "2026-09-25")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return subtareaService.obtenerHoyAgrupado(propietarioDeHoy(usuarioId), fecha);
+    }
+
+
+        @GetMapping
     @Operation(summary = "Listar subtareas de un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de subtareas"),
