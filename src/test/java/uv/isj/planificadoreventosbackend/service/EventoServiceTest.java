@@ -170,6 +170,19 @@ class EventoServiceTest {
     }
 
     @Test
+    void crearEventoAceptaIdUsuarioNuloYUsaElPropietarioDeLaPeticion() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
+        when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EventoDTO resultado = eventoService.crearEvento(1,
+                new EventoDTO(null, null, 2, "Boda", "María",
+                        LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null));
+
+        assertThat(resultado.idUsuario()).isEqualTo(1);
+    }
+
+    @Test
     void actualizarEventoDeOtroUsuarioSeReportaComoInexistente() {
         when(eventoRepository.findByIdYUsuarioId(8, 2)).thenReturn(Optional.empty());
 
@@ -208,13 +221,7 @@ class EventoServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
-        assertThatThrownBy(() -> eventoService.crearEvento(1, 
-                        new EventoDTO(null, null, 2, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("usuario");
-
-        assertThatThrownBy(() -> eventoService.crearEvento(1, 
+        assertThatThrownBy(() -> eventoService.crearEvento(1,
                         new EventoDTO(null, 1, null, "Boda", "María",
                                 LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)

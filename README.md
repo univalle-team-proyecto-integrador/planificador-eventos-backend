@@ -79,10 +79,10 @@ db/
 | `POST`   | `/api/users/login`                  | Autentica y devuelve el token; 401 si las credenciales fallan  |
 | `GET`    | `/api/users/profile`                | Devuelve el usuario del token; 401 sin cabecera `Bearer`        |
 | `GET`    | `/api/tipos-evento`                | Lista el catálogo de tipos de evento                            |
-| `GET`    | `/api/eventos?usuarioId={id}`       | Lista los eventos; el filtro es opcional                        |
+| `GET`    | `/api/eventos`                     | Lista los eventos del usuario del token                          |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
-| `GET`    | `/api/subtareas/hoy?usuarioId={id}&fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
+| `GET`    | `/api/subtareas/hoy?fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
@@ -124,7 +124,7 @@ Rutas públicas (sin token): `/api/health`, `/api/tipos-evento`, `/api/users/reg
 
 ### Aislamiento por propietario
 
-Todos los datos se acotan al usuario del token; los parámetros `usuarioId` del query y del cuerpo se aceptan por compatibilidad pero **se ignoran**:
+Todos los datos se acotan al usuario del token. Los parámetros `usuarioId` del query y el campo `idUsuario` del cuerpo **se ignoran**, y ambos son opcionales:
 
 - `GET /api/eventos` devuelve solo los eventos del token (antes devolvía todos).
 - `POST /api/eventos` asigna el propietario desde el token, ignorando el `idUsuario` del cuerpo.
@@ -193,7 +193,7 @@ bash scripts/verificar-despliegue.sh
 El script comprueba (en orden):
 
 1. **Backend vivo:** `GET /api/health` → `{"status":"healthy","database":"connected",...}`. Repetir 1–2 veces si el servicio estaba dormido (plan free en Render tarda ~35 s en despertar y el primer request puede dar un 500 transitorio, que se resuelve al reintentar).
-2. **Base de datos real (Supabase):** `GET /api/tipos-evento` y `GET /api/eventos?usuarioId=1` devuelven datos reales (solo posibles si la pooler de Supabase responde).
+2. **Base de datos real (Supabase):** `GET /api/tipos-evento` y `GET /api/eventos` (con token) devuelven datos reales (solo posibles si la pooler de Supabase responde).
 3. **CORS hacia el frontend:** preflight `OPTIONS` con `Origin: https://planificador-eventos-frontend-ten.vercel.app` → cabecera `access-control-allow-origin` correcta.
 4. **Frontend apunta al backend correcto:** el bundle JS del SPA desplegado contiene `planificador-eventos-backend-1.onrender.com`.
 

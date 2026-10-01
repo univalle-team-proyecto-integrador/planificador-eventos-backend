@@ -536,6 +536,24 @@
    "y": 4860,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m029",
+   "type": "file",
+   "file": "mejoras/2026-10-01-029-contrato-idusuario-opcional.md",
+   "x": 200,
+   "y": 5060,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p029",
+   "type": "text",
+   "text": "Mejora 029\nidUsuario / usuarioId opcionales\n2026-10-01",
+   "x": 540,
+   "y": 5060,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -929,6 +947,20 @@
    "fromNode": "p028",
    "fromSide": "right",
    "toNode": "m028",
+   "toSide": "left"
+  },
+  {
+   "id": "e57",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m029",
+   "toSide": "top"
+  },
+  {
+   "id": "e58",
+   "fromNode": "p029",
+   "fromSide": "right",
+   "toNode": "m029",
    "toSide": "left"
   }
  ]

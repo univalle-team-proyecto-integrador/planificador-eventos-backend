@@ -440,6 +440,37 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("Con token, crear un evento sin idUsuario en el cuerpo lo asigna al dueño del token")
+    void crearEventoSinIdUsuarioUsaElPropietarioDelToken() throws Exception {
+        Usuario dueno = crearUsuario("crear-sin-id-dueno@uni.edu");
+        TipoEvento tipo = tipoEventoPersistido();
+
+        mockMvc.perform(post("/api/eventos")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonEventoSinIdUsuario(tipo.getIdTipoEvento())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idUsuario").value(dueno.getIdUsuario()));
+    }
+
+    @Test
+    @DisplayName("Con token, hoy sin usuarioId en el query devuelve solo lo del token")
+    void hoySinUsuarioIdEnElQueryUsaElPropietarioDelToken() throws Exception {
+        Usuario victima = crearUsuario("hoy-sin-id-victima@uni.edu");
+        crearEventoYSubtarea(victima, "Tarea de la víctima", 2);
+
+        Usuario atacante = crearUsuario("hoy-sin-id-atacante@uni.edu");
+        crearEventoYSubtarea(atacante, "Tarea del atacante", 1);
+
+        // Sin usuarioId en el query: el propietario sale solo del token.
+        mockMvc.perform(get("/api/subtareas/hoy")
+                        .param("fecha", "2026-11-10")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(atacante)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].nombreGestion").value("Tarea del atacante"));
+    }
+
+    @Test
     @DisplayName("Con token, actualizar un evento ajeno responde 404 y no lo modifica")
     void actualizarUnEventoAjenoResponde404() throws Exception {
         Usuario victima = crearUsuario("update-victima@uni.edu");
@@ -506,6 +537,17 @@ class JwtSecurityIntegrationTest {
         return String.join("\n",
                 "{",
                 "  \"idUsuario\": " + usuarioId + ",",
+                "  \"idTipoEvento\": " + idTipoEvento + ",",
+                "  \"nombre\": \"Boda de prueba\",",
+                "  \"cliente\": \"María y Luis\",",
+                "  \"fechaEvento\": \"2026-12-01T15:00:00\",",
+                "  \"lugar\": \"Cali\"",
+                "}");
+    }
+
+    private String jsonEventoSinIdUsuario(Integer idTipoEvento) {
+        return String.join("\n",
+                "{",
                 "  \"idTipoEvento\": " + idTipoEvento + ",",
                 "  \"nombre\": \"Boda de prueba\",",
                 "  \"cliente\": \"María y Luis\",",

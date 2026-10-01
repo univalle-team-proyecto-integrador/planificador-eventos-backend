@@ -125,9 +125,6 @@ public class EventoService {
         if (dto.nombre() == null || dto.nombre().isBlank()) {
             throw new IllegalArgumentException("El nombre del evento es obligatorio");
         }
-        if (dto.idUsuario() == null) {
-            throw new IllegalArgumentException("El usuario del evento es obligatorio");
-        }
         if (dto.idTipoEvento() == null) {
             throw new IllegalArgumentException("El tipo de evento es obligatorio");
         }

@@ -39,12 +39,18 @@ class ParametrosApiTest {
                 .andExpect(jsonPath("$.title").value("Solicitud inválida"))
                 .andExpect(jsonPath("$.detail").value("Falta el parámetro obligatorio 'eventoId'"))
                 .andExpect(jsonPath("$.errors.eventoId").isNotEmpty());
+    }
 
+    /**
+     * El organizador paso a ser opcional en "hoy": con token manda el del token y
+     * sin token se cae al usuario legado, pero en ningun caso es obligatorio
+     * mandarlo. Antes esto respondia 400 y obligaba al cliente a enviarlo.
+     */
+    @Test
+    void hoyAceptaUsuarioIdAusenteYTomaElPropietarioDelToken() throws Exception {
         mockMvc.perform(get("/api/subtareas/hoy"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Falta el parámetro obligatorio 'usuarioId'"))
-                .andExpect(jsonPath("$.errors.usuarioId").isNotEmpty());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 
     @ParameterizedTest

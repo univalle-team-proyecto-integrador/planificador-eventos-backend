@@ -11,8 +11,9 @@ import java.util.List;
 public record EventoDTO(
         @Schema(description = "Identificador del evento", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
         Integer idEvento,
-        @Schema(description = "Identificador del organizador", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull Integer idUsuario,
+        @Schema(description = "Identificador del organizador. Se ignora: el propietario sale del token",
+                example = "1")
+        Integer idUsuario,
         @Schema(description = "Identificador del tipo de evento", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull Integer idTipoEvento,
         @Schema(description = "Nombre del evento", example = "Boda de María y Luis", maxLength = 150,

@@ -55,11 +55,14 @@ public class SubtareaController {
     @Operation(summary = "Listar las gestiones no ejecutadas de hoy")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Gestiones no ejecutadas para la fecha consultada"),
-            @ApiResponse(responseCode = "400", description = "La fecha o el organizador no son válidos")
+            @ApiResponse(responseCode = "400", description = "La fecha no es válida")
     })
     public List<SubtareaDTO> listarParaHoy(
-            @Parameter(description = "Identificador del organizador", example = "1")
-            @RequestParam Integer usuarioId,
+            @Parameter(description = "Identificador del organizador. Opcional y solo se "
+                    + "honra en peticiones anónimas, por compatibilidad con el cliente anterior "
+                    + "a la autenticación; con token manda el del token",
+                    example = "1")
+            @RequestParam(required = false) Integer usuarioId,
             @Parameter(description = "Fecha objetivo en formato ISO", example = "2026-09-25")
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
@@ -154,9 +157,17 @@ public class SubtareaController {
      * respeta el parametro, que sigue siendo obligatorio para conservar el 400
      * documentado en ParametrosApiTest.
      */
+    /**
+     * Propietario efectivo de "hoy". Con token manda el del token; sin token se
+     * acepta el {@code usuarioId} consultado por compatibilidad, y si tampoco
+     * viene se cae al usuario legado. Nunca se propaga un {@code null} al
+     * repositorio, y con {@code protect-subtareas} activo ambos caminos exigen
+     * token a través de {@link CurrentUserProvider}.
+     */
     private Integer propietarioDeHoy(Integer usuarioIdSolicitado) {
-        return currentUserProvider.esAutenticado()
-                ? currentUserProvider.idUsuarioRequerido()
-                : usuarioIdSolicitado;
+        if (currentUserProvider.esAutenticado()) {
+            return currentUserProvider.idUsuarioRequerido();
+        }
+        return usuarioIdSolicitado != null ? usuarioIdSolicitado : currentUserProvider.idUsuarioActual();
     }
 }

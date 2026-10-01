@@ -29,3 +29,4 @@
 | 2026-09-30  | 026 | Caducidad del token en segundos (JWT_EXPIRATION_SECONDS) | [2026-09-30-026-caducidad-jwt-en-segundos](2026-09-30-026-caducidad-jwt-en-segundos.md) |
 | 2026-10-01  | 027 | El verificador detecta si PROTECT_SUBTAREAS sigue abierto | [2026-10-01-027-verificador-detecta-proteccion-subtareas](2026-10-01-027-verificador-detecta-proteccion-subtareas.md) |
 | 2026-10-01  | 028 | Prueba de token expirado: el último requisito de US-11 sin evidencia | [2026-10-01-028-prueba-token-expirado](2026-10-01-028-prueba-token-expirado.md) |
+| 2026-10-01  | 029 | idUsuario y usuarioId dejan de ser obligatorios: el contrato coincide con el aislamiento | [2026-10-01-029-contrato-idusuario-opcional](2026-10-01-029-contrato-idusuario-opcional.md) |

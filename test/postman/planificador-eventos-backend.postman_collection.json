@@ -187,7 +187,7 @@
 			"name": "3. Eventos",
 			"item": [
 				{
-					"name": "Listar eventos del usuario",
+					"name": "Listar eventos (el usuarioId del query se ignora)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -232,7 +232,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
+							"raw": "{\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos",
@@ -344,7 +344,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman (editado)\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-06T10:00:00\",\n  \"lugar\": \"Salón de pruebas A\"\n}"
+							"raw": "{\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman (editado)\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-06T10:00:00\",\n  \"lugar\": \"Salón de pruebas A\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
@@ -430,6 +430,37 @@
 		{
 			"name": "4. Subtareas",
 			"item": [
+				{
+					"name": "Gestiones de hoy (sin usuarioId: el propietario sale del token)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/hoy?fecha={{fechaHoy}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"subtareas",
+								"hoy"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "{{fechaHoy}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Subtareas por evento",
 					"request": {
@@ -684,7 +715,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
+							"raw": "{\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/eventos",
@@ -1128,6 +1159,12 @@
 			"key": "idSubtarea",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "fechaHoy",
+			"value": "2026-12-05",
+			"type": "string",
+			"description": "Fecha local para /api/subtareas/hoy"
 		}
 	]
 }

@@ -92,9 +92,10 @@ case "$eventos" in
   *)  bad "/api/eventos no devolvió un arreglo (revisa si exige token) → $(echo "$eventos" | head -c 200)" ;;
 esac
 
-# /api/subtareas/hoy todavía exige usuarioId en el query por compatibilidad,
-# aunque con token se ignora: se envía para no caer en el 400 de validación.
-hoy=$(curl -s -m 90 "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)&usuarioId=1" \
+# usuarioId ya no es obligatorio: el propietario sale del token. Se omite a
+# propósito, para comprobar que el contrato nuevo está desplegado y que un
+# despliegue viejo (que exigía el parámetro) se nota.
+hoy=$(curl -s -m 90 "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)" \
   -H "Authorization: Bearer $TOKEN")
 # Solo un arreglo es válido: un ProblemDetail empieza por { y un 401 pasaría
 # por una respuesta sana si no se distingue.
@@ -120,7 +121,7 @@ esac
 # compatibilidad y no es un fallo. Con PDE_ESPERAR_PROTECCION=true se exige
 # que la ventana ya esté cerrada, que es el estado final de US-11.
 sin_token=$(curl -s -m 60 -o /dev/null -w "%{http_code}" \
-  "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)&usuarioId=1")
+  "$BACKEND/api/subtareas/hoy?fecha=$(date +%F)")
 if [ "$sin_token" = "401" ]; then
   ok "/api/subtareas/hoy rechaza peticiones sin token (PROTECT_SUBTAREAS activo)"
 elif [ "${PDE_ESPERAR_PROTECCION:-false}" = "true" ]; then
