@@ -50,3 +50,22 @@ Hacer `usuarioId` opcional en `/hoy` metía un `null` en el camino del propietar
 ## Pendiente
 
 Render sigue con `PROTECT_SUBTAREAS=false`. Ese es el último paso de US-11 y no se puede hacer desde el repositorio.
+## Actualización 2026-10-01 (Tarea 4)
+
+Se añade endpoint `GET /api/subtareas/hoy/agrupado` con respuesta:
+```json
+{
+  "vencidas": [...],
+  "paraHoy": [...],
+  "proximas": [...]
+}
+```
+
+- Servicio: `SubtareaService.obtenerHoyAgrupado` clasifica no ejecutadas (`estado != ejecutada`) comparando `fechaObjetivo` con `hoy` (antes/igual/después). Usa rango `fechaObjetivo <= hoy+30` para evitar traer todo sin límite.
+- Repositorio: `findNoEjecutadasHastaFecha(usuarioId, hasta, estado)`.
+- DTO: `HoyResponseDTO` con los tres grupos.
+- Endpoint compatible: se mantiene `/api/subtareas/hoy` devolviendo lista plana; no se rompe el contrato existente.
+
+## Actualización 2026-10-01 (Tarea 4 verificada en prod)
+
+Endpoint `GET /api/subtareas/hoy/agrupado` verificado en producción: 200 con clasificación correcta (vencidas vacías, paraHoy con 3, próximas con 2). Mantiene `/api/subtareas/hoy` sin cambios.
