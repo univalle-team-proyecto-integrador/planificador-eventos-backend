@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -73,16 +74,25 @@ public class SubtareaController {
 
 
     @GetMapping("/hoy/agrupado")
-    @Operation(summary = "Listar las gestiones no ejecutadas de hoy agrupadas por vencidas/para hoy/próximas")
+    @Operation(
+            summary = "Listar las gestiones no ejecutadas de hoy agrupadas por vencidas/para hoy/próximas",
+            description = "Devuelve las subtareas no ejecutadas del usuario autenticado agrupadas por "
+                    + "fecha objetivo (< hoy: vencidas; == hoy: paraHoy; > hoy: proximas). "
+                    + "Soporta filtros opcionales por nombre del evento y estado. "
+                    + "Requiere autorización Bearer JWT.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Gestiones no ejecutadas agrupadas por fecha objetivo")
+            @ApiResponse(responseCode = "200",
+                    description = "Gestiones no ejecutadas agrupadas por fecha objetivo"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public HoyResponseDTO listarParaHoyAgrupado(
             @Parameter(description = "Identificador del organizador. Opcional y solo se "
                     + "honra en peticiones anónimas, por compatibilidad; con token manda el del token",
                     example = "1")
             @RequestParam(required = false) Integer usuarioId,
-            @Parameter(description = "Fecha objetivo en formato ISO", example = "2026-09-25")
+            @Parameter(description = "Fecha objetivo en formato ISO (yyyy-MM-dd)", example = "2026-10-01")
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         return subtareaService.obtenerHoyAgrupado(propietarioDeHoy(usuarioId), fecha);
