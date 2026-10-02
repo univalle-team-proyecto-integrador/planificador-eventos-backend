@@ -83,6 +83,7 @@ db/
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/hoy?fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
+| `GET`    | `/api/subtareas/hoy/agrupado?fecha={yyyy-MM-dd}[&course={evento}][&status={estado}]` | Vista "Hoy" agrupada: vencidas/paraHoy/próximas (filtros opcionales) |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
