@@ -51,6 +51,15 @@ public class Evento {
     @Column(name = "fecha_evento", nullable = false)
     private LocalDateTime fechaEvento;
 
+    /**
+     * Horas estimadas para el evento completo, declaradas al crearlo. Es
+     * informativo: el total real sigue siendo la suma de las subtareas. El
+     * valor inicial de 6 solo cubre el alta de la columna; el DTO lo exige
+     * siempre en las peticiones.
+     */
+    @Column(name = "horas_estimadas", nullable = false)
+    private Integer horasEstimadas = 6;
+
     @Column(name = "lugar", nullable = false, length = 255)
     private String lugar;
 

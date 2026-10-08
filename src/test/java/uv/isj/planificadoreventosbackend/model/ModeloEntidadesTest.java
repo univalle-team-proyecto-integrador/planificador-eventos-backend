@@ -96,4 +96,40 @@ class ModeloEntidadesTest {
         assertThat(jdbcTemplate.queryForObject("SELECT estado FROM subtarea WHERE id_subtarea = ?",
                 String.class, subtarea.getIdSubtarea())).isEqualTo("pendiente");
     }
+
+    /**
+     * El evento escribe horas_estimadas como entero positivo. Con ddl-auto
+     * create-drop H2 genera la columna desde la entidad, así que esto verifica
+     * el mapeo, no el DDL de Supabase: ese lo comprueba ddl-auto=validate al
+     * arrancar contra la base real.
+     */
+    @Test
+    void elEventoGuardaLasHorasEstimadasComoEnteroPositivo() {
+        TipoEvento tipo = new TipoEvento();
+        tipo.setNombre("Boda");
+        entityManager.persist(tipo);
+
+        Usuario usuario = new Usuario();
+        usuario.setEmail("horas@example.com");
+        usuario.setPasswordHash("hash");
+        usuario.setNombre("Con horas");
+        entityManager.persist(usuario);
+
+        Evento evento = new Evento();
+        evento.setUsuario(usuario);
+        evento.setTipoEvento(tipo);
+        evento.setNombre("Evento");
+        evento.setCliente("Cliente");
+        evento.setFechaEvento(LocalDateTime.now());
+        evento.setLugar("Cali");
+        evento.setHorasEstimadas(24);
+        entityManager.persist(evento);
+        entityManager.flush();
+        entityManager.clear();
+
+        Integer horas = jdbcTemplate.queryForObject(
+                "SELECT horas_estimadas FROM evento WHERE id_evento = ?",
+                Integer.class, evento.getIdEvento());
+        assertThat(horas).isEqualTo(24);
+    }
 }

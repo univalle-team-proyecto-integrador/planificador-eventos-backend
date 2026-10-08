@@ -26,9 +26,18 @@ CREATE TABLE IF NOT EXISTS evento (
     nombre VARCHAR(150) NOT NULL,
     cliente VARCHAR(150) NOT NULL,
     fecha_evento TIMESTAMP NOT NULL,
+    horas_estimadas INT NOT NULL DEFAULT 6 CONSTRAINT chk_horas_evento CHECK (horas_estimadas > 0),
     lugar VARCHAR(255) NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migración 2026-10-08: horas estimadas del evento. Ejecutar UNA sola vez sobre
+-- una base que ya tenga la tabla evento creada. El DEFAULT 6 es necesario para
+-- que no falle sobre filas existentes; el DROP DEFAULT hace que a partir de
+-- aquí la columna deje de rellenarse sola, que es lo que valida el DTO.
+-- ALTER TABLE evento ADD COLUMN horas_estimadas INT NOT NULL DEFAULT 6;
+-- ALTER TABLE evento ALTER COLUMN horas_estimadas DROP DEFAULT;
+-- ALTER TABLE evento ADD CONSTRAINT chk_horas_evento CHECK (horas_estimadas > 0);
 
 CREATE TABLE IF NOT EXISTS subtarea (
     id_subtarea SERIAL PRIMARY KEY,

@@ -541,6 +541,7 @@ class JwtSecurityIntegrationTest {
                 "  \"nombre\": \"Boda de prueba\",",
                 "  \"cliente\": \"María y Luis\",",
                 "  \"fechaEvento\": \"2026-12-01T15:00:00\",",
+                "  \"horasEstimadas\": 20,",
                 "  \"lugar\": \"Cali\"",
                 "}");
     }
@@ -552,6 +553,7 @@ class JwtSecurityIntegrationTest {
                 "  \"nombre\": \"Boda de prueba\",",
                 "  \"cliente\": \"María y Luis\",",
                 "  \"fechaEvento\": \"2026-12-01T15:00:00\",",
+                "  \"horasEstimadas\": 20,",
                 "  \"lugar\": \"Cali\"",
                 "}");
     }

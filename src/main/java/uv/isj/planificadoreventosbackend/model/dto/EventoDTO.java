@@ -1,6 +1,7 @@
 package uv.isj.planificadoreventosbackend.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -25,6 +26,12 @@ public record EventoDTO(
         @Schema(description = "Fecha y hora del evento", example = "2026-12-01T15:00:00",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull LocalDateTime fechaEvento,
+        @Schema(description = "Horas estimadas para el evento completo. Es el dato que declara "
+                + "el organizador al crearlo y es informativo: el total real sigue siendo la "
+                + "suma de las subtareas, que es lo que usa la pantalla de progreso",
+                example = "20", minimum = "1",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull @Min(1) Integer horasEstimadas,
         @Schema(description = "Lugar del evento", example = "Salón El Tesoro", maxLength = 255,
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank @Size(max = 255) String lugar,
