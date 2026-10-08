@@ -29,7 +29,20 @@ no se guarda nada.
 - `src/main/java/uv/isj/planificadoreventosbackend/controller/SubtareaController.java` — devuelve la `SubtareaDTO` directa y documenta el 409.
 - `src/test/java/uv/isj/planificadoreventosbackend/controller/ApiSprint1Test.java` — se actualizaron los 4 tests de reprogramación y se agregaron 7 de capacidad y conflicto.
 - `src/test/java/uv/isj/planificadoreventosbackend/controller/SwaggerOpenApiTest.java` — se verifican el endpoint nuevo, los esquemas `CapacidadDTO`/`LimiteHorasDTO` y el 409 documentado.
+- `src/test/java/uv/isj/planificadoreventosbackend/service/UsuarioServiceTest.java` (nuevo) — 10 pruebas unitarias del servicio de capacidad, en el estilo de Mockito que usa `main`.
+- `src/test/java/uv/isj/planificadoreventosbackend/service/SubtareaServiceTest.java` — se migraron los 13 call sites de `reprogramar` al contrato nuevo; se conservó la intención de cada prueba.
 - `README.md` — contrato HTTP, sección de límite diario y hoja de ruta.
+
+## Fusión con `main`
+
+El trabajo se desarrolló sobre `c97fcf8`, pero `main` había avanzado 7 commits
+(`a48d302` "cierra brechas del sprint 1"). Antes de fusionar se hizo commit propio y luego
+`git merge origin/main`:
+
+- **Conflicto en `boveda/`**: `main` renombró la mejora 014 a 020 y renumeró la serie hasta el 020, así que esta nota pasó de **015 a 021** (archivo, índice y nodos `m021`/`p021` del canvas).
+- **`ApiSprint1Test.java`** se fusionó solo; `SubtareaServiceTest`, `EventoServiceTest`, `TipoEventoServiceTest` y `CasosNegativosApiTest` entraron intactos.
+- **13 pruebas de `SubtareaServiceTest`** que assertaban `resultado.get("conflicto")` con la firma `reprogramar(id, dto, limite)` se migraron a `reprogramar(id, dto)` + `CapacidadExcedidaException`. Ninguna se eliminó: se sigue verificando el conflicto, que no se guarde y que el mismo día no se cuente dos veces.
+- Se conserva el `prepareThreshold=0` que `main` agrego para el pooler de Supabase.
 
 ## Decisiones
 
@@ -45,7 +58,7 @@ no se guarda nada.
 
 ## Verificación
 
-- `./mvnw test` ✅ — 34 pruebas exitosas (antes 27).
+- `./mvnw test` ✅ — **88 pruebas exitosas** sobre el árbol ya fusionado con `main` (27 antes de esta mejora; 34 antes de la fusión, +10 de `UsuarioServiceTest`, +24 de las clases que trajo `main` y +20 de las migradas).
 - Se cubren: horas planificadas que excluyen `ejecutada`, horas disponibles que no bajan de cero, 404 de organizador inexistente, 400 con los tres mensajes de rango, 409 con `excedente`, y 200 con persistencia comprobada contra el repositorio.
 
 ### Nota de entorno

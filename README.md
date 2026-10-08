@@ -70,6 +70,7 @@ db/
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/hoy?usuarioId={id}&fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
 | `GET`    | `/api/usuarios/capacidad?usuarioId={id}&fecha={yyyy-MM-dd}` | Límite diario, horas comprometidas y horas disponibles      |
+| `PUT`    | `/api/usuarios/capacidad?usuarioId={id}` | Ajusta el límite diario (entre 1 y 16 horas)             |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
@@ -80,7 +81,6 @@ db/
 | `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma; 200 con la subtarea o 409 si excede el límite diario |
 | `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
-| `PUT`    | `/api/usuarios/capacidad?usuarioId={id}` | Ajusta el límite diario (entre 1 y 16 horas)             |
 | `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
 | `GET`    | `/v3/api-docs`                      | JSON de la especificación OpenAPI                                |
 
@@ -136,8 +136,8 @@ Swagger UI se genera desde el propio backend con springdoc. No se conecta a `htt
 
 - **Local:** `http://localhost:8080/swagger-ui.html`
 - **Local (OpenAPI JSON):** `http://localhost:8080/v3/api-docs`
-- **Render:** `https://planificador-eventos-backend.onrender.com/swagger-ui.html`
-- **Render (OpenAPI JSON):** `https://planificador-eventos-backend.onrender.com/v3/api-docs`
+- **Render:** `https://planificador-eventos-backend-1.onrender.com/swagger-ui.html`
+- **Render (OpenAPI JSON):** `https://planificador-eventos-backend-1.onrender.com/v3/api-docs`
 
 La opción **Try it out** está habilitada. Como la especificación usa un servidor relativo, Swagger envía las solicitudes al mismo host desde el que se abrió la interfaz, tanto en localhost como en Render.
 
@@ -163,9 +163,28 @@ Ejemplo de respuesta de `/api/health`:
 - `Dockerfile` multi-stage (build `maven:3.9-eclipse-temurin-21` → runtime `eclipse-temurin:21-jre`) que corre como usuario no-root `appuser` (uid 10001).
 - Variables de entorno en Render: `DB_URL`/`DB_USER` (**pooler transaccional**), `JAVA_OPTS=-XX:MaxRAMPercentage=60`; `DB_PASSWORD` se fija a mano en el dashboard (nunca en el repo).
 - CORS: `app.cors.allowed-origins=https://*.vercel.app,http://localhost:5173`, aplicado a `/api/**` por `config/CorsConfig.java`.
-- URL pública: `https://planificador-eventos-backend.onrender.com`
+- URL pública: `https://planificador-eventos-backend-1.onrender.com` (servicio Spring de este repositorio).
 
-> **Estado actual (24 de septiembre de 2026):** la URL pública `https://planificador-eventos-backend.onrender.com` responde con otro servicio **Django REST Framework** (`/api/health` devuelve `status: ok`), no con esta aplicación Spring. `/v3/api-docs` y `/swagger-ui.html` devuelven 404. Se debe crear o corregir el servicio Render de este repositorio, configurar `DB_PASSWORD` en el dashboard y volver a desplegar antes de usar la documentación pública.
+> **Estado actual (24 de septiembre de 2026):** verificado de punta a punta. El servicio Spring del repositorio está desplegado y funcionando en `https://planificador-eventos-backend-1.onrender.com`: `/api/health` responde `healthy`/`connected`, `/v3/api-docs` y `/swagger-ui.html` OK, y los endpoints devuelven datos reales de Supabase. El dominio `https://planificador-eventos-backend.onrender.com` (sin sufijo) sigue sirviendo otra API (no Spring, `/api/health` → `{"status":"ok",...}` y 404 en `/v3/api-docs`): es un servicio ajeno/heredado, no usar.
+>
+> Frontend de referencia: `https://planificador-eventos-frontend-ten.vercel.app` (Vercel, SPA Vite). Su `VITE_API_URL` apunta a `https://planificador-eventos-backend-1.onrender.com`.
+
+### Ruta para verificar la conexión tras un despliegue
+
+Después de cualquier cambio y redeploy del backend o del frontend, ejecutar la verificación de la cadena completa en un solo comando:
+
+```bash
+bash scripts/verificar-despliegue.sh
+```
+
+El script comprueba (en orden):
+
+1. **Backend vivo:** `GET /api/health` → `{"status":"healthy","database":"connected",...}`. Repetir 1–2 veces si el servicio estaba dormido (plan free en Render tarda ~35 s en despertar y el primer request puede dar un 500 transitorio, que se resuelve al reintentar).
+2. **Base de datos real (Supabase):** `GET /api/tipos-evento` y `GET /api/eventos?usuarioId=1` devuelven datos reales (solo posibles si la pooler de Supabase responde).
+3. **CORS hacia el frontend:** preflight `OPTIONS` con `Origin: https://planificador-eventos-frontend-ten.vercel.app` → cabecera `access-control-allow-origin` correcta.
+4. **Frontend apunta al backend correcto:** el bundle JS del SPA desplegado contiene `planificador-eventos-backend-1.onrender.com`.
+
+Más detalles de la validación en `boveda/mejoras/2026-09-24-014-validacion-conexion-front-back-db.md`.
 
 ## Estado y hoja de ruta
 

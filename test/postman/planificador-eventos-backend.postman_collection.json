@@ -1,0 +1,361 @@
+{
+	"info": {
+		"name": "Planificador de Eventos — Backend (Render)",
+		"description": "API del backend Spring desplegado en Render (https://planificador-eventos-backend-1.onrender.com). Pruebas del backend con Postman: secuencia de aceptación completa (crear → leer → actualizar → subtareas → estado → eliminar) y casos negativos.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health",
+			"item": [
+				{
+					"name": "GET /api/health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Esperado: 200 con {\"status\":\"healthy\",\"database\":\"connected\",...}. 503 si la BD no responde."
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Tipos de evento",
+			"item": [
+				{
+					"name": "GET /api/tipos-evento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tipos-evento",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tipos-evento"]
+						},
+						"description": "Esperado: 200 con el catálogo de tipos de evento."
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Eventos",
+			"item": [
+				{
+					"name": "Listar eventos del usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos?usuarioId={{usuarioId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos"],
+							"query": [
+								{
+									"key": "usuarioId",
+									"value": "{{usuarioId}}"
+								}
+							]
+						},
+						"description": "Esperado: 200 con la lista de eventos del usuario."
+					}
+				},
+				{
+					"name": "Crear evento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos"]
+						},
+						"description": "Esperado: 201 con idEvento. Copiar idEvento en el entorno para las siguientes llamadas."
+					}
+				},
+				{
+					"name": "Detalle de evento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}"]
+						},
+						"description": "Esperado: 200 con el detalle del evento."
+					}
+				},
+				{
+					"name": "Plan logístico del evento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "Esperado: 200 con las subtareas del evento."
+					}
+				},
+				{
+					"name": "Actualizar evento",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"Evento de prueba Postman (editado)\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-06T10:00:00\",\n  \"lugar\": \"Salón de pruebas A\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}"]
+						},
+						"description": "Esperado: 200 con el evento actualizado."
+					}
+				},
+				{
+					"name": "Añadir subtarea",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreGestion\": \"Reservar salón de pruebas\",\n  \"fechaObjetivo\": \"2026-12-01\",\n  \"horasEstimadas\": 2,\n  \"notaExplicativa\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}/subtareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}", "subtareas"]
+						},
+						"description": "Esperado: 201 con idSubtarea. Copiar idSubtarea en el entorno para las siguientes llamadas."
+					}
+				},
+				{
+					"name": "Eliminar evento",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/{{idEvento}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "{{idEvento}}"]
+						},
+						"description": "Esperado: 204 (sin cuerpo). Limpieza tras crear."
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Subtareas",
+			"item": [
+				{
+					"name": "Subtareas por evento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas?eventoId={{idEvento}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas"],
+							"query": [
+								{
+									"key": "eventoId",
+									"value": "{{idEvento}}"
+								}
+							]
+						},
+						"description": "Esperado: 200 con las subtareas del evento."
+					}
+				},
+				{
+					"name": "Detalle de subtarea",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}"]
+						},
+						"description": "Esperado: 200 con el detalle de la subtarea."
+					}
+				},
+				{
+					"name": "Editar subtarea",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreGestion\": \"Reservar salón de pruebas (confirmado)\",\n  \"fechaObjetivo\": \"2026-12-02\",\n  \"horasEstimadas\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}"]
+						},
+						"description": "Esperado: 200 con la subtarea actualizada."
+					}
+				},
+				{
+					"name": "Cambiar estado",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"estado\": \"ejecutada\",\n  \"notaExplicativa\": \"Verificado por QA\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/estado",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}", "estado"]
+						},
+						"description": "Esperado: 200. Estados: pendiente, ejecutada, pospuesta."
+					}
+				},
+				{
+					"name": "Reprogramar subtarea",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nuevaFecha\": \"2026-12-10\",\n  \"nuevasHoras\": 4\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}/reprogramar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}", "reprogramar"]
+						},
+						"description": "Esperado: 200. Reprogramar fecha objetivo y horas estimadas."
+					}
+				},
+				{
+					"name": "Eliminar subtarea",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/subtareas/{{idSubtarea}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "subtareas", "{{idSubtarea}}"]
+						},
+						"description": "Esperado: 204 (sin cuerpo). Limpieza."
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Casos negativos (errores de la API)",
+			"item": [
+				{
+					"name": "Crear evento sin nombre (validación)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idUsuario\": {{usuarioId}},\n  \"idTipoEvento\": {{idTipoEvento}},\n  \"nombre\": \"\",\n  \"cliente\": \"Equipo QA\",\n  \"fechaEvento\": \"2026-12-05T10:00:00\",\n  \"lugar\": \"Salón de pruebas\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos"]
+						},
+						"description": "Esperado: 400 (ProblemDetail con violaciones de validación)."
+					}
+				},
+				{
+					"name": "Evento inexistente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/eventos/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "eventos", "999999"]
+						},
+						"description": "Esperado: 404 (ProblemDetail)."
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Documentación (OpenAPI)",
+			"item": [
+				{
+					"name": "Spec OpenAPI (JSON)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v3/api-docs",
+							"host": ["{{baseUrl}}"],
+							"path": ["v3", "api-docs"]
+						},
+						"description": "Esperado: 200 con la spec OpenAPI 3 (usa \"servers\": [{\"url\": \"/\"}])."
+					}
+				},
+				{
+					"name": "Spec OpenAPI (YAML)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v3/api-docs.yaml",
+							"host": ["{{baseUrl}}"],
+							"path": ["v3", "api-docs.yaml"]
+						},
+						"description": "Esperado: 200 con la spec en YAML."
+					}
+				}
+			]
+		}
+	]
+}
