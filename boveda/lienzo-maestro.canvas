@@ -554,6 +554,24 @@
    "y": 5060,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m030",
+   "type": "file",
+   "file": "mejoras/2026-10-08-030-capacidad-diaria-y-conflicto-409.md",
+   "x": 200,
+   "y": 5240,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p030",
+   "type": "text",
+   "text": "Mejora 030\nCapacidad diaria y 409\n2026-10-08",
+   "x": 540,
+   "y": 5240,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -961,6 +979,20 @@
    "fromNode": "p029",
    "fromSide": "right",
    "toNode": "m029",
+   "toSide": "left"
+  },
+  {
+   "id": "e59",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m030",
+   "toSide": "top"
+  },
+  {
+   "id": "e60",
+   "fromNode": "p030",
+   "fromSide": "right",
+   "toNode": "m030",
    "toSide": "left"
   }
  ]

@@ -104,6 +104,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/register/",
                                 "/api/users/login", "/api/users/login/").permitAll()
                         .requestMatchers("/api/users/profile", "/api/users/profile/").authenticated()
+                        // Capacidad y límite diario: siempre autenticados. Sin esta
+                        // regla caerían en anyRequest().permitAll() de más abajo y
+                        // quedarían abiertos; idUsuarioRequerido() refuerza en el service.
+                        .requestMatchers("/api/users/capacity", "/api/users/capacity/").authenticated()
                         .requestMatchers(patronSubtareas()).access(accesoSubtareas)
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

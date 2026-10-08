@@ -2,20 +2,19 @@ package uv.isj.planificadoreventosbackend.service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uv.isj.planificadoreventosbackend.exception.CapacidadExcedidaException;
 import uv.isj.planificadoreventosbackend.exception.RecursoNoEncontradoException;
 import uv.isj.planificadoreventosbackend.model.Evento;
 import uv.isj.planificadoreventosbackend.model.EstadoSubtarea;
 import uv.isj.planificadoreventosbackend.model.Subtarea;
+import uv.isj.planificadoreventosbackend.model.Usuario;
 import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
-import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
 import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
@@ -65,13 +64,6 @@ public class SubtareaService {
         return aDto(buscarEntidad(usuarioId, id));
     }
 
-    @Transactional(readOnly = true)
-    public Integer obtenerLimiteDiario(Integer usuarioId, Integer id) {
-        Subtarea subtarea = buscarEntidad(usuarioId, id);
-        Evento evento = subtarea.getEvento();
-        return evento.getUsuario().getLimiteHorasDiarias();
-    }
-
     @Transactional
     public SubtareaDTO agregarSubtarea(Integer usuarioId, Integer eventoId, SubtareaDTO dto) {
         validarSubtarea(eventoId, dto);
@@ -101,48 +93,57 @@ public class SubtareaService {
         return aDto(subtareaRepository.save(subtarea));
     }
 
+    /**
+     * Reprograma una subtarea respetando el límite diario del propietario.
+     *
+     * <p>El límite se resuelve aquí desde el usuario del evento en lugar de
+     * recibirlo del controlador: así no hay dos llamadas al servicio ni una
+     * ventana en la que el límite y la subtarea puedan no ser del mismo dueño.
+     *
+     * <p>Si el total supera el límite se lanza {@link CapacidadExcedidaException}
+     * y no se guarda nada; el controlador la traduce a un 409. Si cabe, devuelve
+     * la subtarea ya actualizada.
+     */
     @Transactional
-    public Map<String, Object> reprogramar(
+    public SubtareaDTO reprogramar(
             Integer usuarioId,
             Integer id,
-            ReprogramarDTO dto,
-            Double limiteDiario) {
+            ReprogramarDTO dto) {
         Subtarea subtarea = buscarEntidad(usuarioId, id);
-        validarReprogramacion(dto, limiteDiario);
+        validarReprogramacion(dto);
 
         Evento evento = subtarea.getEvento();
-        long horasExistentes = subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
-                evento.getUsuario().getIdUsuario(),
+        Usuario usuario = evento.getUsuario();
+        int limiteDiario = usuario.getLimiteHorasDiarias();
+        validarLimiteDiario(limiteDiario);
+
+        // La consulta ya excluye las ejecutadas: solo cuenta lo pendiente.
+        int horasExistentes = (int) subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
+                usuario.getIdUsuario(),
                 dto.nuevaFecha(),
                 EstadoSubtarea.ejecutada);
 
+        // Si la fecha no cambia, la propia subtarea ya está en la suma: se resta
+        // para no contarla dos veces.
         if (subtarea.getFechaObjetivo().equals(dto.nuevaFecha())
                 && subtarea.getEstado() != EstadoSubtarea.ejecutada) {
             horasExistentes = Math.max(0, horasExistentes - subtarea.getHorasEstimadas());
         }
 
-        double horasTotales = horasExistentes + dto.nuevasHoras();
-        if (horasTotales > limiteDiario) {
-            Map<String, Object> respuesta = new LinkedHashMap<>();
-            respuesta.put("conflicto", true);
-            respuesta.put("limiteDiario", limiteDiario);
-            respuesta.put("horasTotalesCalculadas", horasTotales);
-            respuesta.put(
-                    "mensaje",
-                    "La reprogramación supera el límite diario de horas asignado");
-            return respuesta;
+        int horasPlanificadasTotales = horasExistentes + dto.nuevasHoras();
+        if (horasPlanificadasTotales > limiteDiario) {
+            throw new CapacidadExcedidaException(
+                    subtarea.getIdSubtarea(),
+                    dto.nuevaFecha(),
+                    limiteDiario,
+                    horasExistentes,
+                    dto.nuevasHoras(),
+                    horasPlanificadasTotales);
         }
 
         subtarea.setFechaObjetivo(dto.nuevaFecha());
         subtarea.setHorasEstimadas(dto.nuevasHoras());
-        SubtareaDTO actualizada = aDto(subtareaRepository.save(subtarea));
-
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("conflicto", false);
-        respuesta.put("limiteDiario", limiteDiario);
-        respuesta.put("horasTotalesCalculadas", horasTotales);
-        respuesta.put("subtarea", actualizada);
-        return respuesta;
+        return aDto(subtareaRepository.save(subtarea));
     }
 
     @Transactional
@@ -251,15 +252,25 @@ public class SubtareaService {
         }
     }
 
-    private void validarReprogramacion(ReprogramarDTO dto, Double limiteDiario) {
+    private void validarReprogramacion(ReprogramarDTO dto) {
         if (dto == null || dto.nuevaFecha() == null) {
             throw new IllegalArgumentException("La nueva fecha es obligatoria");
         }
         if (dto.nuevasHoras() == null || dto.nuevasHoras() <= 0) {
             throw new IllegalArgumentException("Las nuevas horas deben ser mayores que cero");
         }
-        if (limiteDiario == null || !Double.isFinite(limiteDiario) || limiteDiario <= 0) {
-            throw new IllegalArgumentException("El límite diario debe ser mayor que cero");
+    }
+
+    /**
+     * Guarda contra datos corruptos: la columna tiene CHECK en la base y
+     * {@code UsuarioService} valida el rango al escribir, así que aquí solo se
+     * evita que un valor imposible se interprete como un conflicto de capacidad.
+     */
+    private void validarLimiteDiario(int limiteDiario) {
+        if (limiteDiario < UsuarioService.LIMITE_MINIMO_HORAS
+                || limiteDiario > UsuarioService.LIMITE_MAXIMO_HORAS) {
+            throw new IllegalStateException(
+                    "El límite diario de " + limiteDiario + " horas está fuera del rango permitido");
         }
     }
 

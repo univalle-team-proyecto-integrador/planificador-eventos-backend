@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +24,6 @@ import uv.isj.planificadoreventosbackend.model.dto.EstadoSubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
-import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
@@ -72,7 +70,6 @@ public class SubtareaController {
         return subtareaService.obtenerParaHoy(propietarioDeHoy(usuarioId), fecha);
     }
 
-
     @GetMapping("/hoy/agrupado")
     @Operation(
             summary = "Listar las gestiones no ejecutadas de hoy agrupadas por vencidas/para hoy/próximas",
@@ -98,8 +95,7 @@ public class SubtareaController {
         return subtareaService.obtenerHoyAgrupado(propietarioDeHoy(usuarioId), fecha);
     }
 
-
-        @GetMapping
+    @GetMapping
     @Operation(summary = "Listar subtareas de un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de subtareas"),
@@ -126,21 +122,22 @@ public class SubtareaController {
     }
 
     @PatchMapping("/{id}/reprogramar")
-    @Operation(summary = "Reprogramar una subtarea y evaluar el límite diario")
+    @Operation(
+            summary = "Reprogramar una subtarea respetando el límite diario",
+            description = "Devuelve 200 con la subtarea actualizada cuando cabe en el límite. "
+                    + "Si lo supera devuelve 409 sin guardar nada, con el detalle de cuántas "
+                    + "horas hay que liberar.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reprogramación evaluada; puede indicar conflicto"),
+            @ApiResponse(responseCode = "200", description = "Reprogramación aplicada"),
             @ApiResponse(responseCode = "400", description = "La nueva fecha o las horas no son válidas"),
-            @ApiResponse(responseCode = "404", description = "La subtarea no existe")
+            @ApiResponse(responseCode = "404", description = "La subtarea no existe"),
+            @ApiResponse(responseCode = "409", description = "Supera el límite diario; la subtarea no se modificó")
     })
-    public ResponseEntity<Map<String, Object>> reprogramar(
+    public SubtareaDTO reprogramar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody ReprogramarDTO dto) {
-        Integer usuarioId = propietario();
-        Integer limiteDiario = subtareaService.obtenerLimiteDiario(usuarioId, id);
-        Map<String, Object> resultado =
-                subtareaService.reprogramar(usuarioId, id, dto, limiteDiario.doubleValue());
-        return ResponseEntity.ok(resultado);
+        return subtareaService.reprogramar(propietario(), id, dto);
     }
 
     @GetMapping("/{id}")
@@ -182,11 +179,6 @@ public class SubtareaController {
         return subtareaService.cambiarEstado(propietario(), id, dto);
     }
 
-    /**
-     * Con token manda el del token y el query param se ignora. Sin token se
-     * respeta el parametro, que sigue siendo obligatorio para conservar el 400
-     * documentado en ParametrosApiTest.
-     */
     /**
      * Propietario efectivo de "hoy". Con token manda el del token; sin token se
      * acepta el {@code usuarioId} consultado por compatibilidad, y si tampoco
