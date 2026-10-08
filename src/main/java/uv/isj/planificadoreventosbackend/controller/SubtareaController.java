@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -79,20 +78,18 @@ public class SubtareaController {
     }
 
     @PatchMapping("/{id}/reprogramar")
-    @Operation(summary = "Reprogramar una subtarea y evaluar el límite diario")
+    @Operation(summary = "Reprogramar una subtarea respetando el límite diario")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Reprogramación evaluada; puede indicar conflicto"),
+            @ApiResponse(responseCode = "200", description = "Reprogramación aplicada; devuelve la subtarea actualizada"),
             @ApiResponse(responseCode = "400", description = "La nueva fecha o las horas no son válidas"),
-            @ApiResponse(responseCode = "404", description = "La subtarea no existe")
+            @ApiResponse(responseCode = "404", description = "La subtarea no existe"),
+            @ApiResponse(responseCode = "409", description = "La reprogramación supera el límite diario; la subtarea no se modificó")
     })
-    public ResponseEntity<Map<String, Object>> reprogramar(
+    public SubtareaDTO reprogramar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
             @Valid @RequestBody ReprogramarDTO dto) {
-        Integer limiteDiario = subtareaService.obtenerLimiteDiario(id);
-        Map<String, Object> resultado =
-                subtareaService.reprogramar(id, dto, limiteDiario.doubleValue());
-        return ResponseEntity.ok(resultado);
+        return subtareaService.reprogramar(id, dto);
     }
 
     @GetMapping("/{id}")

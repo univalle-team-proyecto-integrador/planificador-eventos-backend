@@ -23,6 +23,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
     }
 
+    @ExceptionHandler(CapacidadExcedidaException.class)
+    public ResponseEntity<ProblemDetail> handleCapacidadExcedida(CapacidadExcedidaException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.CONFLICT,
+                "Límite diario excedido",
+                ex.getMessage());
+
+        Map<String, Object> conflicto = new LinkedHashMap<>();
+        conflicto.put("idSubtarea", ex.getIdSubtarea());
+        conflicto.put("fecha", ex.getFecha());
+        conflicto.put("limiteDiario", ex.getLimiteDiario());
+        conflicto.put("horasAsignadasPreviamente", ex.getHorasAsignadasPreviamente());
+        conflicto.put("horasSolicitadas", ex.getHorasSolicitadas());
+        conflicto.put("horasPlanificadasTotales", ex.getHorasPlanificadasTotales());
+        conflicto.put("excedente", ex.getExcedente());
+        problem.setProperties(conflicto);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleArgumentoInvalido(IllegalArgumentException ex) {
         ProblemDetail problem = crearProblema(

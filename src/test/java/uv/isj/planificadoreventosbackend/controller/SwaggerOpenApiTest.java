@@ -37,13 +37,17 @@ class SwaggerOpenApiTest {
                 .andExpect(jsonPath("$.paths['/api/eventos/{id}']").exists())
                 .andExpect(jsonPath("$.paths['/api/eventos/{id}/subtareas']").exists())
                 .andExpect(jsonPath("$.paths['/api/subtareas/{id}']").exists())
-                .andExpect(jsonPath("$.paths['/api/subtareas/{id}/reprogramar']").exists())
+                .andExpect(jsonPath("$.paths['/api/subtareas/{id}/reprogramar'].patch.responses['409']").exists())
                 .andExpect(jsonPath("$.paths['/api/subtareas/{id}/estado']").exists())
+                .andExpect(jsonPath("$.paths['/api/usuarios/capacidad']").exists())
+                .andExpect(jsonPath("$.paths['/api/usuarios/capacidad'].put.responses['400']").exists())
                 .andExpect(jsonPath("$.components.schemas.EventoDTO").exists())
                 .andExpect(jsonPath("$.components.schemas.SubtareaDTO").exists())
                 .andExpect(jsonPath("$.components.schemas.SubtareaActualizacionDTO").exists())
                 .andExpect(jsonPath("$.components.schemas.TipoEventoDTO").exists())
                 .andExpect(jsonPath("$.components.schemas.ReprogramarDTO").exists())
+                .andExpect(jsonPath("$.components.schemas.CapacidadDTO").exists())
+                .andExpect(jsonPath("$.components.schemas.LimiteHorasDTO").exists())
                 .andExpect(jsonPath("$.components.schemas.EstadoSubtareaDTO").exists());
     }
 

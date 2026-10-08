@@ -48,10 +48,10 @@ Base package `uv.isj.planificadoreventosbackend`, organizado en capas al estilo 
 
 ```
 src/main/java/uv/isj/planificadoreventosbackend/
-├── controller/     # HealthController, EventoController, SubtareaController, TipoEventoController
-├── service/        # HealthService, EventoService, SubtareaService, TipoEventoService
+├── controller/     # HealthController, EventoController, SubtareaController, TipoEventoController, UsuarioController
+├── service/        # HealthService, EventoService, SubtareaService, TipoEventoService, UsuarioService
 ├── repository/     # Repositorios Spring Data JPA por entidad
-├── exception/      # Excepción de dominio y manejador global de errores
+├── exception/      # Excepciones de dominio y manejador global de errores
 ├── model/          # Entidades JPA (TipoEvento, Usuario, Evento, Subtarea, EstadoSubtarea)
 │   └── dto/        # DTOs con validación
 └── config/         # Configuración global (CorsConfig, OpenApiConfig)
@@ -69,6 +69,7 @@ db/
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
 | `GET`    | `/api/eventos/{id}/subtareas`       | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/hoy?usuarioId={id}&fecha={yyyy-MM-dd}` | Lista las gestiones no ejecutadas para una fecha                |
+| `GET`    | `/api/usuarios/capacidad?usuarioId={id}&fecha={yyyy-MM-dd}` | Límite diario, horas comprometidas y horas disponibles      |
 | `POST`   | `/api/eventos`                      | Crea un evento; devuelve 201 y la ubicación del recurso          |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
 | `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
@@ -76,11 +77,58 @@ db/
 | `GET`    | `/api/subtareas?eventoId={id}`      | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/{id}`               | Obtiene el detalle de una subtarea                              |
 | `PUT`    | `/api/subtareas/{id}`               | Actualiza nombre, fecha objetivo y horas de una subtarea         |
-| `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma y devuelve el conflicto de límite diario, si existe   |
+| `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma; 200 con la subtarea o 409 si excede el límite diario |
 | `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
+| `PUT`    | `/api/usuarios/capacidad?usuarioId={id}` | Ajusta el límite diario (entre 1 y 16 horas)             |
 | `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
 | `GET`    | `/v3/api-docs`                      | JSON de la especificación OpenAPI                                |
+
+### Límite diario de horas
+
+El organizador tiene un límite de **1 a 16 horas por día**. Ese límite se consulta y se
+ajusta en `/api/usuarios/capacidad`; las horas ya comprometidas de una fecha se calculan
+sumando las subtareas `pendiente` y `pospuesta` de esa fecha. Las `ejecutada` no cuentan.
+
+```
+GET /api/usuarios/capacidad?usuarioId=1&fecha=2026-11-20
+```
+
+```json
+{
+  "usuarioId": 1,
+  "limiteHorasDiarias": 6,
+  "fecha": "2026-11-20",
+  "horasPlanificadas": 5,
+  "horasDisponibles": 1
+}
+```
+
+Si se omite `fecha`, se evalúa el día de Colombia. `PUT` recibe
+`{"limiteHorasDiarias": 8}`; un valor fuera de 1–16 devuelve 400 con el detalle del campo en
+`errors.limiteHorasDiarias`.
+
+Cuando una reprogramación deja al organizador con más horas de las permitidas,
+`PATCH /api/subtareas/{id}/reprogramar` responde **409** y **no guarda nada**. El cuerpo
+trae el excedente para que el frontend sepa cuántas horas hay que liberar:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Límite diario excedido",
+  "status": 409,
+  "detail": "La reprogramación supera el límite diario de 5 horas",
+  "limiteDiario": 5,
+  "horasAsignadasPreviamente": 3,
+  "horasSolicitadas": 3,
+  "horasPlanificadasTotales": 6,
+  "excedente": 1,
+  "fecha": "2026-11-20",
+  "idSubtarea": 12
+}
+```
+
+Si la reprogramación cabe en el límite, responde **200** con la `SubtareaDTO` ya actualizada.
 
 ### Documentación interactiva
 
@@ -131,6 +179,8 @@ Ejemplo de respuesta de `/api/health`:
 - Catálogo de tipos de evento y actualización completa de subtareas
 - API REST de eventos y subtareas con validación, cascada y manejo global de errores
 - Endpoint `/api/subtareas/hoy` para consultar las gestiones no ejecutadas por fecha
+- Capacidad diaria del organizador en `/api/usuarios/capacidad` (consulta y ajuste del límite de 1 a 16 horas)
+- Conflicto de límite diario en la reprogramación: 409 con el excedente, en vez de un 200 con `conflicto: true`
 
 **Pendiente**
 

@@ -15,3 +15,4 @@
 | 2026-09-24  | 012 | Compatibilidad de la API con el frontend     | [2026-09-24-012-compatibilidad-api-frontend](2026-09-24-012-compatibilidad-api-frontend.md) |
 | 2026-09-24  | 013 | Edición de subtareas y catálogo de tipos     | [2026-09-24-013-edicion-y-catalogo-tipos](2026-09-24-013-edicion-y-catalogo-tipos.md) |
 | 2026-09-25  | 014 | Endpoint de consulta de la vista Hoy         | [2026-09-25-014-consulta-hoy](2026-09-25-014-consulta-hoy.md)                         |
+| 2026-10-08  | 015 | Capacidad diaria y conflicto 409 al reprogramar | [2026-10-08-015-capacidad-y-conflicto-409](2026-10-08-015-capacidad-y-conflicto-409.md) |

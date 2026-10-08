@@ -34,13 +34,17 @@ import uv.isj.planificadoreventosbackend.model.EstadoSubtarea;
 import uv.isj.planificadoreventosbackend.model.Subtarea;
 import uv.isj.planificadoreventosbackend.model.TipoEvento;
 import uv.isj.planificadoreventosbackend.model.Usuario;
+import uv.isj.planificadoreventosbackend.model.dto.CapacidadDTO;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
+import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
 import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
+import uv.isj.planificadoreventosbackend.repository.UsuarioRepository;
 import uv.isj.planificadoreventosbackend.service.EventoService;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
+import uv.isj.planificadoreventosbackend.service.UsuarioService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -64,10 +68,16 @@ class ApiSprint1Test {
     private SubtareaRepository subtareaRepository;
 
     @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
     private EventoService eventoService;
 
     @Autowired
     private SubtareaService subtareaService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Test
     void losRepositoriosFiltranOrdenanYSumanLasSubtareas() {
@@ -300,11 +310,16 @@ class ApiSprint1Test {
         mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", actual.getIdSubtarea())
                         .contentType("application/json")
                         .content("{\"nuevaFecha\":\"2026-11-20\",\"nuevasHoras\":3}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.conflicto").value(true))
-                .andExpect(jsonPath("$.limiteDiario").value(5.0))
-                .andExpect(jsonPath("$.horasTotalesCalculadas").value(6.0))
-                .andExpect(jsonPath("$.mensaje").isNotEmpty());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Límite diario excedido"))
+                .andExpect(jsonPath("$.detail").value("La reprogramación supera el límite diario de 5 horas"))
+                .andExpect(jsonPath("$.limiteDiario").value(5))
+                .andExpect(jsonPath("$.horasAsignadasPreviamente").value(3))
+                .andExpect(jsonPath("$.horasSolicitadas").value(3))
+                .andExpect(jsonPath("$.horasPlanificadasTotales").value(6))
+                .andExpect(jsonPath("$.excedente").value(1))
+                .andExpect(jsonPath("$.fecha").value("2026-11-20"))
+                .andExpect(jsonPath("$.idSubtarea").value(actual.getIdSubtarea()));
 
         assertThat(subtareaRepository.findById(actual.getIdSubtarea()))
                 .isPresent()
@@ -314,9 +329,28 @@ class ApiSprint1Test {
     }
 
     @Test
+    void elExcedenteIndicaCuantasHorasHayQueLiberar() throws Exception {
+        BaseFixture base = crearBase(4);
+        LocalDate fechaNueva = LocalDate.of(2026, 11, 23);
+        Subtarea actual = crearSubtarea(
+                base.evento(), "Tarea larga", LocalDate.of(2026, 11, 12), 1,
+                EstadoSubtarea.pendiente);
+        crearSubtarea(base.evento(), "Carga existente", fechaNueva, 4,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", actual.getIdSubtarea())
+                        .contentType("application/json")
+                        .content("{\"nuevaFecha\":\"2026-11-23\",\"nuevasHoras\":4}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.limiteDiario").value(4))
+                .andExpect(jsonPath("$.horasPlanificadasTotales").value(8))
+                .andExpect(jsonPath("$.excedente").value(4));
+    }
+
+    @Test
     void elLimiteDiarioNoIncluyeSubtareasDeOtroOrganizador() {
-        BaseFixture primerOrganizador = crearBase(2);
-        BaseFixture segundoOrganizador = crearBase(2);
+        BaseFixture primerOrganizador = crearBase(3);
+        BaseFixture segundoOrganizador = crearBase(1);
         LocalDate fecha = LocalDate.of(2026, 11, 20);
         Subtarea actual = crearSubtarea(
                 primerOrganizador.evento(), "Tarea propia", fecha, 1,
@@ -325,13 +359,12 @@ class ApiSprint1Test {
                 segundoOrganizador.evento(), "Tarea ajena", fecha, 2,
                 EstadoSubtarea.pendiente);
 
-        var resultado = subtareaService.reprogramar(
+        SubtareaDTO resultado = subtareaService.reprogramar(
                 actual.getIdSubtarea(),
-                new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
-                2.0);
+                new ReprogramarDTO(fecha, 2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(2.0);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(fecha);
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
     }
 
     @Test
@@ -348,10 +381,17 @@ class ApiSprint1Test {
                         .contentType("application/json")
                         .content("{\"nuevaFecha\":\"2026-11-21\",\"nuevasHoras\":3}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.conflicto").value(false))
-                .andExpect(jsonPath("$.horasTotalesCalculadas").value(5.0))
-                .andExpect(jsonPath("$.subtarea.fechaObjetivo").value("2026-11-21"))
-                .andExpect(jsonPath("$.subtarea.horasEstimadas").value(3));
+                .andExpect(jsonPath("$.idSubtarea").value(actual.getIdSubtarea()))
+                .andExpect(jsonPath("$.fechaObjetivo").value("2026-11-21"))
+                .andExpect(jsonPath("$.horasEstimadas").value(3));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(subtareaRepository.findById(actual.getIdSubtarea()))
+                .isPresent()
+                .get()
+                .extracting(Subtarea::getHorasEstimadas)
+                .isEqualTo(3);
     }
 
     @Test
@@ -362,13 +402,135 @@ class ApiSprint1Test {
                 base.evento(), "Tarea actual", fecha, 2, EstadoSubtarea.pendiente);
         crearSubtarea(base.evento(), "Otra tarea", fecha, 1, EstadoSubtarea.pendiente);
 
-        var resultado = subtareaService.reprogramar(
+        SubtareaDTO resultado = subtareaService.reprogramar(
                 actual.getIdSubtarea(),
-                new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
-                3.0);
+                new ReprogramarDTO(fecha, 2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(3.0);
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
+    }
+
+    @Test
+    void consultaLaCapacidadDiariaContandoSoloLoNoEjecutado() throws Exception {
+        BaseFixture base = crearBase(6);
+        LocalDate fecha = LocalDate.of(2026, 11, 20);
+        crearSubtarea(base.evento(), "Pendiente de ese día", fecha, 3,
+                EstadoSubtarea.pendiente);
+        crearSubtarea(base.evento(), "Pospuesta de ese día", fecha, 2,
+                EstadoSubtarea.pospuesta);
+        crearSubtarea(base.evento(), "Ejecutada de ese día", fecha, 4,
+                EstadoSubtarea.ejecutada);
+        crearSubtarea(base.evento(), "Trabajo de otro día", fecha.plusDays(1), 5,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(get("/api/usuarios/capacidad")
+                        .param("usuarioId", String.valueOf(base.usuario().getIdUsuario()))
+                        .param("fecha", fecha.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuarioId").value(base.usuario().getIdUsuario()))
+                .andExpect(jsonPath("$.limiteHorasDiarias").value(6))
+                .andExpect(jsonPath("$.fecha").value("2026-11-20"))
+                .andExpect(jsonPath("$.horasPlanificadas").value(5))
+                .andExpect(jsonPath("$.horasDisponibles").value(1));
+    }
+
+    @Test
+    void lasHorasDisponiblesNoBajanDeCeroEnUnaFechaSobrecargada() {
+        BaseFixture base = crearBase(2);
+        LocalDate fecha = LocalDate.of(2026, 11, 21);
+        crearSubtarea(base.evento(), "Sobrecarga del día", fecha, 5,
+                EstadoSubtarea.pendiente);
+
+        CapacidadDTO capacidad = usuarioService.obtenerCapacidad(
+                base.usuario().getIdUsuario(), fecha);
+
+        assertThat(capacidad.horasPlanificadas()).isEqualTo(5);
+        assertThat(capacidad.horasDisponibles()).isZero();
+    }
+
+    @Test
+    void laCapacidadDeUnOrganizadorInexistenteDevuelve404() throws Exception {
+        mockMvc.perform(get("/api/usuarios/capacidad")
+                        .param("usuarioId", "9999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Recurso no encontrado"))
+                .andExpect(jsonPath("$.detail").value("No existe el usuario con id 9999"));
+    }
+
+    @Test
+    void actualizaElLimiteDiarioYLoDevuelveRecalculado() throws Exception {
+        BaseFixture base = crearBase(6);
+
+        mockMvc.perform(put("/api/usuarios/capacidad")
+                        .param("usuarioId", String.valueOf(base.usuario().getIdUsuario()))
+                        .contentType("application/json")
+                        .content("{\"limiteHorasDiarias\":8}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuarioId").value(base.usuario().getIdUsuario()))
+                .andExpect(jsonPath("$.limiteHorasDiarias").value(8))
+                .andExpect(jsonPath("$.horasDisponibles").value(8));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(usuarioRepository.findById(base.usuario().getIdUsuario()))
+                .isPresent()
+                .get()
+                .extracting(Usuario::getLimiteHorasDiarias)
+                .isEqualTo(8);
+    }
+
+    @Test
+    void rechazaLimitesDeHorasFueraDelRangoConMensajeEnEspanol() throws Exception {
+        BaseFixture base = crearBase(6);
+        String usuarioId = String.valueOf(base.usuario().getIdUsuario());
+
+        mockMvc.perform(put("/api/usuarios/capacidad")
+                        .param("usuarioId", usuarioId)
+                        .contentType("application/json")
+                        .content("{\"limiteHorasDiarias\":17}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Datos inválidos"))
+                .andExpect(jsonPath("$.errors.limiteHorasDiarias")
+                        .value("El límite de horas diarias no puede superar las 16 horas"));
+
+        mockMvc.perform(put("/api/usuarios/capacidad")
+                        .param("usuarioId", usuarioId)
+                        .contentType("application/json")
+                        .content("{\"limiteHorasDiarias\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.limiteHorasDiarias")
+                        .value("El límite de horas diarias debe ser al menos 1 hora"));
+
+        mockMvc.perform(put("/api/usuarios/capacidad")
+                        .param("usuarioId", usuarioId)
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.limiteHorasDiarias")
+                        .value("El límite de horas diarias es obligatorio"));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(usuarioRepository.findById(base.usuario().getIdUsuario()))
+                .isPresent()
+                .get()
+                .extracting(Usuario::getLimiteHorasDiarias)
+                .isEqualTo(6);
+    }
+
+    @Test
+    void elServicioRechazaLimitesFueraDeRangoSinPasarPorElDto() {
+        BaseFixture base = crearBase(6);
+        Integer usuarioId = base.usuario().getIdUsuario();
+
+        assertThatThrownBy(() -> usuarioService.actualizarLimite(usuarioId, 17))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("entre 1 y 16 horas");
+        assertThatThrownBy(() -> usuarioService.actualizarLimite(usuarioId, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("entre 1 y 16 horas");
+        assertThatThrownBy(() -> usuarioService.actualizarLimite(usuarioId, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("obligatorio");
     }
 
     @Test
