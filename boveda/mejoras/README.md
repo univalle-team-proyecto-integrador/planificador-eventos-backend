@@ -31,3 +31,4 @@
 | 2026-10-01  | 028 | Prueba de token expirado: el último requisito de US-11 sin evidencia | [2026-10-01-028-prueba-token-expirado](2026-10-01-028-prueba-token-expirado.md) |
 | 2026-10-01  | 029 | idUsuario y usuarioId dejan de ser obligatorios: el contrato coincide con el aislamiento | [2026-10-01-029-contrato-idusuario-opcional](2026-10-01-029-contrato-idusuario-opcional.md) |
 | 2026-10-08  | 030 | Capacidad diaria y conflicto 409 al reprogramar | [2026-10-08-030-capacidad-diaria-y-conflicto-409](2026-10-08-030-capacidad-diaria-y-conflicto-409.md) |
+| 2026-10-08  | 031 | Horas estimadas declaradas en el evento | [2026-10-08-031-horas-estimadas-del-evento](2026-10-08-031-horas-estimadas-del-evento.md) |

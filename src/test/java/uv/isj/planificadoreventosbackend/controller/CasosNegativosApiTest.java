@@ -91,7 +91,7 @@ class CasosNegativosApiTest {
     private String jsonEventoValido(Integer idUsuario, Integer idTipoEvento) throws Exception {
         EventoDTO dto = new EventoDTO(
                 null, idUsuario, idTipoEvento, "Evento de prueba", "Cliente de prueba",
-                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null);
+                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null);
         return objectMapper.writeValueAsString(dto);
     }
 

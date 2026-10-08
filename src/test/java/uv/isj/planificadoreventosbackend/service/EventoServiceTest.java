@@ -3,6 +3,7 @@ package uv.isj.planificadoreventosbackend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,7 +76,47 @@ class EventoServiceTest {
 
     private EventoDTO dtoValido(String nombre) {
         return new EventoDTO(
-                null, 1, 2, nombre, "María", LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null);
+                null, 1, 2, nombre, "María", LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null);
+    }
+
+    @Test
+    void guardaLasHorasEstimadasDeclaradasAlCrear() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
+        when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EventoDTO resultado = eventoService.crearEvento(1, dtoValido("Boda"));
+
+        assertThat(resultado.horasEstimadas()).isEqualTo(12);
+        verify(eventoRepository).save(argThat(evento -> evento.getHorasEstimadas() == 12));
+    }
+
+    @Test
+    void actualizarEventoCambiaLasHorasEstimadas() {
+        Evento evento = eventoBase(8);
+        when(eventoRepository.findByIdYUsuarioId(10, 1)).thenReturn(Optional.of(evento));
+        when(tipoEventoRepository.findById(2)).thenReturn(Optional.of(tipoEvento));
+        when(eventoRepository.save(any(Evento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EventoDTO resultado = eventoService.actualizarEvento(1, 10, dtoValido("Boda"));
+
+        assertThat(resultado.horasEstimadas()).isEqualTo(12);
+        assertThat(evento.getHorasEstimadas()).isEqualTo(12);
+    }
+
+    @Test
+    void rechazaHorasEstimadasNulasOCero() {
+        EventoDTO sinHoras = new EventoDTO(
+                null, 1, 2, "Boda", "María", LocalDateTime.of(2026, 12, 1, 15, 0), 0, "Cali", null, null);
+        EventoDTO nulas = new EventoDTO(
+                null, 1, 2, "Boda", "María", LocalDateTime.of(2026, 12, 1, 15, 0), null, "Cali", null, null);
+
+        assertThatThrownBy(() -> eventoService.crearEvento(1, sinHoras))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("horas estimadas");
+        assertThatThrownBy(() -> eventoService.crearEvento(1, nulas))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("horas estimadas");
     }
 
     @Test
@@ -150,7 +191,7 @@ class EventoServiceTest {
 
         assertThatThrownBy(() -> eventoService.crearEvento(9999,
                         new EventoDTO(null, 1, 2, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
@@ -163,7 +204,7 @@ class EventoServiceTest {
 
         EventoDTO resultado = eventoService.crearEvento(1,
                 new EventoDTO(null, 7, 2, "Boda", "María",
-                        LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null));
+                        LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null));
 
         assertThat(resultado.idUsuario()).isEqualTo(1);
         verify(usuarioRepository, never()).findById(7);
@@ -177,7 +218,7 @@ class EventoServiceTest {
 
         EventoDTO resultado = eventoService.crearEvento(1,
                 new EventoDTO(null, null, 2, "Boda", "María",
-                        LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null));
+                        LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null));
 
         assertThat(resultado.idUsuario()).isEqualTo(1);
     }
@@ -198,7 +239,7 @@ class EventoServiceTest {
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 9999, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }
@@ -211,48 +252,48 @@ class EventoServiceTest {
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, null, "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "   ", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1,
                         new EventoDTO(null, 1, null, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("tipo de evento");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", null,
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("cliente");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "  ",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("cliente");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
-                        new EventoDTO(null, 1, 2, "Boda", "María", null, "Cali", null, null)))
+                        new EventoDTO(null, 1, 2, "Boda", "María", null, 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), null, null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, null, null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("lugar");
 
         assertThatThrownBy(() -> eventoService.crearEvento(1, 
                         new EventoDTO(null, 1, 2, "Boda", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "   ", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "   ", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("lugar");
 
@@ -287,7 +328,7 @@ class EventoServiceTest {
     void actualizarEventoRechazaDatosIncompletosSinTocarElGuardado() {
         assertThatThrownBy(() -> eventoService.actualizarEvento(1, 
                         8, new EventoDTO(null, 1, 2, "", "María",
-                                LocalDateTime.of(2026, 12, 1, 15, 0), "Cali", null, null)))
+                                LocalDateTime.of(2026, 12, 1, 15, 0), 12, "Cali", null, null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 

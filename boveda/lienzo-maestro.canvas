@@ -572,6 +572,24 @@
    "y": 5240,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m031",
+   "type": "file",
+   "file": "mejoras/2026-10-08-031-horas-estimadas-del-evento.md",
+   "x": 200,
+   "y": 5420,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p031",
+   "type": "text",
+   "text": "Mejora 031\nHoras estimadas del evento\n2026-10-08",
+   "x": 540,
+   "y": 5420,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -993,6 +1011,20 @@
    "fromNode": "p030",
    "fromSide": "right",
    "toNode": "m030",
+   "toSide": "left"
+  },
+  {
+   "id": "e61",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m031",
+   "toSide": "top"
+  },
+  {
+   "id": "e62",
+   "fromNode": "p031",
+   "fromSide": "right",
+   "toNode": "m031",
    "toSide": "left"
   }
  ]
