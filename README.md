@@ -78,6 +78,8 @@ db/
 | `POST`   | `/api/users/register`               | Crea una cuenta y devuelve el token; 409 si el correo ya existe |
 | `POST`   | `/api/users/login`                  | Autentica y devuelve el token; 401 si las credenciales fallan  |
 | `GET`    | `/api/users/profile`                | Devuelve el usuario del token; 401 sin cabecera `Bearer`        |
+| `GET`    | `/api/users/capacity?fecha={yyyy-MM-dd}` | Límite diario, horas comprometidas y disponibles del token |
+| `PUT`    | `/api/users/capacity`               | Ajusta el límite diario (entre 1 y 16 horas)                    |
 | `GET`    | `/api/tipos-evento`                | Lista el catálogo de tipos de evento                            |
 | `GET`    | `/api/eventos`                     | Lista los eventos del usuario del token                          |
 | `GET`    | `/api/eventos/{id}`                 | Obtiene el detalle de un evento                                |
@@ -91,7 +93,7 @@ db/
 | `GET`    | `/api/subtareas?eventoId={id}`      | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/{id}`               | Obtiene el detalle de una subtarea                              |
 | `PUT`    | `/api/subtareas/{id}`               | Actualiza nombre, fecha objetivo y horas de una subtarea         |
-| `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma y devuelve el conflicto de límite diario, si existe   |
+| `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma; 200 con la subtarea o 409 si excede el límite diario |
 | `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
 | `GET`    | `/swagger-ui.html`                  | Documentación OpenAPI (Swagger UI)                               |
@@ -164,6 +166,54 @@ Ejemplo de respuesta de `/api/health`:
 }
 ```
 
+### Límite diario de horas
+
+El organizador tiene un límite de **1 a 16 horas por día**, siempre autenticado: el
+propietario sale del token y no de un parámetro. `/api/users/capacity` consulta y ajusta
+ese límite. Las horas comprometidas de una fecha suman las subtareas `pendiente` y
+`pospuesta`; las `ejecutada` no cuentan.
+
+```
+GET /api/users/capacity?fecha=2026-11-20
+Authorization: Bearer <token>
+```
+
+```json
+{
+  "usuarioId": 1,
+  "limiteHorasDiarias": 6,
+  "fecha": "2026-11-20",
+  "horasPlanificadas": 5,
+  "horasDisponibles": 1
+}
+```
+
+Si se omite `fecha`, se evalúa el día de Colombia. `PUT` recibe
+`{"limiteHorasDiarias": 8}`; un valor fuera de 1–16 devuelve 400 con el detalle del campo en
+`errors.limiteHorasDiarias`.
+
+Cuando una reprogramación deja al organizador con más horas de las permitidas,
+`PATCH /api/subtareas/{id}/reprogramar` responde **409** y **no guarda nada**. El cuerpo
+trae el excedente para que el frontend sepa cuántas horas hay que liberar:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Límite diario excedido",
+  "status": 409,
+  "detail": "La reprogramación supera el límite diario de 5 horas",
+  "limiteDiario": 5,
+  "horasAsignadasPreviamente": 3,
+  "horasSolicitadas": 3,
+  "horasPlanificadasTotales": 6,
+  "excedente": 1,
+  "fecha": "2026-11-20",
+  "idSubtarea": 12
+}
+```
+
+Si la reprogramación cabe en el límite, responde **200** con la `SubtareaDTO` ya actualizada.
+
 ## Base de datos (Supabase)
 
 - Esquema creado a mano en el SQL Editor de Supabase con `db/ddl-supabase.sql` (ya ejecutado y verificado).
@@ -213,11 +263,14 @@ Más detalles de la validación en `boveda/mejoras/2026-09-24-014-validacion-con
 - API REST de eventos y subtareas con validación, cascada y manejo global de errores
 - Endpoint `/api/subtareas/hoy` para consultar las gestiones no ejecutadas por fecha
 - US-11: autenticación JWT stateless (registro, login, perfil), Swagger con `bearerAuth` y aislamiento real por propietario en eventos y subtareas
+- Capacidad diaria del organizador en `/api/users/capacity` (consulta y ajuste del límite de 1 a 16 horas, autenticado por token)
+- Conflicto de límite diario en la reprogramación: 409 con el excedente, en vez de un 200 con `conflicto: true`
 
 **Pendiente**
 
 - Consolidar los usuarios existentes de Supabase con `password_hash` válido (hoy se resuelven registrando una cuenta nueva)
 - Subir `PROTECT_SUBTAREAS=true` en Render una vez el frontend esté desplegado con el token
+- Consumir `/api/users/capacity` desde `planificador-eventos-frontend` (el cliente ya adjunta el `Bearer`)
 
 Cada mejora queda registrada en la bóveda Obsidian del repo (`boveda/mejoras/`).
 

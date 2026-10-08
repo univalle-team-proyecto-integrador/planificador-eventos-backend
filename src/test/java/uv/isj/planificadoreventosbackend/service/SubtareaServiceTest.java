@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uv.isj.planificadoreventosbackend.exception.CapacidadExcedidaException;
 import uv.isj.planificadoreventosbackend.exception.RecursoNoEncontradoException;
 import uv.isj.planificadoreventosbackend.model.Evento;
 import uv.isj.planificadoreventosbackend.model.EstadoSubtarea;
@@ -284,13 +285,25 @@ class SubtareaServiceTest {
                 .findNoEjecutadasParaHoy(anyInt(), any(LocalDate.class), any(EstadoSubtarea.class));
     }
 
+    /**
+ * El límite ya no se pide por separado: reprogramar lo toma del usuario del
+ * evento, así que la prueba verifica que un límite ajeno no entre en el cálculo.
+ */
     @Test
-    void obtenerLimiteDiarioVieneDelUsuarioDelEvento() {
+    void reprogramarTomaElLimiteDelUsuarioDelEvento() {
+        usuario.setLimiteHorasDiarias(4);
         Subtarea subtarea = subtareaCreada(1, "T", LocalDate.of(2026, 11, 10), 2,
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
+                1, LocalDate.of(2026, 11, 15), EstadoSubtarea.ejecutada)).thenReturn(4L);
 
-        assertThat(subtareaService.obtenerLimiteDiario(1, 1)).isEqualTo(5);
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 15), 1)))
+                .isInstanceOf(CapacidadExcedidaException.class)
+                .satisfies(excepcion -> assertThat(
+                                ((CapacidadExcedidaException) excepcion).getLimiteDiario())
+                        .isEqualTo(4));
     }
 
     @Test
@@ -341,12 +354,20 @@ class SubtareaServiceTest {
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(6L);
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3), 5.0);
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3)))
+                .isInstanceOf(CapacidadExcedidaException.class)
+                .satisfies(excepcion -> {
+                    CapacidadExcedidaException conflicto = (CapacidadExcedidaException) excepcion;
+                    assertThat(conflicto.getLimiteDiario()).isEqualTo(5);
+                    assertThat(conflicto.getHorasAsignadasPreviamente()).isEqualTo(6);
+                    assertThat(conflicto.getHorasSolicitadas()).isEqualTo(3);
+                    assertThat(conflicto.getHorasPlanificadasTotales()).isEqualTo(9);
+                    assertThat(conflicto.getExcedente()).isEqualTo(4);
+                    assertThat(conflicto.getFecha()).isEqualTo(LocalDate.of(2026, 11, 20));
+                    assertThat(conflicto.getIdSubtarea()).isEqualTo(1);
+                });
 
-        assertThat(resultado.get("conflicto")).isEqualTo(true);
-        assertThat(resultado.get("limiteDiario")).isEqualTo(5.0);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(9.0);
         assertThat(subtarea.getFechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 11));
         assertThat(subtarea.getHorasEstimadas()).isEqualTo(1);
         verify(subtareaRepository, never()).save(any(Subtarea.class));
@@ -361,16 +382,13 @@ class SubtareaServiceTest {
                 LocalDate.of(2026, 11, 21), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 21), 3), 5.0);
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 21), 3));
 
-        SubtareaDTO subtareaRespuesta = (SubtareaDTO) resultado.get("subtarea");
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(5.0);
         assertThat(subtarea.getFechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 21));
         assertThat(subtarea.getHorasEstimadas()).isEqualTo(3);
-        assertThat(subtareaRespuesta.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 21));
-        assertThat(subtareaRespuesta.horasEstimadas()).isEqualTo(3);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 21));
+        assertThat(resultado.horasEstimadas()).isEqualTo(3);
     }
 
     @Test
@@ -382,11 +400,10 @@ class SubtareaServiceTest {
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2), 5.0);
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(5.0);
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
     }
 
     @Test
@@ -398,11 +415,10 @@ class SubtareaServiceTest {
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3), 5.0);
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(3.0);
+        assertThat(resultado.horasEstimadas()).isEqualTo(3);
     }
 
     @Test
@@ -413,11 +429,14 @@ class SubtareaServiceTest {
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
                 LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2), 5.0);
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2)))
+                .isInstanceOf(CapacidadExcedidaException.class)
+                .satisfies(excepcion -> assertThat(
+                                ((CapacidadExcedidaException) excepcion).getExcedente())
+                        .isEqualTo(2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(true);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(7.0);
+        verify(subtareaRepository, never()).save(any(Subtarea.class));
     }
 
     @Test
@@ -429,11 +448,11 @@ class SubtareaServiceTest {
                 LocalDate.of(2026, 11, 22), EstadoSubtarea.ejecutada)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> resultado = subtareaService.reprogramar(1, 
-                1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3), 5.0);
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(5.0);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 22));
+        assertThat(resultado.horasEstimadas()).isEqualTo(3);
     }
 
     @Test
@@ -442,39 +461,44 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 1, null, 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(1, 1, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(null, 2), 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(null, 2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("fecha");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), null), 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), null)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("horas");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 0), 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 0)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("horas");
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("límite diario");
+        verify(subtareaRepository, never()).save(any(Subtarea.class));
+    }
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), 0.0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("límite diario");
+    /**
+     * Guarda contra datos corruptos: con el CHECK de la base y la validación del
+     * PUT un límite inválido no debería llegar aquí, pero si llega no debe
+     * disfrazarse de un conflicto de capacidad.
+     */
+    @Test
+    void reprogramarConLimiteFueraDeRangoFallaSinGuardar() {
+        usuario.setLimiteHorasDiarias(0);
+        Subtarea subtarea = subtareaCreada(1, "Tarea", LocalDate.of(2026, 11, 21), 1,
+                EstadoSubtarea.pendiente);
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), Double.NaN))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("límite diario");
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("fuera del rango permitido");
 
         verify(subtareaRepository, never()).save(any(Subtarea.class));
     }
@@ -483,8 +507,8 @@ class SubtareaServiceTest {
     void reprogramarSubtareaInexistenteLanzaExcepcion() {
         when(subtareaRepository.findByIdYUsuarioId(9999, 1)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> subtareaService.reprogramar(1, 
-                        9999, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2), 5.0))
+        assertThatThrownBy(() -> subtareaService.reprogramar(
+                        1, 9999, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2)))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("9999");
     }

@@ -133,6 +133,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
+    /**
+     * La reprogramación no cabe en el límite diario. El cuerpo lleva el detalle
+     * del excedente para que el cliente sepa cuántas horas hay que liberar, y no
+     * solo que hubo un conflicto.
+     */
+    @ExceptionHandler(CapacidadExcedidaException.class)
+    public ResponseEntity<ProblemDetail> handleCapacidadExcedida(CapacidadExcedidaException ex) {
+        ProblemDetail problem = crearProblema(
+                HttpStatus.CONFLICT,
+                "Límite diario excedido",
+                ex.getMessage());
+
+        Map<String, Object> conflicto = new LinkedHashMap<>();
+        conflicto.put("idSubtarea", ex.getIdSubtarea());
+        conflicto.put("fecha", ex.getFecha());
+        conflicto.put("limiteDiario", ex.getLimiteDiario());
+        conflicto.put("horasAsignadasPreviamente", ex.getHorasAsignadasPreviamente());
+        conflicto.put("horasSolicitadas", ex.getHorasSolicitadas());
+        conflicto.put("horasPlanificadasTotales", ex.getHorasPlanificadasTotales());
+        conflicto.put("excedente", ex.getExcedente());
+        problem.setProperties(conflicto);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
     private ProblemDetail crearProblema(HttpStatus status, String titulo, String detalle) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detalle);
         problem.setTitle(titulo);

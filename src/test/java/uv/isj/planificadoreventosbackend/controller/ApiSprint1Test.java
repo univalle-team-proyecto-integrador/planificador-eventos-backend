@@ -36,6 +36,7 @@ import uv.isj.planificadoreventosbackend.model.Subtarea;
 import uv.isj.planificadoreventosbackend.model.TipoEvento;
 import uv.isj.planificadoreventosbackend.model.Usuario;
 import uv.isj.planificadoreventosbackend.model.dto.EventoDTO;
+import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.repository.EventoRepository;
@@ -406,11 +407,16 @@ class ApiSprint1Test {
         mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", actual.getIdSubtarea())
                         .contentType("application/json")
                         .content("{\"nuevaFecha\":\"2026-11-20\",\"nuevasHoras\":3}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.conflicto").value(true))
-                .andExpect(jsonPath("$.limiteDiario").value(5.0))
-                .andExpect(jsonPath("$.horasTotalesCalculadas").value(6.0))
-                .andExpect(jsonPath("$.mensaje").isNotEmpty());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Límite diario excedido"))
+                .andExpect(jsonPath("$.detail").value("La reprogramación supera el límite diario de 5 horas"))
+                .andExpect(jsonPath("$.limiteDiario").value(5))
+                .andExpect(jsonPath("$.horasAsignadasPreviamente").value(3))
+                .andExpect(jsonPath("$.horasSolicitadas").value(3))
+                .andExpect(jsonPath("$.horasPlanificadasTotales").value(6))
+                .andExpect(jsonPath("$.excedente").value(1))
+                .andExpect(jsonPath("$.fecha").value("2026-11-20"))
+                .andExpect(jsonPath("$.idSubtarea").value(actual.getIdSubtarea()));
 
         assertThat(subtareaRepository.findByIdYUsuarioId(actual.getIdSubtarea(), base.usuario().getIdUsuario()))
                 .isPresent()
@@ -431,14 +437,15 @@ class ApiSprint1Test {
                 segundoOrganizador.evento(), "Tarea ajena", fecha, 2,
                 EstadoSubtarea.pendiente);
 
-        var resultado = subtareaService.reprogramar(
+        // El límite sale del usuario del evento, no del parametro: el del segundo
+        // organizador no debe contaminar esta reprogramación.
+        SubtareaDTO resultado = subtareaService.reprogramar(
                 primerOrganizador.usuario().getIdUsuario(),
                 actual.getIdSubtarea(),
-                new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
-                2.0);
+                new ReprogramarDTO(fecha, 2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(2.0);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(fecha);
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
     }
 
     @Test
@@ -455,10 +462,18 @@ class ApiSprint1Test {
                         .contentType("application/json")
                         .content("{\"nuevaFecha\":\"2026-11-21\",\"nuevasHoras\":3}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.conflicto").value(false))
-                .andExpect(jsonPath("$.horasTotalesCalculadas").value(5.0))
-                .andExpect(jsonPath("$.subtarea.fechaObjetivo").value("2026-11-21"))
-                .andExpect(jsonPath("$.subtarea.horasEstimadas").value(3));
+                .andExpect(jsonPath("$.idSubtarea").value(actual.getIdSubtarea()))
+                .andExpect(jsonPath("$.fechaObjetivo").value("2026-11-21"))
+                .andExpect(jsonPath("$.horasEstimadas").value(3));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(subtareaRepository.findByIdYUsuarioId(
+                actual.getIdSubtarea(), base.usuario().getIdUsuario()))
+                .isPresent()
+                .get()
+                .extracting(Subtarea::getHorasEstimadas)
+                .isEqualTo(3);
     }
 
     @Test
@@ -469,14 +484,12 @@ class ApiSprint1Test {
                 base.evento(), "Tarea actual", fecha, 2, EstadoSubtarea.pendiente);
         crearSubtarea(base.evento(), "Otra tarea", fecha, 1, EstadoSubtarea.pendiente);
 
-        var resultado = subtareaService.reprogramar(
+        SubtareaDTO resultado = subtareaService.reprogramar(
                 base.usuario().getIdUsuario(),
                 actual.getIdSubtarea(),
-                new uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO(fecha, 2),
-                3.0);
+                new ReprogramarDTO(fecha, 2));
 
-        assertThat(resultado.get("conflicto")).isEqualTo(false);
-        assertThat(resultado.get("horasTotalesCalculadas")).isEqualTo(3.0);
+        assertThat(resultado.horasEstimadas()).isEqualTo(2);
     }
 
     @Test
