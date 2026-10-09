@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -50,7 +51,12 @@ public class EventoController {
 
     @GetMapping
     @Operation(summary = "Listar eventos")
-    @ApiResponse(responseCode = "200", description = "Lista de eventos")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de eventos"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     public List<EventoDTO> obtenerTodos(
             @Parameter(
                     description = "Se acepta por compatibilidad pero se ignora: "
@@ -64,8 +70,11 @@ public class EventoController {
     @Operation(summary = "Obtener el detalle de un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Detalle del evento"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public EventoDTO obtenerPorId(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {
@@ -77,8 +86,11 @@ public class EventoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Evento creado"),
             @ApiResponse(responseCode = "400", description = "Los datos del evento no son válidos"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El usuario o el tipo de evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<EventoDTO> crear(@Valid @RequestBody EventoDTO dto) {
         EventoDTO evento = eventoService.crearEvento(propietario(), dto);
         URI ubicacion = URI.create("/api/eventos/" + evento.idEvento());
@@ -89,8 +101,11 @@ public class EventoController {
     @Operation(summary = "Listar subtareas de un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Subtareas del evento"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public List<SubtareaDTO> obtenerSubtareas(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {
@@ -102,8 +117,11 @@ public class EventoController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Evento actualizado"),
             @ApiResponse(responseCode = "400", description = "Los datos no son válidos"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public EventoDTO actualizar(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id,
@@ -116,8 +134,11 @@ public class EventoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Subtarea creada con estado pendiente"),
             @ApiResponse(responseCode = "400", description = "Los datos de la subtarea no son válidos"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SubtareaDTO> agregarSubtarea(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id,
@@ -130,8 +151,11 @@ public class EventoController {
     @Operation(summary = "Eliminar un evento y sus subtareas")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Evento y subtareas eliminados"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "Identificador del evento", example = "1")
             @PathVariable Integer id) {

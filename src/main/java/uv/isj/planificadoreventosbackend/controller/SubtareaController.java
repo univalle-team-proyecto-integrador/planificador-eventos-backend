@@ -101,8 +101,11 @@ public class SubtareaController {
     @Operation(summary = "Listar subtareas de un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de subtareas"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "El evento no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public List<SubtareaDTO> listarPorEvento(
             @Parameter(description = "Identificador del evento", example = "1")
             @RequestParam Integer eventoId) {
@@ -114,8 +117,11 @@ public class SubtareaController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Subtarea actualizada"),
             @ApiResponse(responseCode = "400", description = "Los datos no son válidos"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO actualizar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
@@ -150,8 +156,11 @@ public class SubtareaController {
     @Operation(summary = "Obtener una subtarea")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Detalle de la subtarea"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO obtenerPorId(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id) {
@@ -162,8 +171,11 @@ public class SubtareaController {
     @Operation(summary = "Eliminar una subtarea")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Subtarea eliminada"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id) {
@@ -176,6 +188,8 @@ public class SubtareaController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Estado actualizado; una subtarea puede reabrirse a pendiente"),
             @ApiResponse(responseCode = "400", description = "El estado solicitado no es válido"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "401",
                     description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe")

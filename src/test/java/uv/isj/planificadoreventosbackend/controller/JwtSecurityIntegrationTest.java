@@ -104,6 +104,19 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("Sin token, listar eventos también responde 401 con la bandera activa")
+    void sinTokenEventosResponde401() throws Exception {
+        // Esta prueba fija el alcance real de app.security.protect-subtareas: el
+        // corte de acceso llega desde la cadena de seguridad y cubre eventos y
+        // subtareas por igual, no solo subtareas. Antes de alinear
+        // SecurityConfig, /api/eventos caía en anyRequest().permitAll() y el 401
+        // salía más tarde, desde CurrentUserProvider en el controlador.
+        mockMvc.perform(get("/api/eventos"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("No autenticado"));
+    }
+
+    @Test
     @DisplayName("Un token corrupto no autentica y responde 401")
     void tokenCorruptoResponde401() throws Exception {
         mockMvc.perform(get("/api/subtareas/hoy")
