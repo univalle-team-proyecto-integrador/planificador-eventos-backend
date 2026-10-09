@@ -336,6 +336,86 @@ class CapacidadApiTest {
                 .andExpect(jsonPath("$.fechaObjetivoOriginal").value(FECHA.toString()));
     }
 
+    // --- US-08: resolver el conflicto reduciendo horas ------------------------
+
+    @Test
+    @DisplayName("Reducir horas resuelve el conflicto y lo dice")
+    void reducirHorasResuelveElConflicto() throws Exception {
+        Usuario dueno = crearUsuario(6);
+        Evento evento = crearEvento(dueno);
+        // El día tiene 5h ajenas + 4h de esta = 9h sobre un límite de 6.
+        Subtarea propia = crearSubtarea(evento, "Carga del día", FECHA, 4, EstadoSubtarea.pendiente);
+        crearSubtarea(evento, "Otra carga", FECHA, 5, EstadoSubtarea.pendiente);
+
+        mockMvc.perform(put("/api/subtareas/{id}", propia.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Carga del día\",\"fechaObjetivo\":\""
+                                + FECHA + "\",\"horasEstimadas\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horasEstimadas").value(1))
+                .andExpect(jsonPath("$.resuelto").value(true));
+    }
+
+    @Test
+    @DisplayName("Reducir sin llegar a resolver guarda y avisa que persiste")
+    void reducirHorasSinAlcanzarGuardaYAvisa() throws Exception {
+        Usuario dueno = crearUsuario(6);
+        Evento evento = crearEvento(dueno);
+        // 5h ajenas + esta de 6h = 11h sobre un límite de 6. Bajar a 4h deja
+        // 9h: sigue pasándose, pero es menos que antes, así que guarda.
+        Subtarea propia = crearSubtarea(evento, "Se reduce", FECHA, 6, EstadoSubtarea.pendiente);
+        crearSubtarea(evento, "Otra carga", FECHA, 5, EstadoSubtarea.pendiente);
+
+        mockMvc.perform(put("/api/subtareas/{id}", propia.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Se reduce\",\"fechaObjetivo\":\""
+                                + FECHA + "\",\"horasEstimadas\":4}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horasEstimadas").value(4))
+                .andExpect(jsonPath("$.resuelto").value(false));
+    }
+
+    @Test
+    @DisplayName("Aumentar horas por encima del límite responde 409 sin guardar")
+    void aumentarHorasQueEmpeoranElDiaResponde409() throws Exception {
+        Usuario dueno = crearUsuario(6);
+        Evento evento = crearEvento(dueno);
+        Subtarea propia = crearSubtarea(evento, "Crece", FECHA, 2, EstadoSubtarea.pendiente);
+        crearSubtarea(evento, "Otra carga", FECHA, 5, EstadoSubtarea.pendiente);
+
+        mockMvc.perform(put("/api/subtareas/{id}", propia.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Crece\",\"fechaObjetivo\":\""
+                                + FECHA + "\",\"horasEstimadas\":6}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Límite diario excedido"));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(subtareaActualizada(propia.getIdSubtarea(), dueno.getIdUsuario())
+                .getHorasEstimadas()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Renombrar una gestión en un día sobrecargado no da 409")
+    void renombrarNoDisparaElLimite() throws Exception {
+        Usuario dueno = crearUsuario(4);
+        Evento evento = crearEvento(dueno);
+        // El día ya está por encima del límite de 4h antes de editar nada.
+        Subtarea propia = crearSubtarea(evento, "Nombre viejo", FECHA, 6, EstadoSubtarea.pendiente);
+
+        mockMvc.perform(put("/api/subtareas/{id}", propia.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Nombre nuevo\",\"fechaObjetivo\":\""
+                                + FECHA + "\",\"horasEstimadas\":6}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombreGestion").value("Nombre nuevo"));
+    }
+
     private void reprogramar(int idSubtarea, Usuario dueno, LocalDate nuevaFecha) throws Exception {
         mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", idSubtarea)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))

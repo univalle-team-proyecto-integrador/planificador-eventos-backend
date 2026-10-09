@@ -80,6 +80,18 @@ public class SubtareaService {
         return aDto(subtareaRepository.save(subtarea));
     }
 
+    /**
+     * Edita una subtarea respetando el límite diario (US-08).
+     *
+     * <p>Regla: el 409 se lanza solo cuando la edición <strong>empeora</strong> el
+     * día. Reducir horas nunca da 409, aunque el día siga sobrecargado: el
+     * guardado va y la respuesta trae {@code resuelto} para que el frontend diga
+     * si el conflicto quedó resuelto o persiste. Así "reducir horas" siempre
+     * deja avanzar y el aviso sigue visible cuando todavía no alcanza.
+     *
+     * <p>Si la edición no cambia fecha ni horas, no se toca el límite: un simple
+     * cambio de nombre nunca puede dar 409.
+     */
     @Transactional
     public SubtareaDTO actualizarSubtarea(
             Integer usuarioId,
@@ -87,11 +99,44 @@ public class SubtareaService {
             SubtareaActualizacionDTO dto) {
         validarActualizacion(dto);
         Subtarea subtarea = buscarEntidad(usuarioId, id);
+
+        Evento evento = subtarea.getEvento();
+        Usuario usuario = evento.getUsuario();
+        int limiteDiario = usuario.getLimiteHorasDiarias();
+        validarLimiteDiario(limiteDiario);
+
+        boolean cambiaFecha = !dto.fechaObjetivo().equals(subtarea.getFechaObjetivo());
+        boolean cambianHoras = dto.horasEstimadas() != subtarea.getHorasEstimadas();
+
+        // Solo entra si la carga del día puede haber cambiado. Un cambio de
+        // nombre con la misma fecha y las mismas horas no toca el límite.
+        boolean resuelto = true;
+        if (cambiaFecha || cambianHoras) {
+            int horasPreviasEnDestino = horasNoEjecutadasEn(usuario, dto.fechaObjetivo(), subtarea);
+            int totalNuevo = horasPreviasEnDestino + dto.horasEstimadas();
+            int horasPreviasEnOrigen = horasNoEjecutadasEn(
+                    usuario, subtarea.getFechaObjetivo(), null);
+            int totalPrevio = horasPreviasEnOrigen + subtarea.getHorasEstimadas();
+
+            // Solo se bloquea si el día queda peor que antes y por encima del límite.
+            if (totalNuevo > totalPrevio && totalNuevo > limiteDiario) {
+                throw new CapacidadExcedidaException(
+                        subtarea.getIdSubtarea(),
+                        dto.fechaObjetivo(),
+                        limiteDiario,
+                        horasPreviasEnDestino,
+                        dto.horasEstimadas(),
+                        totalNuevo);
+            }
+
+            resuelto = totalNuevo <= limiteDiario;
+        }
+
         fijarLineaBaseSiFalta(subtarea, dto.fechaObjetivo());
         subtarea.setNombreGestion(dto.nombreGestion().trim());
         subtarea.setFechaObjetivo(dto.fechaObjetivo());
         subtarea.setHorasEstimadas(dto.horasEstimadas());
-        return aDto(subtareaRepository.save(subtarea));
+        return aDto(subtareaRepository.save(subtarea), resuelto);
     }
 
     /**
@@ -118,19 +163,9 @@ public class SubtareaService {
         int limiteDiario = usuario.getLimiteHorasDiarias();
         validarLimiteDiario(limiteDiario);
 
-        // La consulta ya excluye las ejecutadas: solo cuenta lo pendiente.
-        int horasExistentes = (int) subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
-                usuario.getIdUsuario(),
-                dto.nuevaFecha(),
-                EstadoSubtarea.ejecutada);
-
-        // Si la fecha no cambia, la propia subtarea ya está en la suma: se resta
-        // para no contarla dos veces.
-        if (subtarea.getFechaObjetivo().equals(dto.nuevaFecha())
-                && subtarea.getEstado() != EstadoSubtarea.ejecutada) {
-            horasExistentes = Math.max(0, horasExistentes - subtarea.getHorasEstimadas());
-        }
-
+        // La propia subtarea se excluye de la suma para no contarla dos veces
+        // cuando sigue en la misma fecha.
+        int horasExistentes = horasNoEjecutadasEn(usuario, dto.nuevaFecha(), subtarea);
         int horasPlanificadasTotales = horasExistentes + dto.nuevasHoras();
         if (horasPlanificadasTotales > limiteDiario) {
             throw new CapacidadExcedidaException(
@@ -277,6 +312,29 @@ public class SubtareaService {
     }
 
     /**
+     * Horas no ejecutadas ya asignadas a una fecha, sin contar {@code propia}.
+     *
+     * <p>Es la misma cuenta que usa {@code reprogramar} y {@code
+     * actualizarSubtarea}: la consulta ya excluye las ejecutadas, y a mano se
+     * resta la subtarea en edición cuando sigue en esa fecha, para no contarla
+     * dos veces. Pasar {@code propia = null} cuenta todo el día.
+     */
+    private int horasNoEjecutadasEn(Usuario usuario, LocalDate fecha, Subtarea propia) {
+        int horas = (int) subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
+                usuario.getIdUsuario(),
+                fecha,
+                EstadoSubtarea.ejecutada);
+
+        if (propia != null
+                && propia.getFechaObjetivo().equals(fecha)
+                && propia.getEstado() != EstadoSubtarea.ejecutada) {
+            horas = Math.max(0, horas - propia.getHorasEstimadas());
+        }
+
+        return horas;
+    }
+
+    /**
      * Guarda la línea base de la gestión la primera vez que su fecha cambia.
      *
      * <p>Solo se fija una vez: reprogramar varias veces no va arrastrando la
@@ -292,6 +350,14 @@ public class SubtareaService {
     }
 
     private SubtareaDTO aDto(Subtarea subtarea) {
+        return aDto(subtarea, null);
+    }
+
+    /**
+     * @param resuelto solo tras una edición; {@code null} en lecturas y altas,
+     *                donde no aplica la semántica de conflicto
+     */
+    private SubtareaDTO aDto(Subtarea subtarea, Boolean resuelto) {
         return new SubtareaDTO(
                 subtarea.getIdSubtarea(),
                 subtarea.getEvento().getIdEvento(),
@@ -301,6 +367,7 @@ public class SubtareaService {
                 subtarea.getHorasEstimadas(),
                 subtarea.getEstado(),
                 subtarea.getNotaExplicativa(),
-                subtarea.getFechaCreacion());
+                subtarea.getFechaCreacion(),
+                resuelto);
     }
 }

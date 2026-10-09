@@ -34,5 +34,19 @@ public record SubtareaDTO(
         String notaExplicativa,
         @Schema(description = "Fecha de creación", example = "2026-09-24T10:15:30",
                 accessMode = Schema.AccessMode.READ_ONLY)
-        LocalDateTime fechaCreacion) {
+        LocalDateTime fechaCreacion,
+
+        @Schema(description = "Tras una edición, indica si el día quedó dentro del límite diario. "
+                + "Va en false cuando se aumentaron horas o se movió la gestión y el día sigue "
+                + "pasándose: el guardado ocurrió, pero el conflicto persiste",
+                example = "true")
+        Boolean resuelto) {
+
+    /** DTO de lectura o creación: no aplica la semántica de conflicto. */
+    public SubtareaDTO(Integer idSubtarea, Integer idEvento, String nombreGestion,
+            LocalDate fechaObjetivo, LocalDate fechaObjetivoOriginal, Integer horasEstimadas,
+            EstadoSubtarea estado, String notaExplicativa, LocalDateTime fechaCreacion) {
+        this(idSubtarea, idEvento, nombreGestion, fechaObjetivo, fechaObjetivoOriginal,
+                horasEstimadas, estado, notaExplicativa, fechaCreacion, null);
+    }
 }
