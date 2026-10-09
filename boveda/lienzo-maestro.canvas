@@ -590,6 +590,24 @@
    "y": 5420,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m032",
+   "type": "file",
+   "file": "mejoras/2026-10-09-032-fecha-original-y-desfase.md",
+   "x": 200,
+   "y": 5620,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p032",
+   "type": "text",
+   "text": "Mejora 032\nLínea base de fecha y desfase\n2026-10-09",
+   "x": 540,
+   "y": 5620,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -1025,6 +1043,20 @@
    "fromNode": "p031",
    "fromSide": "right",
    "toNode": "m031",
+   "toSide": "left"
+  },
+  {
+   "id": "e63",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m032",
+   "toSide": "top"
+  },
+  {
+   "id": "e64",
+   "fromNode": "p032",
+   "fromSide": "right",
+   "toNode": "m032",
    "toSide": "left"
   }
  ]

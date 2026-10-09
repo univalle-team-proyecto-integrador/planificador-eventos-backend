@@ -21,6 +21,10 @@ public record SubtareaDTO(
         @Schema(description = "Fecha objetivo", example = "2026-11-10",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull LocalDate fechaObjetivo,
+        @Schema(description = "Fecha con la que se planificó la gestión; null si nunca se reprogramó. "
+                + "Permite derivar el desfase comparándola con la fecha objetivo",
+                example = "2026-11-03", accessMode = Schema.AccessMode.READ_ONLY)
+        LocalDate fechaObjetivoOriginal,
         @Schema(description = "Horas estimadas", example = "3", minimum = "1",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull @Min(1) Integer horasEstimadas,

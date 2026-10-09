@@ -78,7 +78,7 @@ class SubtareaServiceTest {
     }
 
     private SubtareaDTO dtoAgregar(String nombre, LocalDate fecha, Integer horas) {
-        return new SubtareaDTO(null, null, nombre, fecha, horas, null, null, null);
+        return new SubtareaDTO(null, null, nombre, fecha, null, horas, null, null, null);
     }
 
     @Test
@@ -86,7 +86,7 @@ class SubtareaServiceTest {
         when(eventoRepository.findByIdYUsuarioId(10, 1)).thenReturn(Optional.of(evento));
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
         SubtareaDTO dto = new SubtareaDTO(
-                null, null, "  Confirmar catering  ", LocalDate.of(2026, 11, 15), 4,
+                null, null, "  Confirmar catering  ", LocalDate.of(2026, 11, 15), null, 4,
                 EstadoSubtarea.ejecutada, "Nota previa", null);
 
         SubtareaDTO resultado = subtareaService.agregarSubtarea(1, 10, dto);

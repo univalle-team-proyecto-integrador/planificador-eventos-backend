@@ -87,6 +87,7 @@ public class SubtareaService {
             SubtareaActualizacionDTO dto) {
         validarActualizacion(dto);
         Subtarea subtarea = buscarEntidad(usuarioId, id);
+        fijarLineaBaseSiFalta(subtarea, dto.fechaObjetivo());
         subtarea.setNombreGestion(dto.nombreGestion().trim());
         subtarea.setFechaObjetivo(dto.fechaObjetivo());
         subtarea.setHorasEstimadas(dto.horasEstimadas());
@@ -141,6 +142,7 @@ public class SubtareaService {
                     horasPlanificadasTotales);
         }
 
+        fijarLineaBaseSiFalta(subtarea, dto.nuevaFecha());
         subtarea.setFechaObjetivo(dto.nuevaFecha());
         subtarea.setHorasEstimadas(dto.nuevasHoras());
         return aDto(subtareaRepository.save(subtarea));
@@ -274,12 +276,28 @@ public class SubtareaService {
         }
     }
 
+    /**
+     * Guarda la línea base de la gestión la primera vez que su fecha cambia.
+     *
+     * <p>Solo se fija una vez: reprogramar varias veces no va arrastrando la
+     * base, así el desfase que ve el usuario siempre se mide contra la fecha con
+     * la que se planificó. Si la fecha no cambia no se toca nada, para no marcar
+     * como reprogramada una gestión que solo cambió de horas.
+     */
+    private void fijarLineaBaseSiFalta(Subtarea subtarea, LocalDate nuevaFecha) {
+        if (subtarea.getFechaObjetivoOriginal() == null
+                && !nuevaFecha.equals(subtarea.getFechaObjetivo())) {
+            subtarea.setFechaObjetivoOriginal(subtarea.getFechaObjetivo());
+        }
+    }
+
     private SubtareaDTO aDto(Subtarea subtarea) {
         return new SubtareaDTO(
                 subtarea.getIdSubtarea(),
                 subtarea.getEvento().getIdEvento(),
                 subtarea.getNombreGestion(),
                 subtarea.getFechaObjetivo(),
+                subtarea.getFechaObjetivoOriginal(),
                 subtarea.getHorasEstimadas(),
                 subtarea.getEstado(),
                 subtarea.getNotaExplicativa(),

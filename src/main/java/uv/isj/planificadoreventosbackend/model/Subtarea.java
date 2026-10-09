@@ -40,6 +40,18 @@ public class Subtarea {
     @Column(name = "fecha_objetivo", nullable = false)
     private LocalDate fechaObjetivo;
 
+    /**
+     * Fecha con la que la gestión se planificó por primera vez. Se fija la
+     * primera vez que se reprograma o edita la fecha y ya no se recalcula:
+     * permite derivar si quedó postergada, adelantada o reprogramada sin
+     * duplicar ese estado en otra columna.
+     *
+     * <p>Es nullable a propósito: las subtareas creadas antes de esta columna no
+     * tienen línea base recuperable y no se inventa ninguna.
+     */
+    @Column(name = "fecha_objetivo_original")
+    private LocalDate fechaObjetivoOriginal;
+
     @Column(name = "horas_estimadas", nullable = false)
     private Integer horasEstimadas;
 

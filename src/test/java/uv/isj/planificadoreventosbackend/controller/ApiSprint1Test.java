@@ -169,7 +169,7 @@ class ApiSprint1Test {
                 .andExpect(jsonPath("$[*].idEvento", hasItem(eventoId)));
 
         SubtareaDTO subtarea = new SubtareaDTO(
-                null, null, "Confirmar banquete", LocalDate.of(2026, 11, 12), 3,
+                null, null, "Confirmar banquete", LocalDate.of(2026, 11, 12), null, 3,
                 null, null, null);
         mockMvc.perform(post("/api/eventos/{id}/subtareas", eventoId)
                         .contentType("application/json")
@@ -202,6 +202,7 @@ class ApiSprint1Test {
                 null,
                 "Confirmar catering",
                 LocalDate.of(2026, 11, 15),
+                null,
                 4,
                 EstadoSubtarea.ejecutada,
                 "No debe respetarse al crear",
@@ -312,14 +313,14 @@ class ApiSprint1Test {
                 .hasMessageContaining("nombre");
 
         SubtareaDTO nombreInvalido = new SubtareaDTO(
-                null, null, " ", LocalDate.of(2026, 11, 10), 2,
+                null, null, " ", LocalDate.of(2026, 11, 10), null, 2,
                 null, null, null);
         assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.usuario().getIdUsuario(), base.evento().getIdEvento(), nombreInvalido))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("nombre");
 
         SubtareaDTO horasInvalidas = new SubtareaDTO(
-                null, null, "Tarea", LocalDate.of(2026, 11, 10), 0,
+                null, null, "Tarea", LocalDate.of(2026, 11, 10), null, 0,
                 null, null, null);
         assertThatThrownBy(() -> subtareaService.agregarSubtarea(base.usuario().getIdUsuario(), base.evento().getIdEvento(), horasInvalidas))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -340,7 +341,7 @@ class ApiSprint1Test {
     void rechazaHorasCeroAlCrearSubtarea() throws Exception {
         BaseFixture base = crearBase(6);
         SubtareaDTO request = new SubtareaDTO(
-                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), 0,
+                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), null, 0,
                 null, null, null);
 
         mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
@@ -355,7 +356,7 @@ class ApiSprint1Test {
     void rechazaHorasNegativasAlCrearSubtarea() throws Exception {
         BaseFixture base = crearBase(6);
         SubtareaDTO request = new SubtareaDTO(
-                null, null, "Tarea con horas negativas", LocalDate.of(2026, 11, 10), -2,
+                null, null, "Tarea con horas negativas", LocalDate.of(2026, 11, 10), null, -2,
                 null, null, null);
 
         mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
@@ -381,7 +382,7 @@ class ApiSprint1Test {
     void rechazaHorasNulasAlCrearSubtarea() throws Exception {
         BaseFixture base = crearBase(6);
         SubtareaDTO request = new SubtareaDTO(
-                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), null,
+                null, null, "Tarea sin horas", LocalDate.of(2026, 11, 10), null, null,
                 null, null, null);
 
         mockMvc.perform(post("/api/eventos/{id}/subtareas", base.evento().getIdEvento())
