@@ -2,6 +2,8 @@ package uv.isj.planificadoreventosbackend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,6 +27,7 @@ import uv.isj.planificadoreventosbackend.model.dto.ReprogramarDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
+import uv.isj.planificadoreventosbackend.model.dto.ProblemaCapacidadDTO;
 import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
@@ -142,7 +145,13 @@ public class SubtareaController {
             @ApiResponse(responseCode = "401",
                     description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe"),
-            @ApiResponse(responseCode = "409", description = "Supera el límite diario; la subtarea no se modificó")
+            @ApiResponse(responseCode = "409",
+                    description = "Supera el límite diario; la subtarea no se modificó. "
+                            + "Devuelve un ProblemDetail con limiteDiario, "
+                            + "horasAsignadasPreviamente, horasSolicitadas, "
+                            + "horasPlanificadasTotales y excedente en el nivel raíz",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemaCapacidadDTO.class)))
     })
     @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO reprogramar(

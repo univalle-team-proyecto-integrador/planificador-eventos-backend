@@ -265,6 +265,85 @@ class CapacidadApiTest {
                 .andExpect(jsonPath("$.horasEstimadas").value(4));
     }
 
+    // --- Línea base del desfase ---------------------------------------------
+
+    @Test
+    @DisplayName("Reprogramar guarda la fecha con la que se planificó")
+    void reprogramarGuardaLaFechaOriginal() throws Exception {
+        Usuario dueno = crearUsuario(8);
+        Evento evento = crearEvento(dueno);
+        Subtarea mover = crearSubtarea(evento, "Se adelanta", FECHA.plusDays(4), 2,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", mover.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nuevaFecha\":\"" + FECHA + "\",\"nuevasHoras\":2}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fechaObjetivo").value(FECHA.toString()))
+                .andExpect(jsonPath("$.fechaObjetivoOriginal").value(FECHA.plusDays(4).toString()));
+    }
+
+    @Test
+    @DisplayName("Reprogramar dos veces no arrastra la línea base")
+    void reprogramarVariasVecesMantieneLaPrimeraFecha() throws Exception {
+        Usuario dueno = crearUsuario(16);
+        Evento evento = crearEvento(dueno);
+        Subtarea mover = crearSubtarea(evento, "Va y viene", FECHA.plusDays(5), 1,
+                EstadoSubtarea.pendiente);
+
+        reprogramar(mover.getIdSubtarea(), dueno, FECHA.plusDays(1));
+        reprogramar(mover.getIdSubtarea(), dueno, FECHA.plusDays(2));
+
+        entityManager.flush();
+        entityManager.clear();
+        Subtarea guardada = subtareaActualizada(mover.getIdSubtarea(), dueno.getIdUsuario());
+        assertThat(guardada.getFechaObjetivo()).isEqualTo(FECHA.plusDays(2));
+        assertThat(guardada.getFechaObjetivoOriginal()).isEqualTo(FECHA.plusDays(5));
+    }
+
+    @Test
+    @DisplayName("Cambiar solo las horas no marca la gestión como reprogramada")
+    void reprogramarSinCambioDeFechaNoFijaLineaBase() throws Exception {
+        Usuario dueno = crearUsuario(8);
+        Evento evento = crearEvento(dueno);
+        Subtarea misma = crearSubtarea(evento, "Solo cambian las horas", FECHA, 2,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", misma.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nuevaFecha\":\"" + FECHA + "\",\"nuevasHoras\":5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fechaObjetivoOriginal").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Editar la fecha también deja la línea base original")
+    void editarSubtareaFijaLaFechaOriginal() throws Exception {
+        Usuario dueno = crearUsuario(8);
+        Evento evento = crearEvento(dueno);
+        Subtarea editar = crearSubtarea(evento, "Se posterga", FECHA, 3,
+                EstadoSubtarea.pendiente);
+
+        mockMvc.perform(put("/api/subtareas/{id}", editar.getIdSubtarea())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Se posterga\",\"fechaObjetivo\":\""
+                                + FECHA.plusDays(3) + "\",\"horasEstimadas\":3}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fechaObjetivo").value(FECHA.plusDays(3).toString()))
+                .andExpect(jsonPath("$.fechaObjetivoOriginal").value(FECHA.toString()));
+    }
+
+    private void reprogramar(int idSubtarea, Usuario dueno, LocalDate nuevaFecha) throws Exception {
+        mockMvc.perform(patch("/api/subtareas/{id}/reprogramar", idSubtarea)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nuevaFecha\":\"" + nuevaFecha + "\",\"nuevasHoras\":1}"))
+                .andExpect(status().isOk());
+    }
+
     // --- Fixtures -----------------------------------------------------------
 
     private Usuario crearUsuario(int limiteHorasDiarias) {

@@ -44,8 +44,18 @@ CREATE TABLE IF NOT EXISTS subtarea (
     id_evento INT NOT NULL REFERENCES evento(id_evento) ON DELETE CASCADE,
     nombre_gestion VARCHAR(200) NOT NULL,
     fecha_objetivo DATE NOT NULL,
+    fecha_objetivo_original DATE,
     horas_estimadas INT NOT NULL CONSTRAINT chk_horas_positivas CHECK (horas_estimadas > 0),
     estado VARCHAR(20) NOT NULL DEFAULT 'pendiente' CONSTRAINT chk_estado CHECK (estado IN ('pendiente', 'ejecutada', 'pospuesta')),
     nota_explicativa TEXT,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Migración 2026-10-09: fecha con la que la gestión se planificó por primera vez.
+-- Es la que permite derivar el desfase (postergada / adelantada / reprogramada)
+-- sin duplicar ese estado en otra columna. Ejecutar UNA sola vez, ANTES de
+-- desplegar el backend: con ddl-auto=validate la app no arranca si la entidad
+-- declara una columna que la base todavía no tiene.
+-- Es nullable a propósito: las subtareas ya creadas no tienen línea base
+-- recuperable y no se inventa ninguna. Se llena sola al próximo cambio de fecha.
+-- ALTER TABLE subtarea ADD COLUMN fecha_objetivo_original DATE;

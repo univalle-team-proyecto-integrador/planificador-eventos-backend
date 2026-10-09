@@ -166,6 +166,7 @@ public class EventoService {
                 subtarea.getEvento().getIdEvento(),
                 subtarea.getNombreGestion(),
                 subtarea.getFechaObjetivo(),
+                subtarea.getFechaObjetivoOriginal(),
                 subtarea.getHorasEstimadas(),
                 subtarea.getEstado(),
                 subtarea.getNotaExplicativa(),
