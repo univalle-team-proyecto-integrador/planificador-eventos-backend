@@ -66,6 +66,51 @@ class SwaggerOpenApiTest {
                 .andExpect(jsonPath("$.components.schemas.EstadoSubtareaDTO").exists());
     }
 
+    /**
+     * Regresión: Swagger UI decide si adjunta la cabecera Authorization a partir
+     * del campo {@code security} de cada operación. Una operación protegida por
+     * la cadena de seguridad pero declarada sin {@code @SecurityRequirement}
+     * aparece sin candado en la interfaz, el cliente no le manda el token y
+     * recibe un 401 aunque su sesión sea válida. Con PROTECT_SUBTAREAS activo
+     * eso afectaba a /api/subtareas/**.
+     */
+    @Test
+    void lasOperacionesProtegidasDeclaranElEsquemaBearer() throws Exception {
+        String documento = mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode spec = objectMapper.readTree(documento);
+        JsonNode paths = spec.path("paths");
+
+        List<String[]> protegidas = List.of(
+                new String[] { "/api/users/capacity", "get" },
+                new String[] { "/api/users/capacity", "put" },
+                new String[] { "/api/subtareas/hoy", "get" },
+                new String[] { "/api/subtareas/hoy/agrupado", "get" },
+                new String[] { "/api/subtareas/{id}/reprogramar", "patch" },
+                new String[] { "/api/subtareas/{id}/estado", "patch" },
+                new String[] { "/api/users/profile", "get" });
+
+        for (String[] operacion : protegidas) {
+            String ruta = operacion[0];
+            String metodo = operacion[1];
+            JsonNode security = paths.path(ruta).path(metodo).path("security");
+
+            assertThat(security.isArray())
+                    .withFailMessage(
+                            "%s %s debe declarar security bearerAuth para que Swagger UI "
+                                    + "adjunte la cabecera Authorization", metodo.toUpperCase(), ruta)
+                    .isTrue();
+            assertThat(security.toString())
+                    .withFailMessage("%s %s no referencia el esquema bearerAuth",
+                            metodo.toUpperCase(), ruta)
+                    .contains("bearerAuth");
+        }
+    }
+
     @Test
     void ningunaOperacionDocumentadaUsaElMediaTypeGenerico() throws Exception {
         String documento = mockMvc.perform(get("/v3/api-docs"))

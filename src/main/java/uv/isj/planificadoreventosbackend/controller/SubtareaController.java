@@ -56,8 +56,10 @@ public class SubtareaController {
     @Operation(summary = "Listar las gestiones no ejecutadas de hoy")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Gestiones no ejecutadas para la fecha consultada"),
-            @ApiResponse(responseCode = "400", description = "La fecha no es válida")
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public List<SubtareaDTO> listarParaHoy(
             @Parameter(description = "Identificador del organizador. Opcional y solo se "
                     + "honra en peticiones anónimas, por compatibilidad con el cliente anterior "
@@ -126,13 +128,17 @@ public class SubtareaController {
             summary = "Reprogramar una subtarea respetando el límite diario",
             description = "Devuelve 200 con la subtarea actualizada cuando cabe en el límite. "
                     + "Si lo supera devuelve 409 sin guardar nada, con el detalle de cuántas "
-                    + "horas hay que liberar.")
+                    + "horas hay que liberar. "
+                    + "Requiere autorización Bearer JWT.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reprogramación aplicada"),
             @ApiResponse(responseCode = "400", description = "La nueva fecha o las horas no son válidas"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe"),
             @ApiResponse(responseCode = "409", description = "Supera el límite diario; la subtarea no se modificó")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO reprogramar(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
@@ -170,8 +176,11 @@ public class SubtareaController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Estado actualizado; una subtarea puede reabrirse a pendiente"),
             @ApiResponse(responseCode = "400", description = "El estado solicitado no es válido"),
+            @ApiResponse(responseCode = "401",
+                    description = "Falta un token de autenticación válido o el enviado no es válido"),
             @ApiResponse(responseCode = "404", description = "La subtarea no existe")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO cambiarEstado(
             @Parameter(description = "Identificador de la subtarea", example = "1")
             @PathVariable Integer id,
