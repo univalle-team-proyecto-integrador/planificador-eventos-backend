@@ -4,6 +4,17 @@ Backend del MVP (Sprint 1) para el planificador de eventos dirigido a organizado
 
 - Repositorio del frontend: `planificador-eventos-frontend` (deploy en Vercel)
 
+## Documentación del proyecto
+
+Aquí se subirá el enlace a la carpeta con toda la documentación del proyecto
+(se publicará cuando esté disponible).
+
+Mientras tanto, la documentación vive directamente en este repositorio:
+
+- [`docs/`](docs/) — informes de análisis y arquitectura (por ejemplo, [`docs/informe-arquitectura.md`](docs/informe-arquitectura.md))
+- `boveda/` — bóveda Obsidian con el registro de cada mejora
+- `test/` — guías, casos de prueba y evidencia de validación
+
 ## Stack
 
 - **Spring Boot 4.1.1 + Java 21 + Maven** (wrapper `./mvnw`, target `--release 21`)
@@ -68,6 +79,7 @@ src/main/java/uv/isj/planificadoreventosbackend/
 └── config/         # Configuración global (CorsConfig, OpenApiConfig)
 db/
 └── ddl-supabase.sql # DDL ejecutado en Supabase (esquema + seed)
+docs/                # Informes de análisis y arquitectura
 ```
 
 ## API

@@ -33,3 +33,4 @@
 | 2026-10-08  | 030 | Capacidad diaria y conflicto 409 al reprogramar | [2026-10-08-030-capacidad-diaria-y-conflicto-409](2026-10-08-030-capacidad-diaria-y-conflicto-409.md) |
 | 2026-10-08  | 031 | Horas estimadas declaradas en el evento | [2026-10-08-031-horas-estimadas-del-evento](2026-10-08-031-horas-estimadas-del-evento.md) |
 | 2026-10-09  | 032 | Línea base de la fecha para derivar postergada / adelantada | [2026-10-09-032-fecha-original-y-desfase](2026-10-09-032-fecha-original-y-desfase.md) |
+| 2026-10-10  | 033 | Informe de análisis y arquitectura del backend | [2026-10-10-033-informe-analisis-arquitectura](2026-10-10-033-informe-analisis-arquitectura.md) |

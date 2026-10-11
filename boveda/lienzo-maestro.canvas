@@ -608,6 +608,25 @@
    "y": 5620,
    "width": 340,
    "height": 140
+  },
+  {
+   "id": "m033",
+   "type": "file",
+   "file": "mejoras/2026-10-10-033-informe-analisis-arquitectura.md",
+   "x": 200,
+   "y": 5820,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p033",
+   "type": "text",
+   "text": "Mejora 033\nInforme de análisis y arquitectura\n2026-10-10",
+   "x": 540,
+   "y": 5820,
+   "width": 340,
+   "height": 140,
+   "color": "1"
   }
  ],
  "edges": [
@@ -1057,6 +1076,20 @@
    "fromNode": "p032",
    "fromSide": "right",
    "toNode": "m032",
+   "toSide": "left"
+  },
+  {
+   "id": "e65",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m033",
+   "toSide": "top"
+  },
+  {
+   "id": "e66",
+   "fromNode": "p033",
+   "fromSide": "right",
+   "toNode": "m033",
    "toSide": "left"
   }
  ]
