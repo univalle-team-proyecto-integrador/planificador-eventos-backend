@@ -3,6 +3,7 @@ package uv.isj.planificadoreventosbackend.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -491,4 +492,38 @@ class CapacidadApiTest {
     private String tokenDe(Usuario usuario) {
         return jwtService.generarToken(usuario.getIdUsuario(), usuario.getEmail());
     }
+
+    @Test
+    @DisplayName("Crear una subtarea que supera el límite diario devuelve 409 y no la crea")
+    void crearSubtareaQueSuperaLimiteDevuelve409() throws Exception {
+        Usuario dueno = crearUsuario(4);
+        Evento evento = crearEvento(dueno);
+        crearSubtarea(evento, "Primera", FECHA, 3, EstadoSubtarea.pendiente);
+
+        mockMvc.perform(post("/api/eventos/{id}/subtareas", evento.getIdEvento())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombreGestion\":\"Segunda\",\"fechaObjetivo\":\""
+                                + FECHA + "\",\"horasEstimadas\":2}"))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Límite diario excedido"))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.limiteDiario").value(4))
+                .andExpect(jsonPath("$.horasAsignadasPreviamente").value(3))
+                .andExpect(jsonPath("$.horasSolicitadas").value(2))
+                .andExpect(jsonPath("$.horasPlanificadasTotales").value(5))
+                .andExpect(jsonPath("$.excedente").value(1))
+                .andExpect(jsonPath("$.fecha").value(FECHA.toString()))
+                .andExpect(jsonPath("$.idSubtarea").doesNotExist());
+
+        entityManager.clear();
+        long total = entityManager.createQuery(
+                        "SELECT COUNT(s) FROM Subtarea s WHERE s.evento.idEvento = :evento",
+                        Long.class)
+                .setParameter("evento", evento.getIdEvento())
+                .getSingleResult();
+        assertThat(total).isEqualTo(1);
+    }
+
 }

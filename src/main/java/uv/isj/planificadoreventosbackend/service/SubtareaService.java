@@ -68,6 +68,21 @@ public class SubtareaService {
     public SubtareaDTO agregarSubtarea(Integer usuarioId, Integer eventoId, SubtareaDTO dto) {
         validarSubtarea(eventoId, dto);
         Evento evento = buscarEvento(usuarioId, eventoId);
+        Usuario usuario = evento.getUsuario();
+        int limiteDiario = usuario.getLimiteHorasDiarias();
+        validarLimiteDiario(limiteDiario);
+
+        int horasExistentes = horasNoEjecutadasEn(usuario, dto.fechaObjetivo(), null);
+        int horasPlanificadasTotales = horasExistentes + dto.horasEstimadas();
+        if (horasPlanificadasTotales > limiteDiario) {
+            throw new CapacidadExcedidaException(
+                    null,
+                    dto.fechaObjetivo(),
+                    limiteDiario,
+                    horasExistentes,
+                    dto.horasEstimadas(),
+                    horasPlanificadasTotales);
+        }
 
         Subtarea subtarea = new Subtarea();
         evento.agregarSubtarea(subtarea);
