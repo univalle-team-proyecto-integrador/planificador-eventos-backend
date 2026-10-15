@@ -70,7 +70,6 @@ public class EventoService {
         evento.setCliente(dto.cliente().trim());
         evento.setFechaEvento(dto.fechaEvento());
         evento.setLugar(dto.lugar().trim());
-        evento.setHorasEstimadas(dto.horasEstimadas());
         return aDto(eventoRepository.save(evento), List.of());
     }
 
@@ -98,7 +97,6 @@ public class EventoService {
         evento.setCliente(dto.cliente().trim());
         evento.setFechaEvento(dto.fechaEvento());
         evento.setLugar(dto.lugar().trim());
-        evento.setHorasEstimadas(dto.horasEstimadas());
 
         return aDto(eventoRepository.save(evento), List.of());
     }
@@ -139,11 +137,6 @@ public class EventoService {
         if (dto.lugar() == null || dto.lugar().isBlank()) {
             throw new IllegalArgumentException("El lugar del evento es obligatorio");
         }
-        // Segunda capa: el @Min(1) del DTO cubre el binding, esto cubre el resto.
-        if (dto.horasEstimadas() == null || dto.horasEstimadas() <= 0) {
-            throw new IllegalArgumentException(
-                    "Las horas estimadas del evento deben ser mayores que cero");
-        }
     }
 
     private EventoDTO aDto(Evento evento, List<SubtareaDTO> subtareas) {
@@ -154,7 +147,6 @@ public class EventoService {
                 evento.getNombre(),
                 evento.getCliente(),
                 evento.getFechaEvento(),
-                evento.getHorasEstimadas(),
                 evento.getLugar(),
                 evento.getFechaCreacion(),
                 subtareas);

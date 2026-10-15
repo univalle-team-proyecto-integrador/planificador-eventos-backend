@@ -303,7 +303,7 @@ class ApiSprint1Test {
                 base.tipoEvento().getIdTipoEvento(),
                 "   ",
                 "Cliente",
-                LocalDateTime.of(2026, 12, 1, 15, 0), 12,
+                LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
                 null,
                 null);
@@ -545,7 +545,7 @@ class ApiSprint1Test {
                 base.tipoEvento().getIdTipoEvento(),
                 "",
                 "Cliente",
-                LocalDateTime.of(2026, 12, 1, 15, 0), 12,
+                LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
                 null,
                 null);
@@ -617,7 +617,7 @@ class ApiSprint1Test {
                 base.tipoEvento().getIdTipoEvento(),
                 nombre,
                 "Cliente de prueba",
-                LocalDateTime.of(2026, 12, 1, 15, 0), 12,
+                LocalDateTime.of(2026, 12, 1, 15, 0),
                 "Cali",
                 null,
                 null);
