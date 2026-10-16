@@ -29,7 +29,7 @@ flowchart LR
 
 ## CORS
 
-`app.cors.allowed-origins=https://*.vercel.app,http://localhost:5173` en `application.properties`, aplicado por `config/CorsConfig.java` a `/api/**` con `allowCredentials(true)`.
+`app.cors.allowed-origins=https://*.vercel.app,http://localhost:5173,http://127.0.0.1:5173` en `application.properties`, aplicado por `config/CorsConfig.java` a `/api/**` con `allowCredentials(true)`.
 
 - El frontend desplegado (`*.vercel.app`) funciona.
 - El desarrollo local apuntando al backend desplegado también pasa CORS si se abre desde `localhost:5173`.

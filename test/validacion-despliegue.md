@@ -13,11 +13,12 @@ bash scripts/verificar-despliegue.sh
 | # | Paso | Verificación |
 | --- | --- | --- |
 | 1 | Backend vivo | `GET /api/health` → `healthy` + `connected`. Reintenta 3 veces (cold start). |
-| 2 | Supabase real | `GET /api/tipos-evento` y `GET /api/eventos?usuarioId=1` devuelven datos (no `[]`). |
-| 3 | CORS | Preflight `OPTIONS` con `Origin: https://planificador-eventos-frontend-ten.vercel.app` → `access-control-allow-origin` correcto. |
-| 4 | Bundle del frontend | El JS servido por Vercel contiene `planificador-eventos-backend-1.onrender.com`. |
+| 2 | Autenticación (US-11) | `POST /api/users/register` / `login` devuelven token y `GET /api/users/profile` con `Bearer` responde el usuario del token. |
+| 3 | Supabase real | `GET /api/tipos-evento` y `GET /api/eventos?usuarioId=1` devuelven datos (no `[]`). |
+| 4 | CORS | Preflight `OPTIONS` con `Origin: https://planificador-eventos-frontend-ten.vercel.app` → `access-control-allow-origin` correcto. |
+| 5 | Bundle del frontend | El JS servido por Vercel contiene `planificador-eventos-backend-1.onrender.com`. |
 
-Salida esperada al final: `Resumen: 5 correctos, 0 fallidos.` y `Cadena completa operativa.`
+Salida esperada al final: `Cadena completa operativa.` (la línea `Resumen:` debe terminar en `0 fallidos`; el recuento de correctos varía porque los pasos opcionales salen como `[warn]`, no como `[OK]`).
 
 ## Paso a paso manual (equivalente)
 

@@ -5,6 +5,8 @@
 - **Rol:** investigador + arquitecto de software
 - **Estado:** documento de referencia; la priorización P0→P2 es la hoja de ruta sugerida
 
+> **Actualización (2026-10-16):** es una fotografía del 2026-10-10. Desde entonces el **hallazgo crítico 1 quedó resuelto** (`SecurityConfig.patronesProtegidos()` cubre `/api/eventos/**` y `/api/subtareas/**`) y el recuento de pruebas creció. Lo señalado se conserva como historia; el estado vigente está en `README.md` y en la bóveda.
+
 ---
 
 ## Resumen ejecutivo
@@ -34,7 +36,9 @@ El informe identifica **2 hallazgos críticos** (brecha de autenticación en `/a
 
 ## Hallazgos críticos
 
-### 1. `/api/eventos/**` queda abierto en la cadena de seguridad (fail-open)
+### 1. `/api/eventos/**` queda abierto en la cadena de seguridad (fail-open) — RESUELTO
+
+> **Actualización (2026-10-16):** resuelto. `SecurityConfig.patronesProtegidos()` aplica el flag a `/api/eventos/**` **y** `/api/subtareas/**` (`config/SecurityConfig.java:134-136`), de modo que la cadena y el controlador coinciden y ya no declara público lo que responde 401. Sigue pendiente la sugerencia de fondo (default-deny y renombrar el flag), pero la brecha descrita abajo ya no existe.
 
 No hay `requestMatchers` para `/api/eventos/**` en `config/SecurityConfig.java:95-108`, así que esas rutas caen en `anyRequest().permitAll()`. Sin token, `EventoController.propietario()` delega en `CurrentUserProvider.idUsuarioActual()`, que devuelve `LEGACY_USER_ID` (por defecto `1`).
 
@@ -86,14 +90,14 @@ Dos endpoints de la misma vista pueden devolver **días distintos** (desfase de 
 | Datos/persistencia| **Aceptable** | `ddl-auto=validate` evita que la app altere el esquema, pero sin migraciones versionadas ni índices el mantenimiento y el rendimiento sufren. |
 | Rendimiento      | **Aceptable** | Correcto para MVP; N+1 y falta de paginación limitan el crecimiento. |
 | Despliegue       | **Bueno** | 12-factor, Docker multi-stage no-root, health check en `/api/health`, scripts de verificación y smoke. |
-| Testing          | **Bueno** | 133 `@Test`; cobertura por capa y pruebas de aislamiento por reflexión. Limitación razonable: H2 ≠ PostgreSQL. |
+| Testing          | **Bueno** | 167 `@Test` (cifra vigente al 2026-10-16; el informe original contaba 133); cobertura por capa y pruebas de aislamiento por reflexión. Limitación razonable: H2 ≠ PostgreSQL. |
 | Observabilidad   | **Débil** | Actuator mínimo; sin métricas ni logging estructurado. |
 | Mantenibilidad   | **Buena** | Código legible, comentarios útiles, documentación viva en la bóveda. Ruido menor (imports duplicados, javadocs). |
 
 ## Roadmap priorizado
 
 ### P0 — Seguridad y consistencia
-1. Cerrar la brecha de `/api/eventos/**` y pasar a *default-deny* (`anyRequest().authenticated()` + lista blanca).
+1. ~~Cerrar la brecha de `/api/eventos/**`~~ (hecho: `patronesProtegidos()` cubre eventos y subtareas). Queda pasar a *default-deny* (`anyRequest().authenticated()` + lista blanca).
 2. Separar/renombrar el flag de protección para que no acople el alcance de eventos y subtareas.
 3. Unificar la zona horaria (`Clock`/`ZoneId` fijo) en toda la lógica de fechas.
 

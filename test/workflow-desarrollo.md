@@ -61,7 +61,7 @@ Cualquier integrante con acceso al proyecto Render puede ejecutarlo.
 ```bash
 bash scripts/verificar-despliegue.sh
 ```
-→ `Resumen: 5 correctos, 0 fallidos.` (health → datos Supabase → CORS → bundle).
+→ `Cadena completa operativa.` con `0 fallidos` (health → autenticación US-11 → datos Supabase → CORS → bundle).
 
 ### 8. Registrar en la bóveda
 - Crear archivo en `boveda/mejoras/AAAA-MM-DD-NNN-breve-slug.md` (plantilla → `plantilla-mejora.md`).

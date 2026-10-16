@@ -100,11 +100,11 @@ docs/                # Informes de análisis y arquitectura
 | `GET`    | `/api/subtareas/hoy/agrupado?fecha={yyyy-MM-dd}[&course={evento}][&status={estado}]` | Vista "Hoy" agrupada: vencidas/paraHoy/próximas (filtros opcionales) |
 | `POST`   | `/api/eventos`                      | Crea un evento con sus horas estimadas; devuelve 201 y la ubicación |
 | `PUT`    | `/api/eventos/{id}`                 | Actualiza un evento                                             |
-| `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; devuelve 201                                |
+| `POST`   | `/api/eventos/{id}/subtareas`       | Agrega una subtarea; 201, o 409 si supera el límite diario       |
 | `DELETE` | `/api/eventos/{id}`                 | Elimina el evento y sus subtareas en cascada; devuelve 204        |
 | `GET`    | `/api/subtareas?eventoId={id}`      | Lista las subtareas de un evento                               |
 | `GET`    | `/api/subtareas/{id}`               | Obtiene el detalle de una subtarea                              |
-| `PUT`    | `/api/subtareas/{id}`               | Actualiza nombre, fecha objetivo y horas de una subtarea         |
+| `PUT`    | `/api/subtareas/{id}`               | Actualiza nombre, fecha objetivo y horas; 409 si empeora y supera el límite |
 | `PATCH`  | `/api/subtareas/{id}/reprogramar`   | Reprograma; 200 con la subtarea o 409 si excede el límite diario |
 | `PATCH`  | `/api/subtareas/{id}/estado`        | Cambia el estado; `pendiente` reabre una subtarea                |
 | `DELETE` | `/api/subtareas/{id}`               | Elimina una subtarea                                             |
@@ -225,6 +225,12 @@ trae el excedente para que el frontend sepa cuántas horas hay que liberar:
 ```
 
 Si la reprogramación cabe en el límite, responde **200** con la `SubtareaDTO` ya actualizada.
+
+El mismo límite se evalúa al **crear** una subtarea (`POST /api/eventos/{id}/subtareas`) y al
+**editar** horas o fecha (`PUT /api/subtareas/{id}`): si la operación deja al organizador por
+encima del límite, responde **409** y no guarda nada. Al editar solo se rechaza si el cambio
+**empeora** la situación (reducir horas siempre se acepta, aunque el día siga sobrecargado).
+El 409 usa el mismo `ProblemDetail` con el excedente y el `idSubtarea` (`null` al crear).
 
 ## Base de datos (Supabase)
 

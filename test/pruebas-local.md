@@ -5,7 +5,7 @@ Banco de pruebas local: validar contra **Supabase real** antes de desplegar. Req
 ## 0. Precondición: credenciales locales
 
 - Backend `.env`: URL **pooler** + `DB_USER=postgres.akyvplcsiqhmfkqxvgoq` + password real.
-- Frontend `.env`: `VITE_API_URL=http://localhost:8080`, `VITE_USER_ID=1`.
+- Frontend `.env`: `VITE_API_URL=http://localhost:8080` (`VITE_USER_ID` ya no existe: el propietario sale del token).
 
 Comprobación sin levantar la app:
 
@@ -32,10 +32,13 @@ curl -s http://localhost:8080/api/health
 #   → {"status":"healthy","database":"connected",...}
 
 # Crear evento de prueba (devuelve el DTO con idEvento)
+# `idUsuario` es opcional y se ignora: el propietario sale del token.
 curl -s -X POST http://localhost:8080/api/eventos -H "Content-Type: application/json" \
-  -d '{"idUsuario":1,"idTipoEvento":1,"nombre":"Prueba E2E local","cliente":"Equipo","fechaEvento":"2026-12-01T10:00:00","lugar":"Sala de prueba"}'
+  -d '{"idTipoEvento":1,"nombre":"Prueba E2E local","cliente":"Equipo","fechaEvento":"2026-12-01T10:00:00","lugar":"Sala de prueba"}'
 
 # Aparece en el listado del usuario
+# `usuarioId` es opcional y se ignora con token (el propietario sale de él);
+# sin token el backend lo honra solo por compatibilidad con el cliente legado.
 curl -s "http://localhost:8080/api/eventos?usuarioId=1"
 
 # Limpieza: borrar con el idEvento devuelto

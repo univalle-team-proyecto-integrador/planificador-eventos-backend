@@ -8,8 +8,8 @@ La configuración es **12-factor**: cada entorno aporta las variables completas.
 | --- | --- | --- |
 | Backend local (`planificador-eventos-backend/.env`) | `DB_URL`, `DB_USER`, `DB_PASSWORD` | Conexión JDBC a Supabase. Usar **pooler** (este PC no tiene IPv6). |
 | Render (`render.yaml` + dashboard) | `DB_URL`, `DB_USER`, `JAVA_OPTS`; `DB_PASSWORD` **a mano en el dashboard** | Ya configurado y funcionando. No tocar. |
-| Frontend local (`planificador-eventos-frontend/.env`) | `VITE_API_URL`, `VITE_USER_ID` | Solo apuntan al **backend**, nunca a Supabase. |
-| Vercel (dashboard → Environment Variables) | `VITE_API_URL`, `VITE_USER_ID` | **Deben conservar el prefijo `VITE_`** para que Vite las incruste en el bundle. |
+| Frontend local (`planificador-eventos-frontend/.env`) | `VITE_API_URL` | Solo apunta al **backend**, nunca a Supabase. El propietario sale del token: `VITE_USER_ID` ya no existe. |
+| Vercel (dashboard → Environment Variables) | `VITE_API_URL` | **Debe conservar el prefijo `VITE_`** para que Vite la incruste en el bundle. La sesión (US-11) viaja en el token JWT, no por variable de entorno. |
 
 ## Backend `.env` (local)
 
@@ -42,14 +42,13 @@ DB_PASSWORD=<misma password real>
 ```dotenv
 # Backend local levantado con ./mvnw spring-boot:run
 VITE_API_URL=http://localhost:8080
-
-# Usuario temporal del organizador (hasta implementar autenticación)
-VITE_USER_ID=1
 ```
+
+> La autenticación (US-11) ya está implementada con **JWT propio del backend**: la sesión vive en `localStorage` (claves `eventflow.token` / `eventflow.sesion`) y el propietario sale del token, así que el `.env` del frontend solo lleva `VITE_API_URL`. **`VITE_USER_ID` ya no existe.**
 
 ## Vercel (despliegue del frontend)
 
-- `VITE_API_URL=https://planificador-eventos-backend-1.onrender.com` y `VITE_USER_ID=1`.
+- `VITE_API_URL=https://planificador-eventos-backend-1.onrender.com`.
 - **Sin el prefijo `VITE_` la variable no llega al navegador** (Vite solo expone `VITE_*`). No pasa nada catastrófico porque existe el fallback en `api.js`, pero la variable queda inerte.
 - Vite incrusta las variables al **subir el build**: después de cambiarlas hay que *Redeploy*.
 - No poner aquí password de BD ni ningún secreto (van al bundle, son públicas).

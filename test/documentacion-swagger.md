@@ -31,13 +31,18 @@ Swagger UI (mismo host) ────▶ /api/** (Try it out, mismo origen)
 1. Abrir `https://planificador-eventos-backend-1.onrender.com/swagger-ui.html`.
 2. Expandir el endpoint deseado (ej. `GET /api/eventos` o `POST /api/eventos`).
 3. En *Try it out* rellenar parámetros con el usuario real (`usuarioId=1`) o el cuerpo JSON del ejemplo.
-4. *Execute* → revisar código de respuesta (200/201/400/404) y el cuerpo JSON.
+4. *Execute* → revisar código de respuesta (200/201/400/401/404/409) y el cuerpo JSON.
 5. **Evidencia**: captura del endpoint expandido + respuesta del *Try it out*.
 
 ## Endpoints expuestos
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
+| POST | `/api/users/register` | Crear una cuenta (US-11) |
+| POST | `/api/users/login` | Iniciar sesión (US-11) |
+| GET | `/api/users/profile` | Perfil del usuario del token |
+| GET | `/api/users/capacity` | Capacidad diaria (límite, comprometido y disponible) |
+| PUT | `/api/users/capacity` | Ajustar el límite de horas diarias |
 | GET | `/api/health` | Estado de la app y de la BD |
 | GET | `/api/tipos-evento` | Catálogo de tipos de evento |
 | GET | `/api/eventos?usuarioId=1` | Eventos del organizador |
@@ -47,6 +52,8 @@ Swagger UI (mismo host) ────▶ /api/** (Try it out, mismo origen)
 | PUT | `/api/eventos/{id}` | Actualizar evento |
 | DELETE | `/api/eventos/{id}` | Eliminar evento |
 | POST | `/api/eventos/{id}/subtareas` | Añadir subtarea |
+| GET | `/api/subtareas/hoy?fecha={iso}` | Gestiones no ejecutadas de hoy |
+| GET | `/api/subtareas/hoy/agrupado?fecha={iso}` | Gestiones de hoy agrupadas (vencidas/paraHoy/próximas) |
 | GET | `/api/subtareas?eventoId={id}` | Subtareas por evento |
 | GET | `/api/subtareas/{id}` | Detalle de una subtarea |
 | PUT | `/api/subtareas/{id}` | Editar una subtarea |
@@ -60,7 +67,6 @@ Swagger UI (mismo host) ────▶ /api/** (Try it out, mismo origen)
 
 ```json
 {
-  "idUsuario": 1,
   "idTipoEvento": 1,
   "nombre": "Evento de prueba Swagger",
   "cliente": "Equipo QA",

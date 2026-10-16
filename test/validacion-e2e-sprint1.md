@@ -5,6 +5,8 @@
 - **Área:** coordinación / QA
 - **Estado:** completada (pendiente solo evidencia externa del tablero Jira)
 
+> **Nota histórica:** esta acta es evidencia del **Sprint 1**. Las cifras de tests, los recuentos y los hashes de despliegue corresponden a esa fecha (2026-09-25) y no se actualizan; para el estado vigente, consultar los documentos actuales.
+
 ## Objetivo
 
 Cerrar la tarea de coordinación SCRUM-1-COORD-1: demostrar que el flujo del Sprint 1 funciona de punta a punta (**frontend Vercel → backend Render → Supabase**) y que cada historia tiene evidencia.
