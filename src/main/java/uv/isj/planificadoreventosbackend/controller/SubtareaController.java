@@ -28,6 +28,7 @@ import uv.isj.planificadoreventosbackend.model.dto.SubtareaActualizacionDTO;
 import uv.isj.planificadoreventosbackend.model.dto.SubtareaDTO;
 import uv.isj.planificadoreventosbackend.model.dto.HoyResponseDTO;
 import uv.isj.planificadoreventosbackend.model.dto.ProblemaCapacidadDTO;
+import uv.isj.planificadoreventosbackend.model.dto.ProblemaDTO;
 import uv.isj.planificadoreventosbackend.security.CurrentUserProvider;
 import uv.isj.planificadoreventosbackend.service.SubtareaService;
 
@@ -193,15 +194,31 @@ public class SubtareaController {
     }
 
     @PatchMapping("/{id}/estado")
-    @Operation(summary = "Actualizar el estado de una subtarea")
+    @Operation(
+            summary = "Actualizar el estado de una subtarea",
+            description = "Cambia el estado de una subtarea del organizador autenticado y "
+                    + "guarda su nota explicativa. El estado debe ser uno de "
+                    + "pendiente, ejecutada o pospuesta. La nota es opcional y se "
+                    + "guarda tal cual llega. Una subtarea puede reabrirse a pendiente. "
+                    + "Una subtarea ajena responde 404 igual que una inexistente. "
+                    + "Requiere autorización Bearer JWT.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Estado actualizado; una subtarea puede reabrirse a pendiente"),
-            @ApiResponse(responseCode = "400", description = "El estado solicitado no es válido"),
+            @ApiResponse(responseCode = "200",
+                    description = "Estado actualizado; devuelve la subtarea con su nuevo estado y nota",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = SubtareaDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "El estado solicitado no es válido o falta",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemaDTO.class))),
             @ApiResponse(responseCode = "401",
-                    description = "Falta un token de autenticación válido o el enviado no es válido"),
-            @ApiResponse(responseCode = "401",
-                    description = "Falta un token de autenticación válido o el enviado no es válido"),
-            @ApiResponse(responseCode = "404", description = "La subtarea no existe")
+                    description = "Falta un token de autenticación válido o el enviado no es válido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemaDTO.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "La subtarea no existe o pertenece a otro organizador",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemaDTO.class)))
     })
     @SecurityRequirement(name = "bearerAuth")
     public SubtareaDTO cambiarEstado(

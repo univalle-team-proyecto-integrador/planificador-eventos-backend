@@ -28,9 +28,11 @@ public record SubtareaDTO(
         @Schema(description = "Horas estimadas", example = "3", minimum = "1",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull @Min(1) Integer horasEstimadas,
-        @Schema(description = "Estado actual", example = "pendiente", accessMode = Schema.AccessMode.READ_ONLY)
+        @Schema(description = "Estado actual de la gestión: pendiente, ejecutada o pospuesta",
+                example = "pendiente", accessMode = Schema.AccessMode.READ_ONLY)
         EstadoSubtarea estado,
-        @Schema(description = "Nota explicativa", example = "Proveedor sin disponibilidad")
+        @Schema(description = "Nota explicativa del último cambio de estado; null si no se dejó",
+                example = "Proveedor sin disponibilidad", nullable = true)
         String notaExplicativa,
         @Schema(description = "Fecha de creación", example = "2026-09-24T10:15:30",
                 accessMode = Schema.AccessMode.READ_ONLY)

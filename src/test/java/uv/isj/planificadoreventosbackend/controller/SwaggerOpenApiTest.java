@@ -256,6 +256,60 @@ class SwaggerOpenApiTest {
     }
 
     @Test
+    void documentaElCambioDeEstadoConSusCodigosYElEsquemaRfc7807() throws Exception {
+        JsonNode operacion = spec().path("paths").path("/api/subtareas/{id}/estado").path("patch");
+
+        JsonNode respuestas = operacion.path("responses");
+        assertThat(respuestas.has("200")).isTrue();
+        assertThat(respuestas.has("400")).isTrue();
+        assertThat(respuestas.has("401")).isTrue();
+        assertThat(respuestas.has("404")).isTrue();
+
+        // Los errores apuntan al schema reutilizable RFC 7807, no a SubtareaDTO.
+        for (String codigo : List.of("400", "401", "404")) {
+            JsonNode schema = respuestas.path(codigo)
+                    .path("content").path("application/json").path("schema");
+            assertThat(schema.path("$ref").asText())
+                    .withFailMessage("el %s de /api/subtareas/{id}/estado debe documentar ProblemaDTO", codigo)
+                    .endsWith("/ProblemaDTO");
+        }
+
+        // El 200 documenta la subtarea actualizada.
+        assertThat(respuestas.path("200")
+                .path("content").path("application/json").path("schema").path("$ref").asText())
+                .endsWith("/SubtareaDTO");
+
+        assertThat(operacion.path("description").asText())
+                .contains("pendiente")
+                .contains("ejecutada")
+                .contains("pospuesta");
+    }
+
+    @Test
+    void documentaElSobreReutilizableDeErrorYLosValoresDelEstado() throws Exception {
+        JsonNode documento = spec();
+
+        JsonNode problema = documento.path("components").path("schemas").path("ProblemaDTO");
+        assertThat(problema.isMissingNode()).isFalse();
+        assertThat(problema.path("properties").has("title")).isTrue();
+        assertThat(problema.path("properties").has("status")).isTrue();
+        assertThat(problema.path("properties").has("detail")).isTrue();
+        assertThat(problema.path("properties").has("errors")).isTrue();
+
+        JsonNode estado = documento.path("components").path("schemas")
+                .path("EstadoSubtareaDTO").path("properties").path("estado");
+        assertThat(estado.path("enum").toString())
+                .contains("pendiente")
+                .contains("ejecutada")
+                .contains("pospuesta");
+        assertThat(estado.path("example").asText()).isNotBlank();
+
+        JsonNode nota = documento.path("components").path("schemas")
+                .path("EstadoSubtareaDTO").path("properties").path("notaExplicativa");
+        assertThat(nota.path("example").asText()).isNotBlank();
+    }
+
+    @Test
     void documentaLosEsquemasDeTodosLosModelosDeRespuesta() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
