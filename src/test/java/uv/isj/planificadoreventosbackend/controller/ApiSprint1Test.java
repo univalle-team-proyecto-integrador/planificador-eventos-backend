@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,17 +111,30 @@ class ApiSprint1Test {
                 base.evento().getIdEvento(),
                 base.usuario().getIdUsuario()))
                 .hasSize(4);
+
+        // Ni la ejecutada ni la pospuesta comprometen el 10 de noviembre: la
+        // ejecutada porque ya se hizo y la pospuesta porque no tiene fecha
+        // efectiva, solo la última que tuvo. Del día queda la de tres horas.
+        List<EstadoSubtarea> sinCompromiso = List.of(
+                EstadoSubtarea.ejecutada, EstadoSubtarea.pospuesta);
         assertThat(subtareaRepository.findNoEjecutadasParaHoy(
                 base.usuario().getIdUsuario(),
                 LocalDate.of(2026, 11, 10),
-                EstadoSubtarea.ejecutada))
+                sinCompromiso))
                 .extracting(Subtarea::getNombreGestion)
-                .containsExactly("Tarea pospuesta", "Tarea de tres horas");
+                .containsExactly("Tarea de tres horas");
         assertThat(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
                 base.usuario().getIdUsuario(),
                 LocalDate.of(2026, 11, 10),
-                EstadoSubtarea.ejecutada))
-                .isEqualTo(4L);
+                sinCompromiso))
+                .isEqualTo(3L);
+
+        // La pospuesta sigue siendo de la persona y localizable, para que se
+        // pueda reprogramar en vez de quedarse huérfana.
+        assertThat(subtareaRepository.findPospuestas(
+                base.usuario().getIdUsuario(), EstadoSubtarea.pospuesta))
+                .extracting(Subtarea::getNombreGestion)
+                .containsExactly("Tarea pospuesta");
     }
 
     @Test
@@ -136,13 +150,15 @@ class ApiSprint1Test {
         crearSubtarea(base.evento(), "Gestión de otro día", hoy.plusDays(1), 1,
                 EstadoSubtarea.pendiente);
 
+        // Del día solo sale la pendiente. La pospuesta conserva esta fecha pero
+        // ya no compromete el día, así que no aparece en su planificación; sigue
+        // localizable por su propio grupo para poder reprogramarla.
         mockMvc.perform(get("/api/subtareas/hoy")
                         .param("usuarioId", String.valueOf(base.usuario().getIdUsuario()))
                         .param("fecha", hoy.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[*].nombreGestion", hasItem("Gestión pendiente de hoy")))
-                .andExpect(jsonPath("$[*].nombreGestion", hasItem("Gestión pospuesta de hoy")))
                 .andExpect(jsonPath("$[*].fechaObjetivo").value(hasItem(hoy.toString())));
     }
 

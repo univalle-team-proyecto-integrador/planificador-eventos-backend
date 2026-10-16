@@ -22,6 +22,19 @@ import uv.isj.planificadoreventosbackend.repository.SubtareaRepository;
 @Service
 public class SubtareaService {
 
+    /**
+     * Estados que no comprometen un día: {@code ejecutada} porque ya se hizo, y
+     * {@code pospuesta} porque no tiene fecha efectiva conocida.
+     *
+     * <p>La regla vive en {@link UsuarioService#ESTADOS_SIN_COMPROMISO} y se
+     * comparte desde aquí. Que sea una sola lista y no dos copias es lo que
+     * mantiene el 409 de reprogramar y el número que ve /hoy de acuerdo: si una
+     * contara las pospuestas y la otra no, el panel avisaría de un sobrecosto
+     * que el backend daría por bueno al guardar.
+     */
+    private static final List<EstadoSubtarea> ESTADOS_SIN_COMPROMISO =
+            UsuarioService.ESTADOS_SIN_COMPROMISO;
+
     private final SubtareaRepository subtareaRepository;
     private final EventoRepository eventoRepository;
 
@@ -53,7 +66,7 @@ public class SubtareaService {
                 .findNoEjecutadasParaHoy(
                         usuarioId,
                         fechaConsulta,
-                        EstadoSubtarea.ejecutada)
+                        ESTADOS_SIN_COMPROMISO)
                 .stream()
                 .map(this::aDto)
                 .toList();
@@ -195,6 +208,16 @@ public class SubtareaService {
         fijarLineaBaseSiFalta(subtarea, dto.nuevaFecha());
         subtarea.setFechaObjetivo(dto.nuevaFecha());
         subtarea.setHorasEstimadas(dto.nuevasHoras());
+
+        // Reprogramar es la salida de la posposición: la gestión recupera su día
+        // y vuelve a la planificación activa. Sin esto seguiría en `pospuesta`,
+        // invisible en los grupos de /hoy y sin contar para la carga, con una
+        // fecha nueva que no significaría nada. La nota NO se toca: el motivo por
+        // el que se pospuesto forma parte de su historia.
+        if (subtarea.getEstado() == EstadoSubtarea.pospuesta) {
+            subtarea.setEstado(EstadoSubtarea.pendiente);
+        }
+
         return aDto(subtareaRepository.save(subtarea));
     }
 
@@ -206,8 +229,24 @@ public class SubtareaService {
 
         Subtarea subtarea = buscarEntidad(usuarioId, id);
         subtarea.setEstado(dto.estado());
-        subtarea.setNotaExplicativa(dto.notaExplicativa());
+        actualizarNota(subtarea, dto.notaExplicativa());
         return aDto(subtareaRepository.save(subtarea));
+    }
+
+    /**
+     * Escribe la nota solo si el cliente mandó algo.
+     *
+     * <p>Un {@code null} significa "no me cuentes nada", no "borra lo que había".
+     * El cliente manda {@code null} cuando quien registra la gestión deja el
+     * campo en blanco, que es el caso normal al completar algo que estaba
+     * pospuesto: con el overwrite anterior, ese PATCH borraba el motivo por el que
+     * se había pospuesto y el rastro se perdía justo cuando se resolvía. Para
+     * dejarla vacía a propósito hay que mandar la cadena vacía.
+     */
+    private void actualizarNota(Subtarea subtarea, String nota) {
+        if (nota != null) {
+            subtarea.setNotaExplicativa(nota.isBlank() ? null : nota);
+        }
     }
 
     @Transactional
@@ -234,7 +273,15 @@ public class SubtareaService {
         List<Subtarea> noEjecutadas = subtareaRepository.findNoEjecutadasHastaFecha(
                 usuarioId,
                 hoy.plusDays(30),
-                EstadoSubtarea.ejecutada);
+                ESTADOS_SIN_COMPROMISO);
+
+        // Las pospuestas salen en su propio grupo en vez de desaparecer: no
+        // comprometen ningún día, pero siguen siendo de la persona y sin
+        // reprogramar se quedaría sin forma de recuperarlas por la API.
+        List<SubtareaDTO> pospuestas = subtareaRepository.findPospuestas(
+                        usuarioId, EstadoSubtarea.pospuesta).stream()
+                .map(this::aDto)
+                .toList();
 
         List<SubtareaDTO> vencidas = new java.util.ArrayList<>();
         List<SubtareaDTO> paraHoy = new java.util.ArrayList<>();
@@ -256,7 +303,7 @@ public class SubtareaService {
             }
         }
 
-        return new HoyResponseDTO(vencidas, paraHoy, proximas);
+        return new HoyResponseDTO(vencidas, paraHoy, proximas, pospuestas);
     }
 
     private Evento buscarEvento(Integer usuarioId, Integer eventoId) {
@@ -338,11 +385,11 @@ public class SubtareaService {
         int horas = (int) subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
                 usuario.getIdUsuario(),
                 fecha,
-                EstadoSubtarea.ejecutada);
+                ESTADOS_SIN_COMPROMISO);
 
         if (propia != null
                 && propia.getFechaObjetivo().equals(fecha)
-                && propia.getEstado() != EstadoSubtarea.ejecutada) {
+                && !ESTADOS_SIN_COMPROMISO.contains(propia.getEstado())) {
             horas = Math.max(0, horas - propia.getHorasEstimadas());
         }
 

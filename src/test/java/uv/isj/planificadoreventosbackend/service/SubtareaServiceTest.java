@@ -2,6 +2,7 @@ package uv.isj.planificadoreventosbackend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
@@ -64,6 +65,16 @@ class SubtareaServiceTest {
         evento.setUsuario(usuario);
         evento.setTipoEvento(tipoEvento);
     }
+
+    /**
+     * Los estados que el servicio excluye de la carga. Se declara una sola vez
+     * para que los stubs no repitan la lista y para que un test que afirme sobre
+     * ella falle si la regla del servicio cambia, en vez de seguir cuadrando
+     * contra un stub viejo.
+     */
+    private static final List<EstadoSubtarea> SIN_COMPROMISO = List.of(
+            EstadoSubtarea.ejecutada,
+            EstadoSubtarea.pospuesta);
 
     private Subtarea subtareaCreada(
             int id, String nombre, LocalDate fecha, int horas, EstadoSubtarea estado) {
@@ -246,14 +257,14 @@ class SubtareaServiceTest {
     void listarGestionesParaHoyUsaLaFechaDeBogotaCuandoNoSeEnvia() {
         LocalDate esperada = LocalDate.now(ZoneId.of("America/Bogota"));
         when(subtareaRepository.findNoEjecutadasParaHoy(
-                eq(1), any(LocalDate.class), eq(EstadoSubtarea.ejecutada)))
+                eq(1), any(LocalDate.class), eq(SIN_COMPROMISO)))
                 .thenReturn(List.of());
 
         subtareaService.obtenerParaHoy(1, null);
 
         ArgumentCaptor<LocalDate> fecha = ArgumentCaptor.forClass(LocalDate.class);
         verify(subtareaRepository).findNoEjecutadasParaHoy(
-                eq(1), fecha.capture(), eq(EstadoSubtarea.ejecutada));
+                eq(1), fecha.capture(), eq(SIN_COMPROMISO));
         assertThat(fecha.getValue())
                 .isBetween(esperada.minusDays(1), esperada.plusDays(1));
     }
@@ -262,13 +273,13 @@ class SubtareaServiceTest {
     void listarGestionesParaHoyRespetaLaFechaEnviada() {
         LocalDate solicitada = LocalDate.of(2026, 9, 25);
         when(subtareaRepository.findNoEjecutadasParaHoy(
-                1, solicitada, EstadoSubtarea.ejecutada))
+                1, solicitada, SIN_COMPROMISO))
                 .thenReturn(List.of());
 
         subtareaService.obtenerParaHoy(1, solicitada);
 
         verify(subtareaRepository)
-                .findNoEjecutadasParaHoy(1, solicitada, EstadoSubtarea.ejecutada);
+                .findNoEjecutadasParaHoy(1, solicitada, SIN_COMPROMISO);
     }
 
     @Test
@@ -282,7 +293,7 @@ class SubtareaServiceTest {
                 .hasMessageContaining("organizador");
 
         verify(subtareaRepository, never())
-                .findNoEjecutadasParaHoy(anyInt(), any(LocalDate.class), any(EstadoSubtarea.class));
+                .findNoEjecutadasParaHoy(anyInt(), any(LocalDate.class), anyList());
     }
 
     /**
@@ -296,7 +307,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
-                1, LocalDate.of(2026, 11, 15), EstadoSubtarea.ejecutada)).thenReturn(4L);
+                1, LocalDate.of(2026, 11, 15), SIN_COMPROMISO)).thenReturn(4L);
 
         assertThatThrownBy(() -> subtareaService.reprogramar(
                         1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 15), 1)))
@@ -352,7 +363,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(6L);
+                LocalDate.of(2026, 11, 20), SIN_COMPROMISO)).thenReturn(6L);
 
         assertThatThrownBy(() -> subtareaService.reprogramar(
                         1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 3)))
@@ -379,7 +390,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 21), EstadoSubtarea.ejecutada)).thenReturn(2L);
+                LocalDate.of(2026, 11, 21), SIN_COMPROMISO)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
         SubtareaDTO resultado = subtareaService.reprogramar(
@@ -397,7 +408,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
+                LocalDate.of(2026, 11, 20), SIN_COMPROMISO)).thenReturn(5L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
         SubtareaDTO resultado = subtareaService.reprogramar(
@@ -412,7 +423,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(2L);
+                LocalDate.of(2026, 11, 20), SIN_COMPROMISO)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
         SubtareaDTO resultado = subtareaService.reprogramar(
@@ -427,7 +438,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.ejecutada);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 20), EstadoSubtarea.ejecutada)).thenReturn(5L);
+                LocalDate.of(2026, 11, 20), SIN_COMPROMISO)).thenReturn(5L);
 
         assertThatThrownBy(() -> subtareaService.reprogramar(
                         1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 20), 2)))
@@ -445,7 +456,7 @@ class SubtareaServiceTest {
                 EstadoSubtarea.pendiente);
         when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
-                LocalDate.of(2026, 11, 22), EstadoSubtarea.ejecutada)).thenReturn(2L);
+                LocalDate.of(2026, 11, 22), SIN_COMPROMISO)).thenReturn(2L);
         when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
 
         SubtareaDTO resultado = subtareaService.reprogramar(
@@ -453,6 +464,124 @@ class SubtareaServiceTest {
 
         assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 22));
         assertThat(resultado.horasEstimadas()).isEqualTo(3);
+    }
+
+    /**
+     * Reprogramar es la salida de la posposición: la gestión recupera el día y
+     * vuelve a la planificación activa. Sin esto se quedaría `pospuesta` con una
+     * fecha nueva que no significaría nada, invisible en /hoy.
+     */
+    @Test
+    void reprogramarUnaPospuestaLaDevuelveAPendiente() {
+        Subtarea subtarea = subtareaCreada(1, "Pospuesta", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pospuesta);
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
+                LocalDate.of(2026, 11, 22), SIN_COMPROMISO)).thenReturn(2L);
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3));
+
+        assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.pendiente);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 22));
+    }
+
+    /** Reprogramar no debe deshacer un estado que no sea posposición. */
+    @Test
+    void reprogramarUnaPendienteLaDejaPendiente() {
+        Subtarea subtarea = subtareaCreada(1, "Pendiente", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pendiente);
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
+                LocalDate.of(2026, 11, 22), SIN_COMPROMISO)).thenReturn(0L);
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3));
+
+        assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.pendiente);
+    }
+
+    /**
+     * La nota del por qué se pospuesto sobrevive a la reprogramación: es el rastro
+     * de la gestión y el requisito de trazabilidad.
+     */
+    @Test
+    void reprogramarConservaLaNotaDeLaPosposicion() {
+        Subtarea subtarea = subtareaCreada(1, "Pospuesta", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pospuesta);
+        subtarea.setNotaExplicativa("El proveedor no tiene disponibilidad");
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
+                LocalDate.of(2026, 11, 22), SIN_COMPROMISO)).thenReturn(0L);
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 1, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 3));
+
+        assertThat(resultado.notaExplicativa())
+                .isEqualTo("El proveedor no tiene disponibilidad");
+    }
+
+    /**
+     * Completar una gestión pospuesta sin escribir nada no debe borrar el motivo
+     * por el que se pospuso. Con el overwrite anterior ese PATCH lo perdía.
+     */
+    @Test
+    void completarSinNotaConservaLaNotaDeLaPosposicion() {
+        Subtarea subtarea = subtareaCreada(1, "Pospuesta", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pospuesta);
+        subtarea.setNotaExplicativa("El proveedor no tiene disponibilidad");
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.cambiarEstado(
+                1, 1, new EstadoSubtareaDTO(EstadoSubtarea.ejecutada, null));
+
+        assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.ejecutada);
+        assertThat(resultado.notaExplicativa())
+                .isEqualTo("El proveedor no tiene disponibilidad");
+    }
+
+    /** La cadena vacía sí borra: dejarla a limpio es una decisión, no un olvido. */
+    @Test
+    void unaNotaVaciaSiBorraLaAnterior() {
+        Subtarea subtarea = subtareaCreada(1, "Pospuesta", LocalDate.of(2026, 11, 10), 2,
+                EstadoSubtarea.pospuesta);
+        subtarea.setNotaExplicativa("Motivo viejo");
+        when(subtareaRepository.findByIdYUsuarioId(1, 1)).thenReturn(Optional.of(subtarea));
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.cambiarEstado(
+                1, 1, new EstadoSubtareaDTO(EstadoSubtarea.ejecutada, ""));
+
+        assertThat(resultado.notaExplicativa()).isNull();
+    }
+
+    /**
+     * Una pospuesta no bloquea el día al que se reprograma: si contara, con el
+     * límite en 5 y 4 horas pospuestas ahí, volver a la planificación exigiría
+     * lowering para algo que el propio sistema acaba de sacar de la cuenta.
+     */
+    @Test
+    void reprogramarAPosteriorConUnaPospuestaEnElDiaNoDaConflicto() {
+        usuario.setLimiteHorasDiarias(5);
+        Subtarea pospuesta = subtareaCreada(2, "Pospuesta", LocalDate.of(2026, 11, 22), 4,
+                EstadoSubtarea.pospuesta);
+        assertThat(pospuesta.getEstado()).isEqualTo(EstadoSubtarea.pospuesta);
+
+        when(subtareaRepository.findByIdYUsuarioId(2, 1)).thenReturn(Optional.of(pospuesta));
+        // El día solo compromete 1 hora: las 4 pospuestas quedaron fuera.
+        when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(1,
+                LocalDate.of(2026, 11, 22), SIN_COMPROMISO)).thenReturn(1L);
+        when(subtareaRepository.save(any(Subtarea.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SubtareaDTO resultado = subtareaService.reprogramar(
+                1, 2, new ReprogramarDTO(LocalDate.of(2026, 11, 22), 2));
+
+        assertThat(resultado.estado()).isEqualTo(EstadoSubtarea.pendiente);
+        assertThat(resultado.fechaObjetivo()).isEqualTo(LocalDate.of(2026, 11, 22));
     }
 
     @Test

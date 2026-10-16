@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,11 @@ import uv.isj.planificadoreventosbackend.repository.UsuarioRepository;
 class UsuarioServiceTest {
 
     private static final LocalDate FECHA = LocalDate.of(2026, 11, 20);
+
+    /** Espejo de la regla del servicio; si cambia, estos stubs dejan de cuadrar. */
+    private static final List<EstadoSubtarea> SIN_COMPROMISO = List.of(
+            EstadoSubtarea.ejecutada,
+            EstadoSubtarea.pospuesta);
 
     @Mock
     private UsuarioRepository usuarioRepository;
@@ -57,7 +63,7 @@ class UsuarioServiceTest {
      */
     private void stubSumaDeHoras(long total) {
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
-                eq(1), any(LocalDate.class), eq(EstadoSubtarea.ejecutada)))
+                eq(1), any(LocalDate.class), eq(SIN_COMPROMISO)))
                 .thenReturn(total);
     }
 
@@ -65,7 +71,7 @@ class UsuarioServiceTest {
     void obtenerCapacidadProyectaLoComprometidoSobreElLimite() {
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
-                1, FECHA, EstadoSubtarea.ejecutada)).thenReturn(5L);
+                1, FECHA, SIN_COMPROMISO)).thenReturn(5L);
 
         CapacidadDTO resultado = usuarioService.obtenerCapacidad(1, FECHA);
 
@@ -88,7 +94,7 @@ class UsuarioServiceTest {
         usuarioService.obtenerCapacidad(1, FECHA);
 
         verify(subtareaRepository).sumarHorasNoEjecutadasPorFechaYUsuario(
-                1, FECHA, EstadoSubtarea.ejecutada);
+                1, FECHA, SIN_COMPROMISO);
     }
 
     @Test

@@ -85,6 +85,8 @@ class CapacidadApiTest {
         crearSubtarea(evento, "Pendiente", FECHA, 3, EstadoSubtarea.pendiente);
         crearSubtarea(evento, "Pospuesta", FECHA, 2, EstadoSubtarea.pospuesta);
 
+        // Solo la pendiente compromete el día: la pospuesta conserva la fecha pero
+        // no tiene fecha efectiva, así que no cuenta. De ahí 3 de 6 y no 5 de 6.
         mockMvc.perform(get("/api/users/capacity")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDe(dueno))
                         .param("fecha", FECHA.toString()))
@@ -92,8 +94,8 @@ class CapacidadApiTest {
                 .andExpect(jsonPath("$.usuarioId").value(dueno.getIdUsuario()))
                 .andExpect(jsonPath("$.limiteHorasDiarias").value(6))
                 .andExpect(jsonPath("$.fecha").value(FECHA.toString()))
-                .andExpect(jsonPath("$.horasPlanificadas").value(5))
-                .andExpect(jsonPath("$.horasDisponibles").value(1));
+                .andExpect(jsonPath("$.horasPlanificadas").value(3))
+                .andExpect(jsonPath("$.horasDisponibles").value(3));
     }
 
     @Test

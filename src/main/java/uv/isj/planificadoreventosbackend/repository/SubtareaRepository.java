@@ -59,41 +59,80 @@ public interface SubtareaRepository extends Repository<Subtarea, Integer> {
             @Param("idSubtarea") Integer idSubtarea,
             @Param("usuarioId") Integer usuarioId);
 
+    /**
+     * Gestiones que planifican el día indicado.
+     *
+     * <p>Excluye `pospuesta` además de `ejecutada` por el mismo motivo que la
+     * suma de horas: sin fecha efectiva la gestión no pertenece a ningún día.
+     */
     @Query("""
             SELECT s
             FROM Subtarea s
             WHERE s.evento.usuario.idUsuario = :usuarioId
               AND s.fechaObjetivo = :fecha
-              AND s.estado <> :estado
+              AND s.estado NOT IN :estadosSinCompromiso
             ORDER BY s.fechaObjetivo ASC, s.horasEstimadas ASC
             """)
     List<Subtarea> findNoEjecutadasParaHoy(
             @Param("usuarioId") Integer usuarioId,
             @Param("fecha") LocalDate fecha,
-            @Param("estado") EstadoSubtarea estado);
+            @Param("estadosSinCompromiso") List<EstadoSubtarea> estadosSinCompromiso);
 
+    /**
+     * Horas que comprometen un día concreto.
+     *
+     * <p>El estado va como colección y no como un enum suelto porque hay DOS
+     * estados que no comprometen el día, no uno: `ejecutada` porque ya se hizo, y
+     * `pospuesta` porque no tiene fecha efectiva conocida. Una gestión pospuesta
+     * conserva la última fecha que tuvo, pero esa ya no es un compromiso: hasta
+     * reprogramarla no se sabe cuándo se hará, así que sumarla sería contabilizar
+     * sobre una fecha muerta. Se le pasa la lista al llamador para que la regla
+     * viva en el servicio y no repetida en cada consulta.
+     */
     @Query("""
             SELECT COALESCE(SUM(s.horasEstimadas), 0)
             FROM Subtarea s
             WHERE s.evento.usuario.idUsuario = :usuarioId
               AND s.fechaObjetivo = :fecha
-              AND s.estado <> :estado
+              AND s.estado NOT IN :estadosSinCompromiso
             """)
     long sumarHorasNoEjecutadasPorFechaYUsuario(
             @Param("usuarioId") Integer usuarioId,
             @Param("fecha") LocalDate fecha,
-            @Param("estado") EstadoSubtarea estado);
+            @Param("estadosSinCompromiso") List<EstadoSubtarea> estadosSinCompromiso);
 
+    /**
+     * Gestiones que planifican los próximos días, agrupables en vencidas, para
+     * hoy y próximas. Excluye `pospuesta` por la misma razón que las demás: sin
+     * fecha efectiva no se ubica en ningún día.
+     */
     @Query("""
             SELECT s
             FROM Subtarea s
             WHERE s.evento.usuario.idUsuario = :usuarioId
-              AND s.estado <> :estado
+              AND s.estado NOT IN :estadosSinCompromiso
               AND s.fechaObjetivo <= :hasta
             ORDER BY s.fechaObjetivo ASC, s.horasEstimadas ASC, s.idSubtarea ASC
             """)
     List<Subtarea> findNoEjecutadasHastaFecha(
             @Param("usuarioId") Integer usuarioId,
             @Param("hasta") LocalDate hasta,
+            @Param("estadosSinCompromiso") List<EstadoSubtarea> estadosSinCompromiso);
+
+    /**
+     * Gestiones pospuestas del organizador, sin restricción de fecha.
+     *
+     * <p>Existe para que la posposición no sea un callejón sin salida: la gestión
+     * no ocupa ningún día, pero tiene que poder listarse y reprogramarse.
+     */
+    @Query("""
+            SELECT s
+            FROM Subtarea s
+            WHERE s.evento.usuario.idUsuario = :usuarioId
+              AND s.estado = :estado
+            ORDER BY s.fechaObjetivo ASC, s.horasEstimadas ASC, s.idSubtarea ASC
+            """)
+    List<Subtarea> findPospuestas(
+            @Param("usuarioId") Integer usuarioId,
             @Param("estado") EstadoSubtarea estado);
 }

@@ -2,6 +2,7 @@ package uv.isj.planificadoreventosbackend.service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,16 @@ public class UsuarioService {
 
     public static final int LIMITE_MINIMO_HORAS = 1;
     public static final int LIMITE_MAXIMO_HORAS = 16;
+
+    /**
+     * Estados que no comprometen un día. Vive aquí y no en {@code SubtareaService}
+     * porque la capacidad y la reprogramación tienen que aplicar exactamente la
+     * misma regla: si una cuenta de un sitio y el otro no, el panel avisa de un
+     * sobrecosto que el backend acepta al guardar.
+     */
+    static final List<EstadoSubtarea> ESTADOS_SIN_COMPROMISO = List.of(
+            EstadoSubtarea.ejecutada,
+            EstadoSubtarea.pospuesta);
 
     private final UsuarioRepository usuarioRepository;
     private final SubtareaRepository subtareaRepository;
@@ -53,11 +64,16 @@ public class UsuarioService {
 
     private CapacidadDTO calcularCapacidad(Usuario usuario, LocalDate fecha) {
         int limite = usuario.getLimiteHorasDiarias();
-        // La consulta ya excluye las ejecutadas: solo queda carga pendiente.
+        // La consulta ya excluye las ejecutadas y las pospuestas: solo queda lo
+        // que realmente compromete el día. Una gestión pospuesta conserva la
+        // última fecha que tuvo, pero sin fecha efectiva nocompromete nada, así
+        // que aquí bajaría la carga igual que en el 409 de la reprogramación. Si
+        // estas dos cuentas se desincronizan, el panel de hoy avisa de un
+        // sobrecosto que el backend daría por bueno al guardar.
         int horasPlanificadas = (int) subtareaRepository.sumarHorasNoEjecutadasPorFechaYUsuario(
                 usuario.getIdUsuario(),
                 fecha,
-                EstadoSubtarea.ejecutada);
+                ESTADOS_SIN_COMPROMISO);
         return new CapacidadDTO(
                 usuario.getIdUsuario(),
                 limite,

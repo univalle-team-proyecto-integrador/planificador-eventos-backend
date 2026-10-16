@@ -12,5 +12,20 @@ public record HoyResponseDTO(
         List<SubtareaDTO> paraHoy,
 
         @Schema(description = "Subtareas con fecha objetivo posterior a hoy")
-        List<SubtareaDTO> proximas) {
+        List<SubtareaDTO> proximas,
+
+        @Schema(description = "Subtareas pospuestas. Van aparte porque no tienen fecha efectiva: "
+                + "conservan la última que tuvieron pero no comprometen ningún día ni cuentan para "
+                + "el límite diario. Aparecen aquí para que sigan siendo alcanzables y se puedan "
+                + "reprogramar",
+                accessMode = Schema.AccessMode.READ_ONLY)
+        List<SubtareaDTO> pospuestas) {
+
+    /** Constructor de los tres grupos temporales, sin pospuestas. */
+    public HoyResponseDTO(
+            List<SubtareaDTO> vencidas,
+            List<SubtareaDTO> paraHoy,
+            List<SubtareaDTO> proximas) {
+        this(vencidas, paraHoy, proximas, List.of());
+    }
 }
