@@ -136,7 +136,15 @@ public class EventoController {
             @ApiResponse(responseCode = "400", description = "Los datos de la subtarea no son válidos"),
             @ApiResponse(responseCode = "401",
                     description = "Falta un token de autenticación válido o el enviado no es válido"),
-            @ApiResponse(responseCode = "404", description = "El evento no existe")
+            @ApiResponse(responseCode = "404", description = "El evento no existe"),
+            @ApiResponse(responseCode = "409",
+                    description = "Supera el límite diario; la subtarea no se creó. "
+                            + "Devuelve un ProblemDetail con limiteDiario, "
+                            + "horasAsignadasPreviamente, horasSolicitadas, "
+                            + "horasPlanificadasTotales y excedente en el nivel raíz",
+                    content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(
+                                    implementation = uv.isj.planificadoreventosbackend.model.dto.ProblemaCapacidadDTO.class)))
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<SubtareaDTO> agregarSubtarea(
