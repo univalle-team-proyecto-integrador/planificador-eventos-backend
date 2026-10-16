@@ -35,3 +35,18 @@ La revisión de la cadena frontend → backend → Supabase dejó varias zonas s
 - `bash scripts/verificar-despliegue.sh` → **5 correctos, 0 fallidos**; detecta la URL en `/assets/api-DG8p8SxS.js` tras revisar 13 bundles.
 - Caso negativo del script (URL de backend falsa) → correctamente reporta `[FAIL] ningún bundle de 13 revisados referencia ...`.
 - `python3 -m json.tool boveda/lienzo-maestro.canvas` → JSON válido.
+
+---
+
+## Actualización (2026-10-16)
+
+Los hallazgos descritos más arriba quedaron **resueltos** por la mejora
+`2026-09-29-023-cors-127-y-problemdetail-parametros.md` (023):
+
+- `http://127.0.0.1:5173` ya está incluido en `app.cors.allowed-origins` y las pruebas
+  de `CorsConfigTest` lo tratan como origen permitido (algunos clientes normalizan
+  `localhost` a `127.0.0.1` en el preflight).
+- `GlobalExceptionHandler` ahora cubre `MissingServletRequestParameterException`: el
+  400 de un parámetro obligatorio ausente llega con `ProblemDetail`, ya no con el
+  cuerpo vacío. La aserción de la prueba que hoy espera `ProblemDetail` quedó actualizada
+  en esa misma mejora.

@@ -78,3 +78,16 @@ Estado real del despliegue en este momento: `/api/health` correcto, base de dato
 
 - `POST /api/eventos` exige `idUsuario` en el cuerpo (`@NotNull`) y **después lo ignora**: el propietario sale del token. Se detectó al validar el flujo. El frontend lo envía por herencia de `VITE_USER_ID`, así que nada falla hoy, pero es contradictorio. Decidir si `idUsuario` pasa a ser opcional y el frontend deja de mandarlo.
 - BCrypt trunca a 72 **bytes** mientras `@Size(max = 72)` cuenta caracteres: una contraseña larga con acentos se recorta en silencio. Preexistente, pero ahora el registro es público.
+
+---
+
+## Actualización (2026-10-16)
+
+Dos puntos de este registro quedaron **obsoletos** por la mejora
+`2026-10-01-029-contrato-idusuario-opcional.md` (029):
+
+- El verificador ya no envía `usuarioId` a `/api/subtareas/hoy`: el parámetro pasó a
+  ser opcional, igual que el resto de identificadores de usuario del contrato.
+- El pendiente de `POST /api/eventos` se resolvió: `idUsuario` dejó de ser obligatorio
+  en el cuerpo, así que ya no hace falta decidir si se manda un campo que después se
+  ignora.

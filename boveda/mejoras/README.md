@@ -33,4 +33,8 @@
 | 2026-10-08  | 030 | Capacidad diaria y conflicto 409 al reprogramar | [2026-10-08-030-capacidad-diaria-y-conflicto-409](2026-10-08-030-capacidad-diaria-y-conflicto-409.md) |
 | 2026-10-08  | 031 | Horas estimadas declaradas en el evento | [2026-10-08-031-horas-estimadas-del-evento](2026-10-08-031-horas-estimadas-del-evento.md) |
 | 2026-10-09  | 032 | Línea base de la fecha para derivar postergada / adelantada | [2026-10-09-032-fecha-original-y-desfase](2026-10-09-032-fecha-original-y-desfase.md) |
-| 2026-10-10  | 033 | Informe de análisis y arquitectura del backend | [2026-10-10-033-informe-analisis-arquitectura](2026-10-10-033-informe-analisis-arquitectura.md) |
+| 2026-10-09  | 033 | Editar una subtarea evalúa el límite diario (US-08) | [2026-10-09-033-editar-subtarea-evalua-el-limite](2026-10-09-033-editar-subtarea-evalua-el-limite.md) |
+| 2026-10-10  | 034 | Informe de análisis y arquitectura del backend | [2026-10-10-034-informe-analisis-arquitectura](2026-10-10-034-informe-analisis-arquitectura.md) |
+| 2026-10-14  | 035 | Quita las horas estimadas del evento (siguen en las gestiones) | [2026-10-14-035-quita-horas-estimadas-del-evento](2026-10-14-035-quita-horas-estimadas-del-evento.md) |
+| 2026-10-14  | 036 | Límite diario también al crear una subtarea | [2026-10-14-036-limite-diario-al-crear-subtarea](2026-10-14-036-limite-diario-al-crear-subtarea.md) |
+| 2026-10-16  | 037 | Documentación OpenAPI del cambio de estado de subtarea | [2026-10-16-037-documentacion-openapi-cambio-estado](2026-10-16-037-documentacion-openapi-cambio-estado.md) |

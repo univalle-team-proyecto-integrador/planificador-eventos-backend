@@ -610,23 +610,77 @@
    "height": 140
   },
   {
-   "id": "m033",
+   "id": "m034",
    "type": "file",
-   "file": "mejoras/2026-10-10-033-informe-analisis-arquitectura.md",
+   "file": "mejoras/2026-10-10-034-informe-analisis-arquitectura.md",
    "x": 200,
    "y": 5820,
    "width": 280,
    "height": 140
   },
   {
-   "id": "p033",
+   "id": "p034",
    "type": "text",
-   "text": "Mejora 033\nInforme de análisis y arquitectura\n2026-10-10",
+   "text": "Mejora 034\nInforme de análisis y arquitectura\n2026-10-10",
    "x": 540,
    "y": 5820,
    "width": 340,
    "height": 140,
    "color": "1"
+  },
+  {
+   "id": "m035",
+   "type": "file",
+   "file": "mejoras/2026-10-14-035-quita-horas-estimadas-del-evento.md",
+   "x": 200,
+   "y": 6020,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p035",
+   "type": "text",
+   "text": "Mejora 035\nQuita horas estimadas del evento (revierte 031)\n2026-10-14",
+   "x": 540,
+   "y": 6020,
+   "width": 340,
+   "height": 140
+  },
+  {
+   "id": "m036",
+   "type": "file",
+   "file": "mejoras/2026-10-14-036-limite-diario-al-crear-subtarea.md",
+   "x": 200,
+   "y": 6220,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p036",
+   "type": "text",
+   "text": "Mejora 036\nLímite diario al crear subtarea (409)\n2026-10-14",
+   "x": 540,
+   "y": 6220,
+   "width": 340,
+   "height": 140
+  },
+  {
+   "id": "m037",
+   "type": "file",
+   "file": "mejoras/2026-10-16-037-documentacion-openapi-cambio-estado.md",
+   "x": 200,
+   "y": 6420,
+   "width": 280,
+   "height": 140
+  },
+  {
+   "id": "p037",
+   "type": "text",
+   "text": "Mejora 037\nDocumentación OpenAPI del cambio de estado\n2026-10-16",
+   "x": 540,
+   "y": 6420,
+   "width": 340,
+   "height": 140
   }
  ],
  "edges": [
@@ -1082,14 +1136,56 @@
    "id": "e65",
    "fromNode": "indice",
    "fromSide": "bottom",
-   "toNode": "m033",
+   "toNode": "m034",
    "toSide": "top"
   },
   {
    "id": "e66",
-   "fromNode": "p033",
+   "fromNode": "p034",
    "fromSide": "right",
-   "toNode": "m033",
+   "toNode": "m034",
+   "toSide": "left"
+  },
+  {
+   "id": "e67",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m035",
+   "toSide": "top"
+  },
+  {
+   "id": "e68",
+   "fromNode": "p035",
+   "fromSide": "right",
+   "toNode": "m035",
+   "toSide": "left"
+  },
+  {
+   "id": "e69",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m036",
+   "toSide": "top"
+  },
+  {
+   "id": "e70",
+   "fromNode": "p036",
+   "fromSide": "right",
+   "toNode": "m036",
+   "toSide": "left"
+  },
+  {
+   "id": "e71",
+   "fromNode": "indice",
+   "fromSide": "bottom",
+   "toNode": "m037",
+   "toSide": "top"
+  },
+  {
+   "id": "e72",
+   "fromNode": "p037",
+   "fromSide": "right",
+   "toNode": "m037",
    "toSide": "left"
   }
  ]

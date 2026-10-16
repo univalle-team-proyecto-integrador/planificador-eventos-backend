@@ -99,3 +99,14 @@ Cuando `PROTECT_SUBTAREAS=true`, `CurrentUserProvider` **deja de devolver el usu
 - Configurar `JWT_SECRET` en el panel de Render. **Sin él el servicio no arranca.**
 - Desplegar el frontend y luego subir `PROTECT_SUBTAREAS=true`.
 - Los usuarios preexistentes en Supabase pueden tener `password_hash` que no corresponde a una contraseña conocida: la vía es registrar una cuenta nueva.
+
+---
+
+## Actualización (2026-10-16)
+
+El "side effect" descrito más arriba quedó **obsoleto**: `SecurityConfig` ya no deja
+`/api/eventos/**` en `permitAll()`. Hoy `SecurityConfig.patronesProtegidos()` cubre
+`/api/eventos/**` y `/api/subtareas/**` con la misma condición de acceso, así que el
+matcher ya no cubre "solo la familia de subtareas" y la protección de eventos ya no
+depende únicamente de la resolución de propietario. El registro se conserva como
+histórico de cómo estaba el despliegue gradual en su momento.

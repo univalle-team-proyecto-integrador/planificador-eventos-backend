@@ -56,3 +56,12 @@ encima del límite **y** peor que antes de la edición.
 - Coincide con el criterio de QA de US-08: *probar reducir las horas pero
   dejando un valor que aún exceda el límite, para confirmar que el aviso
   persiste*. Ese caso guarda y avisa; no bloquea.
+
+---
+
+## Actualización (2026-10-16)
+
+El recuento de "**182 pruebas**, 0 fallos" de la verificación es **histórico**: la suite
+ha seguido evolucionando desde entonces (el revert de las horas estimadas del evento de
+la mejora 035 y otros cambios movieron el total). Hoy hay **167** métodos `@Test` en
+`src/test`.

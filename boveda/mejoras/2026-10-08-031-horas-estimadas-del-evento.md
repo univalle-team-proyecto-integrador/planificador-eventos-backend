@@ -73,3 +73,14 @@ detectan, porque el perfil de test usa `create-drop` y H2 genera el esquema desd
 - `./mvnw test` ✅ — 172 pruebas en verde (168 antes).
 - Verificado en verde con JDK 21 vía Docker; en local con `-Dlombok.version=1.18.48`, porque la
   máquina tiene JDK 27 y el Lombok de Spring Boot 4.1.1 no compila ahí.
+
+---
+
+## Actualización (2026-10-16)
+
+Esta feature fue **revertida** por la mejora
+`2026-10-14-035-quita-horas-estimadas-del-evento.md` (commit `905acd1`): el campo
+`horasEstimadas` se eliminó de `Evento`, `EventoDTO` y `EventoService`, y la columna se
+retiró directamente en la base de Supabase. Las horas estimadas siguen viviendo en las
+gestiones (subtareas), que es de donde sale el total real del progreso. Este registro se
+conserva como histórico.
